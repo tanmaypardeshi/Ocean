@@ -9,14 +9,16 @@ from .forms import UserChangeForm, UserCreationForm
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
+    readonly_fields = ('date_joined', 'last_login',)
 
     list_display = ('email', 'first_name', 'last_name', 'age', 'gender', 'staff', 'admin',)
     list_filter = ('active', 'staff', 'admin',)
     fieldsets = (
         ('Login Info', {'fields': ('email', 'password')}),
-        ('Primary Info', {'fields': ('first_name', 'last_name','age', 'gender', 'dob')}),
+        ('Primary Info', {'fields': ('first_name', 'last_name', 'age', 'gender', 'dob')}),
         ('Secondary Info', {'fields': ('city', 'state', 'country',)}),
         ('Permissions', {'fields': ('active', 'staff', 'admin',)}),
+        ('Time', {'fields': ('date_joined', 'last_login',)}),
     )
     add_fieldsets = (
         (None, {
