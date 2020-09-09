@@ -1,4 +1,5 @@
 import random
+from datetime import timedelta
 from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
@@ -6,10 +7,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.settings import api_settings
-from datetime import timedelta
 
-from .models import User, Tag, OTP
-from .serializers import TagSerializer, LoginSerializer, EditSerializer, ForgotSerializer, ChangeSerializer
+from .models import (User, Tag, OTP, )
+from .serializers import (TagSerializer, LoginSerializer, EditSerializer,
+                          ForgotSerializer, ChangeSerializer, )
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
