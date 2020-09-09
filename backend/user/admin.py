@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, Tag
+from .models import User, Tag, OTP
 from .forms import UserChangeForm, UserCreationForm
 
 
@@ -17,7 +17,7 @@ class UserAdmin(BaseUserAdmin):
         ('Login Info', {'fields': ('email', 'password')}),
         ('Primary Info', {'fields': ('first_name', 'last_name', 'age', 'gender', 'dob')}),
         ('Secondary Info', {'fields': ('city', 'state', 'country',)}),
-        ('Permissions', {'fields': ('active', 'staff', 'admin',)}),
+        ('Permissions', {'fields': ('active', 'staff', 'admin', 'is_otp_verified')}),
         ('Time', {'fields': ('date_joined', 'last_login',)}),
     )
     add_fieldsets = (
@@ -34,4 +34,5 @@ class UserAdmin(BaseUserAdmin):
 admin.site.site_header = 'Ocean'
 admin.site.register(User, UserAdmin)
 admin.site.register(Tag)
+admin.site.register(OTP)
 admin.site.unregister(Group)

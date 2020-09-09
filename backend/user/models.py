@@ -19,6 +19,7 @@ class User(AbstractBaseUser):
     admin = models.BooleanField(default=False)
     staff = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
+    is_otp_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -76,6 +77,15 @@ class Tag(models.Model):
     stress = models.BooleanField(default=False)
     sleep_disorder = models.BooleanField(default=False)
     empathy_deficit_disorder = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.email
+
+
+class OTP(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='otp')
+    otp = models.IntegerField(default=0)
+    counter = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.email
