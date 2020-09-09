@@ -1,3 +1,5 @@
 venv
 backend/backend/__pycache__
 backend/user/__pycache__
+.idea
+backend/.idea
