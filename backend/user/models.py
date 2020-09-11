@@ -72,11 +72,11 @@ class Tag(models.Model):
     ptsd = models.BooleanField(default=False)
     alcohol = models.BooleanField(default=False)
     internet_addiction = models.BooleanField(default=False)
-    bipolar_disorder = models.BooleanField(default=False)
-    social_anxiety_disorder = models.BooleanField(default=False)
+    bipolar = models.BooleanField(default=False)
+    social_anxiety = models.BooleanField(default=False)
     stress = models.BooleanField(default=False)
-    sleep_disorder = models.BooleanField(default=False)
-    empathy_deficit_disorder = models.BooleanField(default=False)
+    sleep = models.BooleanField(default=False)
+    empathy_deficit = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.email

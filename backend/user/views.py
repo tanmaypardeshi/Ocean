@@ -99,22 +99,22 @@ class ProfileView(APIView):
                         "self_improvement": tag.self_improvement,
                         "personal_development": tag.personal_development,
                         "spirituality": tag.spirituality,
-                        "motivation":tag.motivation,
-                        "positivity":tag.positivity,
-                        "career":tag.career,
-                        "discipline":tag.discipline,
-                        "relationships":tag.relationships,
+                        "motivation": tag.motivation,
+                        "positivity": tag.positivity,
+                        "career": tag.career,
+                        "discipline": tag.discipline,
+                        "relationships": tag.relationships,
                         "success": tag.success,
                         "depression": tag.depression,
                         "anxiety": tag.anxiety,
                         "ptsd": tag.ptsd,
                         "alcohol": tag.alcohol,
-                        "internet_addiction":tag.internet_addiction,
-                        "bipolar_disorder":tag.bipolar_disorder,
-                        "social_anxiety_disorder":tag.social_anxiety_disorder,
-                        "stress":tag.stress,
-                        "sleep_disorder":tag.sleep_disorder,
-                        "empathy_deficit_disorder":tag.empathy_deficit_disorder
+                        "internet_addiction": tag.internet_addiction,
+                        "bipolar": tag.bipolar,
+                        "social_anxiety": tag.social_anxiety,
+                        "stress": tag.stress,
+                        "sleep": tag.sleep,
+                        "empathy_deficit": tag.empathy_deficit
                     }
 
                 }

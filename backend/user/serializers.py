@@ -101,11 +101,11 @@ class EditSerializer(serializers.Serializer):
         tag.ptsd = data['ptsd']
         tag.alcohol = data['alcohol']
         tag.internet_addiction = data['internet_addiction']
-        tag.bipolar_disorder = data['bipolar_disorder']
-        tag.social_anxiety_disorder =data['social_anxiety_disorder']
+        tag.bipolar = data['bipolar']
+        tag.social_anxiety = data['social_anxiety']
         tag.stress = data['stress']
-        tag.sleep_disorder = data['sleep_disorder']
-        tag.empathy_deficit_disorder = data['empathy_deficit_disorder']
+        tag.sleep = data['sleep']
+        tag.empathy_deficit = data['empathy_deficit']
         tag.save()
         user.save()
         return user
