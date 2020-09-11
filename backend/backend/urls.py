@@ -4,6 +4,7 @@ from django.urls import path
 from user.views import (UserView, LoginView, ProfileView,
                         OTPView, VerifyOtp, ForgotPassword,
                         ChangePassword, )
+from post.views import (PostView, CategoryView, )
 
 urlpatterns = [
     # user
@@ -16,7 +17,8 @@ urlpatterns = [
     path('api/change/', ChangePassword.as_view(), name='change'),
 
     # post
-
+    path('api/wall/', PostView.as_view(), name='wall'),
+    path('api/<tag>/', CategoryView.as_view(), name='category'),
     # admin
     path('admin/', admin.site.urls),
 ]

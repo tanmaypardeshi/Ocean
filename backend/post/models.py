@@ -11,6 +11,9 @@ class Post(models.Model):
     comments = models.IntegerField(default=0)
     published_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['published_at']
+
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.title}"
 
@@ -21,6 +24,9 @@ class Post(models.Model):
 class Tag(models.Model):
     post = models.ManyToManyField(Post, related_name='post_tag')
     tag_name = models.CharField(max_length=20)
+
+    class Meta:
+        ordering = ['tag_name']
 
     def __str__(self):
         return self.tag_name
