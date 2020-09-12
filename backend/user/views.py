@@ -1,5 +1,5 @@
 import random
-from datetime import timedelta
+import datetime
 from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
@@ -71,8 +71,8 @@ class ProfileView(APIView):
         try:
             user = User.objects.get(email=request.user)
             tag = Tag.objects.get(user=request.user)
-            last_login = str(user.last_login + timedelta(hours=5.5))
-            date_joined = str(user.date_joined + timedelta(hours=5.5))
+            last_login = str(user.last_login + datetime.timedelta(hours=5.5))
+            date_joined = str(user.date_joined + datetime.timedelta(hours=5.5))
             last_login = f"{last_login[:10]} {last_login[11:19]}"
             date_joined = f"{date_joined[:10]} {date_joined[11:19]}"
             status_code = status.HTTP_200_OK
@@ -85,7 +85,8 @@ class ProfileView(APIView):
                         'email': user.email,
                         'first_name': user.first_name,
                         'last_name': user.last_name,
-                        'age': user.age,
+                        'dob': user.dob,
+                        'age': (datetime.date.today() - user.dob).days // 365,
                         'gender': user.gender,
                         'city': user.city,
                         'state': user.state,
@@ -110,11 +111,11 @@ class ProfileView(APIView):
                         "ptsd": tag.ptsd,
                         "alcohol": tag.alcohol,
                         "internet_addiction": tag.internet_addiction,
-                        "bipolar": tag.bipolar,
-                        "social_anxiety": tag.social_anxiety,
+                        "bipolar_disorder": tag.bipolar_disorder,
+                        "social_anxiety_disorder": tag.social_anxiety_disorder,
                         "stress": tag.stress,
-                        "sleep": tag.sleep,
-                        "empathy_deficit": tag.empathy_deficit
+                        "sleep_disorder": tag.sleep_disorder,
+                        "empathy_deficit_disorder": tag.empathy_deficit_disorder
                     }
 
                 }

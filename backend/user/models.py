@@ -7,7 +7,6 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=120, unique=True)
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
-    age = models.IntegerField(default=0)
     dob = models.DateField(max_length=8, null=True)
     gender = models.CharField(max_length=20)
     city = models.CharField(max_length=60)
@@ -72,11 +71,11 @@ class Tag(models.Model):
     ptsd = models.BooleanField(default=False)
     alcohol = models.BooleanField(default=False)
     internet_addiction = models.BooleanField(default=False)
-    bipolar = models.BooleanField(default=False)
-    social_anxiety = models.BooleanField(default=False)
+    bipolar_disorder = models.BooleanField(default=False)
+    social_anxiety_disorder = models.BooleanField(default=False)
     stress = models.BooleanField(default=False)
-    sleep = models.BooleanField(default=False)
-    empathy_deficit = models.BooleanField(default=False)
+    sleep_disorder = models.BooleanField(default=False)
+    empathy_deficit_disorder = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.email

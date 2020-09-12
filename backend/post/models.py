@@ -23,7 +23,7 @@ class Post(models.Model):
 
 class Tag(models.Model):
     post = models.ManyToManyField(Post, related_name='post_tag')
-    tag_name = models.CharField(max_length=20)
+    tag_name = models.CharField(max_length=30)
 
     class Meta:
         ordering = ['tag_name']

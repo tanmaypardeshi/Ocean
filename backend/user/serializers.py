@@ -13,14 +13,13 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password', 'first_name', 'last_name',
-                  'age', 'dob', 'gender', 'city', 'state', 'country']
+                  'dob', 'gender', 'city', 'state', 'country']
 
     def create(self, validated_data):
         user = User.objects.create_user(email=validated_data['email'],
                                         password=validated_data['password'])
         user.first_name = validated_data['first_name']
         user.last_name = validated_data['last_name']
-        user.age = validated_data['age']
         user.dob = validated_data['dob']
         user.gender = validated_data['gender']
         user.city = validated_data['city']
@@ -80,7 +79,6 @@ class EditSerializer(serializers.Serializer):
         user.first_name = data['first_name']
         user.last_name = data['last_name']
         user.dob = data['dob']
-        user.age = data['age']
         user.gender = data['gender']
         user.city = data['city']
         user.state = data['state']
@@ -101,11 +99,11 @@ class EditSerializer(serializers.Serializer):
         tag.ptsd = data['ptsd']
         tag.alcohol = data['alcohol']
         tag.internet_addiction = data['internet_addiction']
-        tag.bipolar = data['bipolar']
-        tag.social_anxiety = data['social_anxiety']
+        tag.bipolar_disorder = data['bipolar_disorder']
+        tag.social_anxiety_disorder = data['social_anxiety_disorder']
         tag.stress = data['stress']
-        tag.sleep = data['sleep']
-        tag.empathy_deficit = data['empathy_deficit']
+        tag.sleep_disorder = data['sleep_disorder']
+        tag.empathy_deficit_disorder = data['empathy_deficit_disorder']
         tag.save()
         user.save()
         return user
