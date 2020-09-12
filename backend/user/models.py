@@ -9,8 +9,6 @@ class User(AbstractBaseUser):
     last_name = models.CharField(max_length=60)
     dob = models.DateField(max_length=8, null=True)
     gender = models.CharField(max_length=20)
-    city = models.CharField(max_length=60)
-    state = models.CharField(max_length=60)
     country = models.CharField(max_length=60)
     last_login = models.DateTimeField(auto_now_add=True)
     date_joined = models.DateTimeField(auto_now_add=True)

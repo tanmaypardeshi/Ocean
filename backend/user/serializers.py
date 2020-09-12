@@ -22,8 +22,6 @@ class UserSerializer(ModelSerializer):
         user.last_name = validated_data['last_name']
         user.dob = validated_data['dob']
         user.gender = validated_data['gender']
-        user.city = validated_data['city']
-        user.state = validated_data['state']
         user.country = validated_data['country']
         user.save()
         return user

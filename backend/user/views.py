@@ -88,8 +88,6 @@ class ProfileView(APIView):
                         'dob': user.dob,
                         'age': (datetime.date.today() - user.dob).days // 365,
                         'gender': user.gender,
-                        'city': user.city,
-                        'state': user.state,
                         'country': user.country,
                         'last_joined': last_login,
                         'date_joined': date_joined
