@@ -73,13 +73,10 @@ class EditSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'A user with this email and password is not found.'
             )
-
         user.first_name = data['first_name']
         user.last_name = data['last_name']
         user.dob = data['dob']
         user.gender = data['gender']
-        user.city = data['city']
-        user.state = data['state']
         user.country = data['country']
         tag.productivity = data['productivity']
         tag.self_help = data['self_help']

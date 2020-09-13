@@ -19,6 +19,26 @@ class PostView(ListAPIView):
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def post(self, request, *args, **kwargs):
+        tag = str(request.data['tag'])
+        tag_list = tag.split(' ')
+        queryset_list = []
+        for tag_name in tag_list:
+            tag = Tag.objects.get(tag_name=tag_name)
+            queryset_list.append(tag)
+        post = Post.objects.create(user=request.user,
+                                   title=request.data['title'],
+                                   description=request.data['description'],
+                                   )
+        post.save()
+        for queryset in queryset_list:
+            post.post_tag.add(queryset)
+        post.save()
+        return Response({
+            'success': True,
+            'message': 'Saved post successfully'
+        }, status=status.HTTP_200_OK)
+
 
 class CategoryView(ListAPIView):
     permission_classes = (IsAuthenticated,)
