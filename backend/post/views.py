@@ -14,7 +14,7 @@ class PostView(ListAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all().order_by('published_at').reverse()
 
-    def list(self, request):
+    def get(self, request):
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
