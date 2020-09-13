@@ -39,6 +39,35 @@ class PostView(ListAPIView):
             'message': 'Saved post successfully'
         }, status=status.HTTP_200_OK)
 
+    def patch(self, request, *args, **kwargs):
+        id = int(request.data['id'])
+        try:
+            post = Post.objects.get(id=id)
+            post.post_tag.clear()
+            new_title = request.data['title']
+            new_description = request.data['description']
+            tag = str(request.data['tag'])
+            tag_list = tag.split(' ')
+            queryset_list = []
+            for tag_name in tag_list:
+                tag = Tag.objects.get(tag_name=tag_name)
+                queryset_list.append(tag)
+            post.title = new_title
+            post.description = new_description
+            post.save()
+            for queryset in queryset_list:
+                post.post_tag.add(queryset)
+            post.save()
+            return Response({
+                'success': True,
+                'message': 'Saved post successfully'
+            }, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            return Response({
+                'success': True,
+                'message': 'Could not edit post'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CategoryView(ListAPIView):
     permission_classes = (IsAuthenticated,)
