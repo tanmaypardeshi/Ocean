@@ -64,8 +64,23 @@ class PostView(ListAPIView):
             }, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
             return Response({
-                'success': True,
+                'success': False,
                 'message': 'Could not edit post'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        id = int(request.data['id'])
+        try:
+            post = Post.objects.get(id=id)
+            post.delete()
+            return Response({
+                'success': True,
+                'message': 'Deleted post'
+            }, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Could not delete post'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
