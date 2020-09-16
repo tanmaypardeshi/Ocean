@@ -273,7 +273,7 @@ export default ({navigation}) => {
                 }
                 style={styles.inputStyle}
                 editable={false}
-                value={date.getDate() + "-" + (date.getMonth()+1) + "-" + date.getUTCFullYear()}
+                value={date.getUTCFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate()}
             />
             {/* <Menu
                 visible={userDetails.country.length}

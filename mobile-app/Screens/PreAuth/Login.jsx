@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { View, ImageBackground, Alert } from 'react-native'
-import BeachDark from '../../assets/beachDark.png'
-import BeachLight from '../../assets/beachLight.png'
 import { TextInput, Button, HelperText, ActivityIndicator } from 'react-native-paper'
 import { StyleSheet } from 'react-native'
 import { useTheme } from '@react-navigation/native'
