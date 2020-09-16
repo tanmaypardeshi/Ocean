@@ -6,19 +6,16 @@ from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from .models import Post, Tag, Like
-from .serializers import PostSerializer
 
 
 class PostView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
-    serializer_class = PostSerializer
-    queryset = Post.objects.all().order_by('published_at').reverse()
 
     def get(self, request):
-        queryset = self.get_queryset()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        posts = Post.objects.all().order_by('published_at').reverse()
+        post_list = get_posts(posts, request)
+        return Response(post_list, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         tag = str(request.data['tag'])
@@ -88,7 +85,6 @@ class PostView(generics.GenericAPIView):
 class CategoryView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
-    serializer_class = PostSerializer
 
     def get_queryset(self):
         tag = Tag.objects.get(tag_name=self.kwargs['tag'])
@@ -97,32 +93,55 @@ class CategoryView(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        post_list = get_posts(queryset, request)
+        return Response(post_list, status=status.HTTP_200_OK)
 
 
 class LikeView(APIView):
-    permission_classes = (AllowAny, )
-    authentication_classes = (JSONWebTokenAuthentication, )
-
-    def get(self, request, *args, **kwargs):
-        return Response({'message': 'HI'}, status=status.HTTP_200_OK)
+    permission_classes = (AllowAny,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def post(self, request, *args, **kwargs):
         user = request.user
         post_id = request.data['id']
         try:
             post = Post.objects.get(id=post_id)
-            post.likes = post.likes + 1
             post.save()
-            like = Like.objects.create(user=user, post=post)
-            like.save()
-            return Response({
-                'success': True,
-                'message': 'Liked post'
-            }, status=status.HTTP_200_OK)
+            like, created = Like.objects.get_or_create(user=user, post=post)
+            if not created:
+                return Response({
+                    'success': False,
+                    'message': 'Already liked the post before'
+                }, status=status.HTTP_200_OK)
+            else:
+                like.save()
+                return Response({
+                    'success': True,
+                    'message': 'Liked post'
+                }, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
             return Response({
                 'success': False,
                 'message': 'Could not like post'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+def get_posts(posts, request):
+    post_list = []
+    objects = {}
+    for post in posts:
+        try:
+            Like.objects.get(post=post, user=request.user)
+            is_liked = True
+        except Like.DoesNotExist:
+            is_liked = False
+        objects['id'] = post.id
+        objects['first_name'] = post.user.first_name
+        objects['last_name'] = post.user.last_name
+        objects['title'] = post.title
+        objects['description'] = post.description
+        objects['published_at'] = post.published_at
+        objects['is_liked'] = is_liked
+        post_list.append(objects)
+        objects = {}
+    return post_list

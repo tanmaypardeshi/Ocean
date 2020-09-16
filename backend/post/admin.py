@@ -4,7 +4,7 @@ from .models import Post, Tag, Like
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['author', 'title', 'likes', 'comments']
+    list_display = ['author', 'title']
 
 
 admin.site.register(Tag)

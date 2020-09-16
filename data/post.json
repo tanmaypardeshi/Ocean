@@ -6,8 +6,6 @@
         "user": 7,
         "title": "Alcohol",
         "description": "Alcohol",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T16:38:08.616Z"
     }
 },
@@ -18,8 +16,6 @@
         "user": 7,
         "title": "Stress",
         "description": "Stress description",
-        "likes": 2,
-        "comments": 0,
         "published_at": "2020-09-13T17:07:09.979Z"
     }
 },
@@ -30,8 +26,6 @@
         "user": 9,
         "title": "Positivity",
         "description": "Positivity",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:04:52.200Z"
     }
 },
@@ -42,8 +36,6 @@
         "user": 9,
         "title": "Anxiety Depression",
         "description": "Anxiety Depression",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:06:01.454Z"
     }
 },
@@ -54,8 +46,6 @@
         "user": 6,
         "title": "Bipolar Discipline",
         "description": "Bipolar Discipline",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:06:21.252Z"
     }
 },
@@ -66,8 +56,6 @@
         "user": 6,
         "title": "Internet Motivation Personal",
         "description": "Internet Motivation Personal",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:06:42.166Z"
     }
 },
@@ -78,8 +66,6 @@
         "user": 8,
         "title": "Productivity PTSD",
         "description": "Productivity PTSD",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:06:59.242Z"
     }
 },
@@ -90,8 +76,6 @@
         "user": 8,
         "title": "Self help improvement",
         "description": "Self help improvement",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:07:15.403Z"
     }
 },
@@ -102,8 +86,6 @@
         "user": 6,
         "title": "Social Success",
         "description": "Social Success",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:07:58.602Z"
     }
 },
@@ -114,8 +96,6 @@
         "user": 7,
         "title": "Relationships",
         "description": "Relationships",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:08:14.641Z"
     }
 },
@@ -126,8 +106,6 @@
         "user": 9,
         "title": "Career Alcohol",
         "description": "Career Alcohol",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:09:10.071Z"
     }
 },
@@ -138,8 +116,6 @@
         "user": 8,
         "title": "Empathy Productivity",
         "description": "Empathy Productivity",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:09:59.429Z"
     }
 },
@@ -150,8 +126,6 @@
         "user": 9,
         "title": "Stress Productivity",
         "description": "Stress Productivity",
-        "likes": 0,
-        "comments": 0,
         "published_at": "2020-09-13T20:12:10.906Z"
     }
 },
@@ -162,8 +136,6 @@
         "user": 6,
         "title": "Stress",
         "description": "Stress description",
-        "likes": 2,
-        "comments": 0,
         "published_at": "2020-09-16T08:43:34.198Z"
     }
 },
@@ -377,23 +349,23 @@
 },
 {
     "model": "post.like",
-    "pk": 1,
+    "pk": 35,
     "fields": {
-        "post": 69,
+        "post": 62,
         "user": 6
     }
 },
 {
     "model": "post.like",
-    "pk": 2,
+    "pk": 36,
     "fields": {
-        "post": 69,
+        "post": 61,
         "user": 6
     }
 },
 {
     "model": "post.like",
-    "pk": 3,
+    "pk": 37,
     "fields": {
         "post": 55,
         "user": 6
@@ -401,9 +373,9 @@
 },
 {
     "model": "post.like",
-    "pk": 4,
+    "pk": 38,
     "fields": {
-        "post": 55,
+        "post": 59,
         "user": 6
     }
 }
