@@ -4,3 +4,17 @@ backend/user/__pycache__
 backend/post/__pycache__
 .idea
 backend/.idea
+
+mobile-app/node_modules/**/*
+mobile-app/.expo/*
+mobile-app/npm-debug.*
+mobile-app/*.jks
+mobile-app/*.p8
+mobile-app/*.p12
+mobile-app/*.key
+mobile-app/*.mobileprovision
+mobile-app/*.orig.*
+mobile-app/web-build/
+
+# macOS
+mobile-app/.DS_Store
