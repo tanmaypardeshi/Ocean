@@ -4,6 +4,7 @@ import { TextInput, Button, useTheme, HelperText } from 'react-native-paper'
 import { View, ImageBackground } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler';
 import Axios from 'axios';
+import { SERVER_URI } from '../../config';
 
 const styles = StyleSheet.create({
     inputStyle: {
@@ -112,7 +113,7 @@ export default ({navigation}) => {
         }
         else {
             Axios.post(
-                "http://192.168.29.126:8000/api/otp/",
+                `${SERVER_URI}/user/otp/`,
                 {
                     "email": userDetails.email.value
                 },
@@ -144,7 +145,7 @@ export default ({navigation}) => {
         }
         else {
             Axios.post(
-                "http://192.168.29.126:8000/api/otp/",
+                `${SERVER_URI}/user/verify/`,
                 {
                     "email": userDetails.email.value,
                     "otp": userDetails.otp.value
@@ -178,7 +179,7 @@ export default ({navigation}) => {
         else {
             setLoading(true);
             Axios.post(
-                "http://192.168.29.126:8000/api/forgot/",
+                `${SERVER_URI}/user/forgot/`,
                 {
                     "email": userDetails.email.value,
                     "new_password": userDetails.password.value

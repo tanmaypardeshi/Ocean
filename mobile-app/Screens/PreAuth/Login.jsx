@@ -7,6 +7,7 @@ import { StyleSheet } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import Axios from 'axios'
 import * as SecureStore from 'expo-secure-store'
+import { SERVER_URI } from '../../config'
 
 const styles = StyleSheet.create({
     inputStyle: {
@@ -73,7 +74,7 @@ export default ({navigation}) => {
             }
             console.log(data);
             Axios.post(
-                "http://192.168.29.126:8000/api/login/",
+                `${SERVER_URI}/user/login/`,
                 data,
                 {
                     headers: {

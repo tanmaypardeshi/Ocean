@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTheme } from '@react-navigation/native'
 import Axios from 'axios';
 import { ScrollView } from 'react-native-gesture-handler';
+import { SERVER_URI } from '../../config'
 
 const styles = StyleSheet.create({
     inputStyle: {
@@ -142,7 +143,7 @@ export default ({navigation}) => {
             }
             console.log(data);
             Axios.post(
-                "http://192.168.29.126:8000/api/register/",
+                `${SERVER_URI}/user/register/`,
                 data,
                 {
                     headers: {

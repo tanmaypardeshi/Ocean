@@ -6,6 +6,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerI
 import HomeStackParent from './Drawer/HomeStackParent';
 import Profile from './Drawer/Profile';
 import Axios from 'axios';
+import { SERVER_URI } from '../../config';
 
 const Drawer = createDrawerNavigator();
 
@@ -17,7 +18,7 @@ export default ({route, navigation}) => {
     React.useEffect(() => {
         SecureStore.getItemAsync("token")
         .then(token => {
-            Axios.get("http://192.168.29.126:8000/api/profile/", {
+            Axios.get(`${SERVER_URI}/user/profile/`, {
                 headers: {
                     "Access-Control-Allow-Origin": "*",
                     "Content-Type" : "application/json",
