@@ -64,7 +64,7 @@ class PostView(ListAPIView):
             }, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
             return Response({
-                'success': False,
+                'success': Falsetanm,
                 'message': 'Could not edit post'
             }, status=status.HTTP_400_BAD_REQUEST)
 

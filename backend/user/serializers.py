@@ -112,6 +112,10 @@ class ChangeSerializer(serializers.Serializer):
         user = instance
         password = data['password']
         new_password = data['new_password']
+        if password == new_password:
+            raise serializers.ValidationError(
+                'Old and New password cannot be the same'
+            )
 
         user = authenticate(email=user, password=password)
         if user is None:
