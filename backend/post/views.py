@@ -94,7 +94,7 @@ class CategoryView(ListAPIView):
         posts = Post.objects.filter(post_tag=tag)
         return posts
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
