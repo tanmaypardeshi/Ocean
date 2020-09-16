@@ -4,7 +4,7 @@ from django.urls import path
 from user.views import (UserView, LoginView, ProfileView,
                         OTPView, VerifyOtp, ForgotPassword,
                         ChangePassword, )
-from post.views import (PostView, CategoryView, )
+from post.views import (PostView, CategoryView, LikeView, )
 
 urlpatterns = [
     # user
@@ -18,6 +18,7 @@ urlpatterns = [
 
     # post
     path('api/post/wall/', PostView.as_view(), name='wall'),
+    path('api/post/like/', LikeView.as_view(), name='like'),
     path('api/post/<tag>/', CategoryView.as_view(), name='category'),
 
     # admin

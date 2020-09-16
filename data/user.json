@@ -10,7 +10,7 @@
         "dob": "2020-09-10",
         "gender": "Male",
         "country": "India",
-        "last_login": "2020-09-10T18:12:44.810Z",
+        "last_login": "2020-09-16T11:03:19.976Z",
         "date_joined": "2020-09-08T18:28:42.852Z",
         "admin": true,
         "staff": true,
@@ -22,14 +22,14 @@
     "model": "user.user",
     "pk": 6,
     "fields": {
-        "password": "pbkdf2_sha256$216000$kxqfRNrIgXRn$qzDtNjHbi5wKpM3BrJEhYKkeRfg457n8O88ykFjcXmk=",
+        "password": "pbkdf2_sha256$216000$Qz6b4cfonYdJ$zOnmtdOqOsa2z2QiqvNif9iF5EwLKFGTBTjBoPDse0E=",
         "email": "tanmaypardeshi@gmail.com",
         "first_name": "Tanmay",
         "last_name": "Pardeshi",
         "dob": "2000-03-07",
         "gender": "Male",
         "country": "India",
-        "last_login": "2020-09-13T16:16:41.606Z",
+        "last_login": "2020-09-16T10:50:27.210Z",
         "date_joined": "2020-09-13T15:55:17.477Z",
         "admin": false,
         "staff": false,
@@ -48,7 +48,7 @@
         "dob": "2000-07-02",
         "gender": "Male",
         "country": "India",
-        "last_login": "2020-09-13T17:05:49.457Z",
+        "last_login": "2020-09-16T05:26:37.367Z",
         "date_joined": "2020-09-13T15:55:27.765Z",
         "admin": false,
         "staff": false,
@@ -132,22 +132,22 @@
         "self_improvement": false,
         "personal_development": false,
         "spirituality": false,
-        "motivation": true,
-        "positivity": true,
-        "career": true,
-        "discipline": true,
-        "relationships": true,
+        "motivation": false,
+        "positivity": false,
+        "career": false,
+        "discipline": false,
+        "relationships": false,
         "success": false,
         "depression": false,
         "anxiety": false,
         "ptsd": false,
         "alcohol": false,
-        "internet_addiction": true,
-        "bipolar_disorder": true,
-        "social_anxiety_disorder": true,
-        "stress": true,
-        "sleep_disorder": true,
-        "empathy_deficit_disorder": true
+        "internet_addiction": false,
+        "bipolar_disorder": false,
+        "social_anxiety_disorder": false,
+        "stress": false,
+        "sleep_disorder": false,
+        "empathy_deficit_disorder": false
     }
 },
 {
@@ -232,6 +232,15 @@
         "stress": true,
         "sleep_disorder": true,
         "empathy_deficit_disorder": true
+    }
+},
+{
+    "model": "user.otp",
+    "pk": 2,
+    "fields": {
+        "user": 6,
+        "otp": 6511,
+        "counter": 1
     }
 }
 ]

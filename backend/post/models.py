@@ -30,3 +30,12 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.tag_name
+
+
+class Like(models.Model):
+    post = models.ForeignKey(Post, related_name='post_liked', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='user_liked', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Like by {self.user.first_name}. Author is {self.post.user.first_name} for post title {self.post.title}"
+

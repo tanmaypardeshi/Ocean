@@ -1,14 +1,15 @@
-from rest_framework.generics import ListAPIView
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from .models import Post, Tag
+from .models import Post, Tag, Like
 from .serializers import PostSerializer
 
 
-class PostView(ListAPIView):
+class PostView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
     serializer_class = PostSerializer
@@ -84,17 +85,44 @@ class PostView(ListAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CategoryView(ListAPIView):
+class CategoryView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
     serializer_class = PostSerializer
 
     def get_queryset(self):
         tag = Tag.objects.get(tag_name=self.kwargs['tag'])
-        posts = Post.objects.filter(post_tag=tag)
+        posts = Post.objects.filter(post_tag=tag).order_by('published_at').reverse()
         return posts
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LikeView(APIView):
+    permission_classes = (AllowAny, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request, *args, **kwargs):
+        return Response({'message': 'HI'}, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        post_id = request.data['id']
+        try:
+            post = Post.objects.get(id=post_id)
+            post.likes = post.likes + 1
+            post.save()
+            like = Like.objects.create(user=user, post=post)
+            like.save()
+            return Response({
+                'success': True,
+                'message': 'Liked post'
+            }, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Could not like post'
+            }, status=status.HTTP_400_BAD_REQUEST)

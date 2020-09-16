@@ -16,9 +16,9 @@
     "pk": 55,
     "fields": {
         "user": 7,
-        "title": "Sleep Disorder",
-        "description": "Sleep Disorder",
-        "likes": 0,
+        "title": "Stress",
+        "description": "Stress description",
+        "likes": 2,
         "comments": 0,
         "published_at": "2020-09-13T17:07:09.979Z"
     }
@@ -153,6 +153,18 @@
         "likes": 0,
         "comments": 0,
         "published_at": "2020-09-13T20:12:10.906Z"
+    }
+},
+{
+    "model": "post.post",
+    "pk": 69,
+    "fields": {
+        "user": 6,
+        "title": "Stress",
+        "description": "Stress description",
+        "likes": 2,
+        "comments": 0,
+        "published_at": "2020-09-16T08:43:34.198Z"
     }
 },
 {
@@ -339,7 +351,9 @@
     "fields": {
         "tag_name": "stress",
         "post": [
-            67
+            55,
+            67,
+            69
         ]
     }
 },
@@ -348,9 +362,7 @@
     "pk": 21,
     "fields": {
         "tag_name": "sleep_disorder",
-        "post": [
-            55
-        ]
+        "post": []
     }
 },
 {
@@ -361,6 +373,38 @@
         "post": [
             66
         ]
+    }
+},
+{
+    "model": "post.like",
+    "pk": 1,
+    "fields": {
+        "post": 69,
+        "user": 6
+    }
+},
+{
+    "model": "post.like",
+    "pk": 2,
+    "fields": {
+        "post": 69,
+        "user": 6
+    }
+},
+{
+    "model": "post.like",
+    "pk": 3,
+    "fields": {
+        "post": 55,
+        "user": 6
+    }
+},
+{
+    "model": "post.like",
+    "pk": 4,
+    "fields": {
+        "post": 55,
+        "user": 6
     }
 }
 ]
