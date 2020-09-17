@@ -37,3 +37,13 @@ class Like(models.Model):
     def __str__(self):
         return f"Like by {self.user.first_name}. Author is {self.post.user.first_name} for post title {self.post.title}"
 
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, related_name='post_comment', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='user_comment', on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', blank=True, null=True, related_name='comment', on_delete=models.CASCADE)
+    content = models.TextField(default='')
+    published_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.first_name} on post {self.post.title}"
