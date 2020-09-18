@@ -83,6 +83,28 @@ class PostView(generics.GenericAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SinglePostView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request, id):
+        post = Post.objects.get(id=id)
+        objects = {}
+        try:
+            Like.objects.get(post=post, user=request.user)
+            is_liked = True
+        except Like.DoesNotExist:
+            is_liked = False
+        objects['id'] = post.id
+        objects['first_name'] = post.user.first_name
+        objects['last_name'] = post.user.last_name
+        objects['title'] = post.title
+        objects['description'] = post.description
+        objects['published_at'] = post.published_at
+        objects['is_liked'] = is_liked
+        return Response(objects, status=status.HTTP_200_OK)
+
+
 class CategoryView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)

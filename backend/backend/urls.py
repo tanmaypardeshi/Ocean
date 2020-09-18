@@ -5,7 +5,7 @@ from user.views import (UserView, LoginView, ProfileView,
                         OTPView, VerifyOtp, ForgotPassword,
                         ChangePassword, )
 from post.views import (PostView, CategoryView, LikeView,
-                        CommentView, UnlikeView)
+                        CommentView, UnlikeView, SinglePostView)
 
 urlpatterns = [
     # user
@@ -19,6 +19,7 @@ urlpatterns = [
 
     # post
     path('api/post/wall/', PostView.as_view(), name='wall'),
+    path('api/post/<int:id>/', SinglePostView.as_view(), name='one-post'),
     path('api/post/like/', LikeView.as_view(), name='like'),
     path('api/post/unlike/', UnlikeView.as_view(), name='unlike'),
     path('api/post/comment/<int:id>/', CommentView.as_view(), name='comment'),
