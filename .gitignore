@@ -2,6 +2,9 @@ venv
 backend/backend/__pycache__
 backend/user/__pycache__
 backend/post/__pycache__
+backend/post/migrations/
+backend/user/migrations
+backend/db.sqlite3
 .idea
 backend/.idea
 
