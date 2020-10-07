@@ -90,6 +90,84 @@ class SingleTaskView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class TakeTaskView(APIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def post(self, request, *args, **kwargs):
+        try:
+            task = Task.objects.get(id=request.data['id'])
+            subtasks = SubTask.objects.filter(task=task)
+            new_task = Task(user=request.user, task=task.task)
+            new_task.save()
+            for subtask in subtasks:
+                sub = SubTask(task=new_task, title=subtask.title)
+                sub.save()
+            taken = Taken(task=new_task, user=request.user)
+            taken.save()
+            return Response({
+                'success': True,
+                'message': 'Added task'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteTaskView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            task = Task.objects.get(id=request.data['id'])
+            if task.user == request.user:
+                task.delete()
+                return Response({
+                    'success': True,
+                    'message': 'Deleted task'
+                }, status=status.HTTP_200_OK)
+            return Response({
+                'success': False,
+                'message': "Cannot delete someone others' task"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateProgressView(APIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            task = Task.objects.get(id=request.data['id'])
+            if task.user == request.user:
+                subtasks = request.data.pop('subtasks')
+                for subtask in subtasks:
+                    sub = SubTask.objects.get(title__contains=subtask['title'])
+                    sub.is_subtask = True
+                    sub.save()
+                return Response({
+                    'success': True,
+                    'message': 'Updated data'
+                }, status=status.HTTP_200_OK)
+            return Response({
+                'success': False,
+                'message': "Cannot update someone else's data"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
 def get_tasks(tasks, request):
     tasks_list = []
     subtask_list = []
@@ -118,7 +196,7 @@ def get_tasks(tasks, request):
         objects['is_taken'] = is_taken
         if is_taken:
             objects['progress'] = (completed / total) * 100
-        objects['sub_tasks'] = subtask_list
+        objects['subtasks'] = subtask_list
         tasks_list.append(objects)
         objects = {}
         subtask_list = []
