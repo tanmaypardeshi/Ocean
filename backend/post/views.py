@@ -14,29 +14,44 @@ class PostView(generics.GenericAPIView):
     authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request):
-        posts = Post.objects.all().order_by('published_at').reverse()
-        post_list = get_posts(posts, request)
-        return Response(post_list, status=status.HTTP_200_OK)
+        try:
+            posts = Post.objects.all().order_by('published_at').reverse()
+            post_list = get_posts(posts, request)
+            return Response({
+                'success': True,
+                'post_list':post_list
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success':False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, *args, **kwargs):
-        tag = str(request.data['tag'])
-        tag_list = tag.split(' ')
-        queryset_list = []
-        for tag_name in tag_list:
-            tag = Tag.objects.get(tag_name=tag_name)
-            queryset_list.append(tag)
-        post = Post.objects.create(user=request.user,
-                                   title=request.data['title'],
-                                   description=request.data['description'],
-                                   )
-        post.save()
-        for queryset in queryset_list:
-            post.post_tag.add(queryset)
-        post.save()
-        return Response({
-            'success': True,
-            'message': 'Saved post successfully'
-        }, status=status.HTTP_200_OK)
+        try:
+            tag = str(request.data['tag'])
+            tag_list = tag.split(' ')
+            queryset_list = []
+            for tag_name in tag_list:
+                tag = Tag.objects.get(tag_name=tag_name)
+                queryset_list.append(tag)
+            post = Post.objects.create(user=request.user,
+                                       title=request.data['title'],
+                                       description=request.data['description'],
+                                       )
+            post.save()
+            for queryset in queryset_list:
+                post.post_tag.add(queryset)
+            post.save()
+            return Response({
+                'success': True,
+                'message': 'Saved post successfully'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': f'Could not post data. {e.__str__()}'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, *args, **kwargs):
         id = int(request.data['id'])
@@ -59,7 +74,7 @@ class PostView(generics.GenericAPIView):
             post.save()
             return Response({
                 'success': True,
-                'message': 'Saved post successfully'
+                'message': 'Edit post successfully'
             }, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
             return Response({
@@ -74,7 +89,7 @@ class PostView(generics.GenericAPIView):
             post.delete()
             return Response({
                 'success': True,
-                'message': 'Deleted post'
+                'message': 'Deleted post successfully'
             }, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
             return Response({
@@ -115,9 +130,18 @@ class CategoryView(generics.ListAPIView):
         return posts
 
     def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        post_list = get_posts(queryset, request)
-        return Response(post_list, status=status.HTTP_200_OK)
+        try:
+            queryset = self.get_queryset()
+            post_list = get_posts(queryset, request)
+            return Response({
+                'success': True,
+                'post_list':post_list}
+            ,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LikeView(APIView):
@@ -236,6 +260,83 @@ class CommentView(generics.ListAPIView):
             return Response({
                 'success': False,
                 'message': 'Could not delete comment'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MyPosts(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request, *args, **kwargs):
+        try:
+            posts = Post.objects.filter(user=request.user)
+            post_list = get_posts(posts, request)
+            return Response({
+                'success': True,
+                'post_list': post_list
+            })
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MyLikes(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request, *args, **kwargs):
+        try:
+            likes = Like.objects.filter(user=request.user)
+            objects = {}
+            like_list = []
+            for like in likes:
+                objects['post_id'] = like.post.pk
+                objects['post_title'] = like.post.title
+                objects['author'] = f"{like.post.user.first_name} {like.post.user.last_name}"
+                like_list.append(objects)
+                objects = {}
+            return Response({
+                'success': True,
+                'message': 'Fetched Likes Successfully',
+                'like_list': like_list
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MyComments(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request, *args, **kwargs):
+        try:
+            comments = Comment.objects.filter(user=request.user)
+            objects = {}
+            comment_list = []
+            for comment in comments:
+                objects['post_id'] = comment.post.pk
+                objects['post_title'] = comment.post.title
+                objects['author'] = f"{comment.post.user.first_name} {comment.post.user.last_name}"
+                objects['comment_id'] = comment.pk
+                objects['parent_id'] = comment.parent
+                objects['content'] = comment.content
+                objects['published_at'] = comment.published_at
+                comment_list.append(objects)
+                objects = {}
+            return Response({
+                'success': True,
+                'message': 'Fetched Comments Successfully',
+                'comment_list': comment_list
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
 
 

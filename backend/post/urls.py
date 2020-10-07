@@ -1,7 +1,8 @@
 from django.urls import path
 
 from .views import (PostView, CategoryView, LikeView,
-                    CommentView, UnlikeView, SinglePostView, )
+                    CommentView, UnlikeView, SinglePostView,
+                    MyPosts, MyLikes, MyComments, )
 
 urlpatterns = [
     path('wall/', PostView.as_view(), name='wall'),
@@ -10,4 +11,7 @@ urlpatterns = [
     path('unlike/', UnlikeView.as_view(), name='unlike'),
     path('comment/<int:id>/', CommentView.as_view(), name='comment'),
     path('<str:tag>/', CategoryView.as_view(), name='category'),
+    path('myposts/', MyPosts.as_view(), name='my-posts'),
+    path('mylikes/', MyLikes.as_view(), name='my-liskes'),
+    path('mycomments/', MyComments.as_view(), name='my-comments')
 ]
