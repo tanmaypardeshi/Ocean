@@ -5,10 +5,17 @@ from user.models import User
 class Task(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task')
     task = models.TextField(default='')
-    is_taken = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - {self.task}'
+
+
+class Taken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_task')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='taken_task')
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name} for task {self.task.id} : {self.task.task}'
 
 
 class SubTask(models.Model):

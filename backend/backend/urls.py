@@ -8,6 +8,9 @@ urlpatterns = [
     # post
     path('api/post/', include('post.urls')),
 
+    # cheer
+    path('api/cheer/', include('cheer.urls')),
+
     # admin
     path('admin/', admin.site.urls),
 ]

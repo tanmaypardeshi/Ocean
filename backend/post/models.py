@@ -35,7 +35,7 @@ class Like(models.Model):
     user = models.ForeignKey(User, related_name='user_liked', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Like by {self.user.first_name}. Author is {self.post.user.first_name} for post title {self.post.title}"
+        return f"Like by {self.user.first_name}. Author is {self.post.user.first_name} for post {self.post.pk} : {self.post.title}"
 
 
 class Comment(models.Model):

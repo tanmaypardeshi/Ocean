@@ -24,7 +24,7 @@ class PostView(generics.GenericAPIView):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'success':False,
+                'success': False,
                 'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
 
