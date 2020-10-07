@@ -284,7 +284,8 @@ class MyPosts(generics.ListAPIView):
             post_list = get_posts(posts, request)
             return Response({
                 'success': True,
-                'post_list': post_list
+                'post_list': post_list,
+                'post count': len(post_list)
             })
         except Exception as e:
             return Response({
@@ -311,12 +312,13 @@ class MyLikes(generics.ListAPIView):
             return Response({
                 'success': True,
                 'message': 'Fetched Likes Successfully',
-                'like_list': like_list
+                'like_list': like_list,
+                'like count': len(like_list)
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 'success': False,
-                'message': 'lol'
+                'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -334,7 +336,6 @@ class MyComments(generics.ListAPIView):
                 objects['post_title'] = comment.post.title
                 objects['author'] = f"{comment.post.user.first_name} {comment.post.user.last_name}"
                 objects['comment_id'] = comment.pk
-                objects['parent_id'] = comment.parent
                 objects['content'] = comment.content
                 objects['published_at'] = comment.published_at
                 comment_list.append(objects)
@@ -347,7 +348,7 @@ class MyComments(generics.ListAPIView):
         except Exception as e:
             return Response({
                 'success': False,
-                'message': 'lol'
+                'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
