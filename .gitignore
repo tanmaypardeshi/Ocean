@@ -1,12 +1,14 @@
 venv
+.idea
+backend/.idea
 backend/backend/__pycache__
 backend/user/__pycache__
 backend/post/__pycache__
-backend/post/migrations/
+backend/cheer/__pycache__
+backend/post/migrations
 backend/user/migrations
+backend/cheer/migrations
 backend/db.sqlite3
-.idea
-backend/.idea
 
 mobile-app/node_modules/**/*
 mobile-app/.expo/*

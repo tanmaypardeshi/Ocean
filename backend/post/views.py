@@ -148,6 +148,7 @@ class LikeView(APIView):
                 'message': 'Could not like post'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UnlikeView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
