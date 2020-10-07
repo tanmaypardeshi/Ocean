@@ -35,7 +35,7 @@ class UserView(APIView):
 
             return Response(response, status=status.HTTP_201_CREATED)
         response = {
-            'success': 'False',
+            'success': False,
             'message': 'User Already Registered!',
         }
         return Response(response, status=status.HTTP_401_UNAUTHORIZED)
@@ -133,14 +133,14 @@ class ProfileView(APIView):
         if serializer.is_valid():
             serializer.update(User.objects.get(email=request.user), request.data)
             response = {
-                'success': 'True',
+                'success': True,
                 'status code': status.HTTP_200_OK,
             }
             status_code = status.HTTP_200_OK
 
             return Response(response, status=status_code)
         response = {
-            'success': 'False',
+            'success': False,
             'status code': status.HTTP_401_UNAUTHORIZED,
         }
         return Response(response, status=status.HTTP_401_UNAUTHORIZED)
@@ -172,21 +172,18 @@ class OTPView(APIView):
                 )
             except:
                 response = {
-                    'success': 'False',
-                    'status code': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'success': False,
                     'message': 'Could not send email. Please try again later',
                 }
                 return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             response = {
-                'success': 'True',
-                'status code': status.HTTP_200_OK,
+                'success': True,
                 'message': 'OTP sent to email successfully',
             }
             return Response(response, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             response = {
-                'success': 'False',
-                'status code': status.HTTP_400_BAD_REQUEST,
+                'success': False,
                 'message': 'Email does not exist',
             }
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
@@ -206,30 +203,26 @@ class VerifyOtp(APIView):
                     user.is_otp_verified = True
                     user.save()
                     response = {
-                        'success': 'True',
-                        'status code': status.HTTP_200_OK,
+                        'success': True,
                         'message': 'OTP verified'
                     }
                     return Response(response, status=status.HTTP_200_OK)
                 else:
                     response = {
-                        'success': 'False',
-                        'status code': status.HTTP_400_BAD_REQUEST,
+                        'success': False,
                         'message': 'OTP could not be verified'
                     }
                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
             except OTP.DoesNotExist:
                 response = {
-                    'success': 'False',
-                    'status code': status.HTTP_400_BAD_REQUEST,
+                    'success': False,
                     'message': 'Please generate an OTP on registered email'
                 }
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         except User.DoesNotExist:
             response = {
-                'success': 'False',
-                'status code': status.HTTP_401_UNAUTHORIZED,
+                'success': False,
                 'message': 'Could not find user'
             }
             return Response(response, status=status.HTTP_401_UNAUTHORIZED)
@@ -241,25 +234,35 @@ class ForgotPassword(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
+            response = {
+                'success': True,
+                'message': 'Changed password'
+            }
+            return Response(response, status=status.HTTP_200_OK)
         response = {
-            'success': 'True',
-            'status code': status.HTTP_200_OK,
+            'success': True,
+            'message': 'Please verify OTP first'
         }
-        return Response(response, status=status.HTTP_200_OK)
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangePassword(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        serializer = ChangeSerializer(User.objects.get(email=request.user), request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        response = {
-            'success': 'True',
-            'status code': status.HTTP_200_OK,
-            'message': 'Password updated successfully',
-        }
-        status_code = status.HTTP_200_OK
-        return Response(response, status=status_code)
+        try:
+            serializer = ChangeSerializer(User.objects.get(email=request.user), request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response = {
+                'success': True,
+                'message': 'Password updated successfully',
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        except Exception as e:
+            response = {
+                'success': False,
+                'message': e.__str__()
+            }
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
