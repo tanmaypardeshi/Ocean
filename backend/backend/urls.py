@@ -1,29 +1,12 @@
 from django.contrib import admin
-from django.urls import path
-
-from user.views import (UserView, LoginView, ProfileView,
-                        OTPView, VerifyOtp, ForgotPassword,
-                        ChangePassword, )
-from post.views import (PostView, CategoryView, LikeView,
-                        CommentView, UnlikeView, SinglePostView)
+from django.urls import path, include
 
 urlpatterns = [
     # user
-    path('api/user/register/', UserView.as_view(), name='register'),
-    path('api/user/login/', LoginView.as_view(), name='login'),
-    path('api/user/profile/', ProfileView.as_view(), name='view'),
-    path('api/user/otp/', OTPView.as_view(), name='otp'),
-    path('api/user/verify/', VerifyOtp.as_view(), name='verify'),
-    path('api/user/forgot/', ForgotPassword.as_view(), name='forgot'),
-    path('api/user/change/', ChangePassword.as_view(), name='change'),
+    path('api/user/', include('user.urls')),
 
     # post
-    path('api/post/wall/', PostView.as_view(), name='wall'),
-    path('api/post/<int:id>/', SinglePostView.as_view(), name='one-post'),
-    path('api/post/like/', LikeView.as_view(), name='like'),
-    path('api/post/unlike/', UnlikeView.as_view(), name='unlike'),
-    path('api/post/comment/<int:id>/', CommentView.as_view(), name='comment'),
-    path('api/post/<str:tag>/', CategoryView.as_view(), name='category'),
+    path('api/post/', include('post.urls')),
 
     # admin
     path('admin/', admin.site.urls),
