@@ -12,6 +12,6 @@ urlpatterns = [
     path('comment/<int:id>/', CommentView.as_view(), name='comment'),
     path('<str:tag>/', CategoryView.as_view(), name='category'),
     path('myposts/', MyPosts.as_view(), name='my-posts'),
-    path('mylikes/', MyLikes.as_view(), name='my-liskes'),
+    path('mylikes/', MyLikes.as_view(), name='my-likes'),
     path('mycomments/', MyComments.as_view(), name='my-comments')
 ]

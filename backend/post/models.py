@@ -46,4 +46,4 @@ class Comment(models.Model):
     published_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.first_name} on post {self.post.title}"
+        return f"Comment by {self.user.first_name} on post {self.post.pk}"

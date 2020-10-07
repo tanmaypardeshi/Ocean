@@ -19,7 +19,8 @@ class PostView(generics.GenericAPIView):
             post_list = get_posts(posts, request)
             return Response({
                 'success': True,
-                'post_list':post_list
+                'message': f'Fetched {len(post_list)} posts',
+                'post_list': post_list
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -57,25 +58,30 @@ class PostView(generics.GenericAPIView):
         id = int(request.data['id'])
         try:
             post = Post.objects.get(id=id)
-            post.post_tag.clear()
-            new_title = request.data['title']
-            new_description = request.data['description']
-            tag = str(request.data['tag'])
-            tag_list = tag.split(' ')
-            queryset_list = []
-            for tag_name in tag_list:
-                tag = Tag.objects.get(tag_name=tag_name)
-                queryset_list.append(tag)
-            post.title = new_title
-            post.description = new_description
-            post.save()
-            for queryset in queryset_list:
-                post.post_tag.add(queryset)
-            post.save()
+            if post.user == request.user:
+                post.post_tag.clear()
+                new_title = request.data['title']
+                new_description = request.data['description']
+                tag = str(request.data['tag'])
+                tag_list = tag.split(' ')
+                queryset_list = []
+                for tag_name in tag_list:
+                    tag = Tag.objects.get(tag_name=tag_name)
+                    queryset_list.append(tag)
+                post.title = new_title
+                post.description = new_description
+                post.save()
+                for queryset in queryset_list:
+                    post.post_tag.add(queryset)
+                post.save()
+                return Response({
+                    'success': True,
+                    'message': 'Edit post successfully'
+                }, status=status.HTTP_200_OK)
             return Response({
-                'success': True,
-                'message': 'Edit post successfully'
-            }, status=status.HTTP_200_OK)
+                'success': False,
+                'message': "Cannot edit someone else's post"
+            }, status=status.HTTP_401_UNAUTHORIZED)
         except Post.DoesNotExist:
             return Response({
                 'success': False,
@@ -86,11 +92,16 @@ class PostView(generics.GenericAPIView):
         id = int(request.data['id'])
         try:
             post = Post.objects.get(id=id)
-            post.delete()
+            if post.user == request.user:
+                post.delete()
+                return Response({
+                    'success': True,
+                    'message': 'Deleted post successfully'
+                }, status=status.HTTP_200_OK)
             return Response({
-                'success': True,
-                'message': 'Deleted post successfully'
-            }, status=status.HTTP_200_OK)
+                'success': False,
+                'message': "Cannot delete someone else's post"
+            }, status=status.HTTP_401_UNAUTHORIZED)
         except Post.DoesNotExist:
             return Response({
                 'success': False,
@@ -192,7 +203,7 @@ class UnlikeView(APIView):
         except:
             return Response({
                 'success': False,
-                'message': 'Could not unlike post'
+                'message': 'Already unliked this post'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -305,7 +316,7 @@ class MyLikes(generics.ListAPIView):
         except Exception as e:
             return Response({
                 'success': False,
-                'message': e.__str__()
+                'message': 'lol'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -336,7 +347,7 @@ class MyComments(generics.ListAPIView):
         except Exception as e:
             return Response({
                 'success': False,
-                'message': e.__str__()
+                'message': 'lol'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
