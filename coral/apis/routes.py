@@ -34,9 +34,9 @@ def getkey():
                       recipients=[email])
         msg.body = f"Your API Key is {apikey}."
         mail.send(msg)
-        return render_template('getkey.html', apikey='API Key sent to your email')
+        return render_template('getkey.html', apikey=f'API Key sent to your {email}')
     except:
-        return render_template('getkey.html', error='Email already exists')
+        return render_template('getkey.html', error=f'API key for {email} already exists')
 
 
 @app.route("/api/chat/", methods=["POST"])
@@ -52,8 +52,8 @@ def chat():
             messages = ['Okay Boomer', 'Hi there',
                         'Nobody Cares', 'Sad Life',
                         'I am gonna pretend I didnt see that']
-            msg = random.choice(messages, )
+            msg = random.choice(messages)
             return jsonify({'reply': msg}, 200)
         return jsonify({'reply': 'Not authenticated'}, 401)
-    except Exception as e:
-        return jsonify({'reply': e.__str__()}, 400)
+    except:
+        return jsonify({'reply': 'Not authenticated', 400)
