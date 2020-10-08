@@ -11,6 +11,9 @@ urlpatterns = [
     # cheer
     path('api/cheer/', include('cheer.urls')),
 
+    # chat
+    path('api/coral/', include('coral.urls')),
+
     # admin
     path('admin/', admin.site.urls),
 ]

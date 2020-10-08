@@ -1,5 +1,6 @@
 import random
 import secrets
+import json
 from apis import app, db, bcrypt, mail
 from flask import jsonify, request, render_template
 from flask_mail import Message
@@ -55,5 +56,6 @@ def chat():
             msg = random.choice(messages)
             return jsonify({'reply': msg}, 200)
         return jsonify({'reply': 'Not authenticated'}, 401)
-    except:
-        return jsonify({'reply': 'Not authenticated', 400)
+    except Exception as e:
+        return jsonify({'reply': e.__str__()}, 400)
+
