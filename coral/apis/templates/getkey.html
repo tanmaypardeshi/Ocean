@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Get API key</title>
+</head>
+<body>
+    <h2>Get your API Key</h2>
+    <form method="post">
+        <table>
+            <tr>
+                <td>
+                    <label>Name:- </label>
+                </td>
+                <td>
+                    <input type="text" name="name" placeholder="Enter name">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Email:- </label>
+                </td>
+                <td>
+                    <input type="email" name="email" placeholder="Enter email">
+                </td>
+            </tr>
+        </table><br>
+        <input type="submit" value="GET API Key">
+    </form>
+    <h3>
+        {% if error %} {{ error }} {% endif %}
+    </h3>
+    <h3>
+       {% if apikey %} {{ apikey }} {% endif %}
+    </h3>
+    <a href="{{ url_for('home') }}">Go to home page</a>
+</body>
+</html>

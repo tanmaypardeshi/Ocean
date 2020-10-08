@@ -21,5 +21,10 @@ mobile-app/*.mobileprovision
 mobile-app/*.orig.*
 mobile-app/web-build/
 
+coral/.idea
+coral/__pycache__
+coral/apis/__pycache__
+coral/apis/coral.db
+
 # macOS
 mobile-app/.DS_Store
