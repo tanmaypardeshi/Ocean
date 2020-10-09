@@ -96,7 +96,7 @@ class TakeTaskView(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            task = Task.objects.get(id=request.data['id'])
+            task = Task.objects.get(id=kwargs['id'])
             subtasks = SubTask.objects.filter(task=task)
             new_task = Task(user=request.user, task=task.task)
             new_task.save()
@@ -106,6 +106,7 @@ class TakeTaskView(APIView):
             taken = Taken(task=new_task, user=request.user)
             taken.save()
             return Response({
+                'id': new_task.pk,
                 'success': True,
                 'message': 'Added task'
             }, status=status.HTTP_200_OK)
@@ -122,7 +123,7 @@ class DeleteTaskView(APIView):
 
     def delete(self, request, *args, **kwargs):
         try:
-            task = Task.objects.get(id=request.data['id'])
+            task = Task.objects.get(id=kwargs['id'])
             if task.user == request.user:
                 task.delete()
                 return Response({
