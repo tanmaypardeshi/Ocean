@@ -75,12 +75,47 @@ class SingleTaskView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            task = Task.objects.filter(id=kwargs['id'])
-            task_list = get_tasks(task, request)
+            subtask_list = []
+            sub_objects = {}
+            task = Task.objects.get(id=kwargs['id'])
+            subtasks = SubTask.objects.filter(task=task, user__first_name__contains=task.created_by.split(' ')[0])
+            for subtask in subtasks:
+                sub_objects['title'] = subtask.title
+                subtask_list.append(sub_objects)
+                sub_objects = {}
+
+            users = task.user.all()
+            user_list = []
+            user_objects = {}
+            for user in users:
+                total = 0
+                completed = 0
+                user_objects['name'] = f"{user.first_name} {user.last_name}"
+                subs = SubTask.objects.filter(user=user)
+                temp_list = []
+                temp_object = {}
+                for s in subs:
+                    temp_object['title'] = s.title
+                    temp_object['is_subtask'] = s.is_subtask
+                    if s.is_subtask:
+                        completed = completed + 1
+                    temp_list.append(temp_object)
+                    total = total + 1
+                    temp_object = {}
+                user_objects['table'] = temp_list
+                user_objects['progress'] = completed / total * 100
+                user_list.append(user_objects)
+                user_objects = {}
+
             return Response({
                 'success': True,
                 'message': f"Fetched task ID {kwargs['id']} successfully",
-                'task': task_list
+                'data': {
+                    'task': task.task,
+                    'created_by': task.created_by,
+                    'subtasks': subtask_list,
+                    'table': user_list
+                }
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
