@@ -1,6 +1,5 @@
 import random
 import secrets
-import json
 from apis import app, db, bcrypt, mail
 from flask import jsonify, request, render_template
 from flask_mail import Message

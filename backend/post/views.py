@@ -88,26 +88,6 @@ class PostView(generics.GenericAPIView):
                 'message': 'Could not edit post'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request):
-        id = int(request.data['id'])
-        try:
-            post = Post.objects.get(id=id)
-            if post.user == request.user:
-                post.delete()
-                return Response({
-                    'success': True,
-                    'message': 'Deleted post successfully'
-                }, status=status.HTTP_200_OK)
-            return Response({
-                'success': False,
-                'message': "Cannot delete someone else's post"
-            }, status=status.HTTP_401_UNAUTHORIZED)
-        except Post.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': 'Could not delete post'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
 
 class SinglePostView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, )
@@ -129,6 +109,25 @@ class SinglePostView(generics.GenericAPIView):
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
         return Response(objects, status=status.HTTP_200_OK)
+
+    def delete(self, request, id):
+        try:
+            post = Post.objects.get(id=id)
+            if post.user == request.user:
+                post.delete()
+                return Response({
+                    'success': True,
+                    'message': 'Deleted post successfully'
+                }, status=status.HTTP_200_OK)
+            return Response({
+                'success': False,
+                'message': "Cannot delete someone else's post"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        except Post.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Could not delete post'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryView(generics.ListAPIView):
@@ -260,8 +259,7 @@ class CommentView(generics.ListAPIView):
 
     def delete(self, request, *args, **kwargs):
         try:
-            id = request.data['id']
-            comment = Comment.objects.get(id=id, user=request.user)
+            comment = Comment.objects.get(id=kwargs['id'], user=request.user)
             comment.delete()
             return Response({
                 'success': True,
