@@ -85,10 +85,11 @@ class SingleTaskView(APIView):
                 subtask_list.append(sub_objects)
                 sub_objects = {}
 
-            current_user = task.user.get(email=request.user)
+            current_user = User.objects.get(email=request.user)
             current_user_object = get_users(current_user)
 
             users = task.user.all()
+
             user_list = []
             for user in users:
                 user_objects = get_users(user)
@@ -207,7 +208,7 @@ def get_tasks(tasks, request):
 
 def get_users(current_user):
     current_user_object = {}
-    total = 0
+    total = 1
     completed = 0
     current_user_object['name'] = f"{current_user.first_name} {current_user.last_name}"
     subs = SubTask.objects.filter(user=current_user)
