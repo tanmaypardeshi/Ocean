@@ -176,20 +176,15 @@ class UpdateProgressView(APIView):
     def patch(self, request, *args, **kwargs):
         try:
             task = Task.objects.get(id=request.data['id'])
-            if task.user == request.user:
-                subtasks = request.data.pop('subtasks')
-                for subtask in subtasks:
-                    sub = SubTask.objects.get(title__contains=subtask['title'], user=request.user)
-                    sub.is_subtask = True
-                    sub.save()
-                return Response({
-                    'success': True,
-                    'message': 'Updated data'
-                }, status=status.HTTP_200_OK)
+            subtasks = request.data.pop('subtasks')
+            for subtask in subtasks:
+                sub = SubTask.objects.get(task=task, title__contains=subtask['title'], user=request.user)
+                sub.is_subtask = True
+                sub.save()
             return Response({
-                'success': False,
-                'message': "Cannot update someone else's data"
-            }, status=status.HTTP_401_UNAUTHORIZED)
+                'success': True,
+                'message': 'Updated data'
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 'success': False,
@@ -206,6 +201,7 @@ def get_tasks(tasks, request):
         subtasks = SubTask.objects.filter(task=task, user__first_name__contains=task.created_by.split(' ')[0])
         for subtask in subtasks:
             sub_objects['title'] = subtask.title
+            sub_objects['is_subtask'] = subtask.is_subtask
             subtask_list.append(sub_objects)
             sub_objects = {}
         objects['id'] = task.id
