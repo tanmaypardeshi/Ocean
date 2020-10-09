@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from .models import Task, SubTask, Taken
+from .models import Task, SubTask
 
 
 class TaskView(generics.GenericAPIView):
@@ -15,11 +15,11 @@ class TaskView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         try:
             tasks = Task.objects.all()
-            tasks_list = get_tasks(tasks, request)
+            task_list = get_tasks(tasks, request)
             return Response({
                 'success': True,
-                'message': f'Fetched {len(tasks_list)} posts',
-                'post_list': tasks_list
+                'message': f'Fetched {len(task_list)} tasks',
+                'post_list': task_list
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -32,12 +32,11 @@ class TaskView(generics.GenericAPIView):
             data = request.data
             user = request.user
             subtasks = data.pop('subtasks')
-            task = Task(user=user, task=data['task'])
-            taken = Taken(user=user, task=task)
+            task = Task.objects.create(task=data['task'], created_by=f"{user.first_name} {user.last_name}")
+            task.user.add(user)
             task.save()
-            taken.save()
             for subtask in subtasks:
-                sub = SubTask(task=task, title=subtask['title'])
+                sub = SubTask(user=request.user, task=task, title=subtask['title'])
                 sub.save()
             return Response({
                 'success': True,
@@ -45,7 +44,7 @@ class TaskView(generics.GenericAPIView):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                'success': True,
+                'success': False,
                 'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -57,11 +56,11 @@ class UserTaskView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         try:
             tasks = Task.objects.filter(user=request.user)
-            tasks_list = get_tasks(tasks, request)
+            task_list = get_tasks(tasks, request)
             return Response({
                 'success': True,
-                'message': f'Fetched {len(tasks_list)} posts',
-                'post_list': tasks_list
+                'message': f'Fetched {len(task_list)} tasks',
+                'post_list': task_list
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -98,15 +97,13 @@ class TakeTaskView(APIView):
         try:
             task = Task.objects.get(id=kwargs['id'])
             subtasks = SubTask.objects.filter(task=task)
-            new_task = Task(user=request.user, task=task.task)
-            new_task.save()
+            task.user.add(request.user)
+            task.save()
             for subtask in subtasks:
-                sub = SubTask(task=new_task, title=subtask.title)
+                sub = SubTask(task=task, title=subtask.title, user=request.user)
                 sub.save()
-            taken = Taken(task=new_task, user=request.user)
-            taken.save()
             return Response({
-                'id': new_task.pk,
+                'id': task.pk,
                 'success': True,
                 'message': 'Added task'
             }, status=status.HTTP_200_OK)
@@ -124,16 +121,12 @@ class DeleteTaskView(APIView):
     def delete(self, request, *args, **kwargs):
         try:
             task = Task.objects.get(id=kwargs['id'])
-            if task.user == request.user:
-                task.delete()
-                return Response({
-                    'success': True,
-                    'message': 'Deleted task'
-                }, status=status.HTTP_200_OK)
+            task.user.remove(request.user)
+            task.save()
             return Response({
-                'success': False,
-                'message': "Cannot delete someone others' task"
-            }, status=status.HTTP_401_UNAUTHORIZED)
+                'success': True,
+                'message': 'Deleted task'
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 'success': False,
@@ -151,7 +144,7 @@ class UpdateProgressView(APIView):
             if task.user == request.user:
                 subtasks = request.data.pop('subtasks')
                 for subtask in subtasks:
-                    sub = SubTask.objects.get(title__contains=subtask['title'])
+                    sub = SubTask.objects.get(title__contains=subtask['title'], user=request.user)
                     sub.is_subtask = True
                     sub.save()
                 return Response({
@@ -170,37 +163,25 @@ class UpdateProgressView(APIView):
 
 
 def get_tasks(tasks, request):
-    tasks_list = []
+    task_list = []
     subtask_list = []
     objects = {}
     sub_objects = {}
     for task in tasks:
-        completed = 0
-        total = 0
-        subtasks = SubTask.objects.filter(task=task.id)
+        subtasks = SubTask.objects.filter(task=task, user__first_name__contains=task.created_by.split(' ')[0])
         for subtask in subtasks:
             sub_objects['title'] = subtask.title
-            if subtask.is_subtask:
-                completed = completed + 1
             subtask_list.append(sub_objects)
-            total = total + 1
             sub_objects = {}
-        try:
-            Taken.objects.get(task=task, user=request.user)
-            is_taken = True
-        except Taken.DoesNotExist:
-            is_taken = False
         objects['id'] = task.id
-        objects['first_name'] = task.user.first_name
-        objects['last_name'] = task.user.last_name
         objects['task'] = task.task
-        objects['is_taken'] = is_taken
-        if is_taken:
-            objects['progress'] = (completed / total) * 100
+        objects['created_by'] = task.created_by
         objects['subtasks'] = subtask_list
-        tasks_list.append(objects)
+        objects['is_taken'] = False
+        if request.user in task.user.all():
+            objects['is_taken'] = True
+        task_list.append(objects)
         objects = {}
         subtask_list = []
-    return tasks_list
-
+    return task_list
 
