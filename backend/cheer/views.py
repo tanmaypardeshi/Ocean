@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from .models import Task, SubTask
+from user.models import User
 
 
 class TaskView(generics.GenericAPIView):
@@ -50,8 +51,8 @@ class TaskView(generics.GenericAPIView):
 
 
 class UserTaskView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -84,28 +85,14 @@ class SingleTaskView(APIView):
                 subtask_list.append(sub_objects)
                 sub_objects = {}
 
+            current_user = task.user.get(email=request.user)
+            current_user_object = get_users(current_user)
+
             users = task.user.all()
             user_list = []
-            user_objects = {}
             for user in users:
-                total = 0
-                completed = 0
-                user_objects['name'] = f"{user.first_name} {user.last_name}"
-                subs = SubTask.objects.filter(user=user)
-                temp_list = []
-                temp_object = {}
-                for s in subs:
-                    temp_object['title'] = s.title
-                    temp_object['is_subtask'] = s.is_subtask
-                    if s.is_subtask:
-                        completed = completed + 1
-                    temp_list.append(temp_object)
-                    total = total + 1
-                    temp_object = {}
-                user_objects['table'] = temp_list
-                user_objects['progress'] = completed / total * 100
+                user_objects = get_users(user)
                 user_list.append(user_objects)
-                user_objects = {}
 
             return Response({
                 'success': True,
@@ -114,6 +101,7 @@ class SingleTaskView(APIView):
                     'task': task.task,
                     'created_by': task.created_by,
                     'subtasks': subtask_list,
+                    'current_user': current_user_object,
                     'table': user_list
                 }
             }, status=status.HTTP_200_OK)
@@ -125,8 +113,8 @@ class SingleTaskView(APIView):
 
 
 class TakeTaskView(APIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def post(self, request, *args, **kwargs):
         try:
@@ -170,8 +158,8 @@ class DeleteTaskView(APIView):
 
 
 class UpdateProgressView(APIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def patch(self, request, *args, **kwargs):
         try:
@@ -216,3 +204,23 @@ def get_tasks(tasks, request):
         subtask_list = []
     return task_list
 
+
+def get_users(current_user):
+    current_user_object = {}
+    total = 0
+    completed = 0
+    current_user_object['name'] = f"{current_user.first_name} {current_user.last_name}"
+    subs = SubTask.objects.filter(user=current_user)
+    temp_list = []
+    temp_object = {}
+    for s in subs:
+        temp_object['title'] = s.title
+        temp_object['is_subtask'] = s.is_subtask
+        if s.is_subtask:
+            completed = completed + 1
+        temp_list.append(temp_object)
+        total = total + 1
+        temp_object = {}
+    current_user_object['table'] = temp_list
+    current_user_object['progress'] = completed / total * 100
+    return current_user_object
