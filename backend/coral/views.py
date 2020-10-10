@@ -38,22 +38,29 @@ class ChatView(generics.GenericAPIView):
             text = data['text']
             chat = Chat(user=request.user, text=text, type=1)
             user = User.objects.get(email=request.user)
-            if user.counter % 2 != 0    :
-                chat_history = ''
+            if user.counter % 2 != 0:
+                data = {
+                    "email": "tanmaypardeshi@gmail.com",
+                    "key": "7fce33c1921f253fc71df92912d274d5",
+                    "counter": user.counter,
+                    "string1": text,
+                    "string2": '',
+                    "string3": ''
+                }
             else:
-                obj = Chat.objects.filter(type=2).order_by('createdAt')
-                total = obj.count()
-                temp = obj[total - 1]
-                chat_history = temp.text
+                string1 = get_text(1)
+                string2 = get_text(2)
+                data = {
+                    "email": "tanmaypardeshi@gmail.com",
+                    "key": "7fce33c1921f253fc71df92912d274d5",
+                    "counter": user.counter,
+                    "string1": string1,
+                    "string2": string2,
+                    "string3": text
+                }
             chat.save()
             url = "http://127.0.0.1:5000/api/chat/"
-            data = {
-                "email": "tanmaypardeshi@gmail.com",
-                "key": "7fce33c1921f253fc71df92912d274d5",
-                "message": text,
-                "counter": user.counter,
-                "chat_history": chat_history
-            }
+
             user.counter = user.counter + 1
             user.save()
             send = requests.post(url, json=data)
@@ -88,3 +95,10 @@ def get_chats(chats):
         user = {}
         objects = {}
     return chat_list
+
+
+def get_text(num):
+    obj = Chat.objects.filter(type=num).order_by('createdAt')
+    total = obj.count()
+    temp = obj[total - 1]
+    return temp.text
