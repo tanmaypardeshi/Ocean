@@ -1,20 +1,19 @@
-import * as React from 'react';
-import { StyleSheet } from 'react-native';
-import { TextInput, Button, useTheme, HelperText } from 'react-native-paper'
-import { View, ImageBackground } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler';
-import Axios from 'axios';
-import { SERVER_URI } from '../../config';
+import * as React from 'react'
+import { ScrollView, StyleSheet } from 'react-native'
+import { TextInput, Title, Button, HelperText, ActivityIndicator } from 'react-native-paper'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Axios from 'axios'
+import { SERVER_URI, AXIOS_HEADERS } from '../../Constants/Network'
 
 const styles = StyleSheet.create({
     inputStyle: {
         width: '90%',
         alignSelf: 'center',
-        marginBottom: 15
+        marginVertical: 10
     },
     helperText: {
-        marginLeft: '2%',
-        marginBottom: '2%'
+        alignSelf: 'flex-start',
+        marginLeft: '5%'
     }
 })
 
@@ -22,11 +21,10 @@ const errPattern = {
     value: '',
     error: false,
     message: ''
-};
+}
 
 export default ({navigation}) => {
 
-    const theme = useTheme()
     const [userDetails, setUserDetails] = React.useState({
         email: errPattern,
         otp: errPattern,
@@ -34,29 +32,29 @@ export default ({navigation}) => {
         confpass: errPattern
     })
 
-    const [level, setLevel] = React.useState(0);
-    const [sec, setSec] = React.useState(true);
-    const [loading, setLoading] = React.useState(false);
+    const [level, setLevel] = React.useState(0)
+    const [sec, setSec] = React.useState(true)
+    const [loading, setLoading] = React.useState(true)
 
     const handleUserChange = target => value => {
-        let details = {...userDetails[target], value};
-        details.error = false;
-        details.message = '';
+        let details = {...userDetails[target], value}
+        details.error = false
+        details.message = ''
 
         if (value === '') {
-            details.error = true;
+            details.error = true
             details.message = 'This field cannot be empty'
         }
         else if (target === 'password') {
-            var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})");
+            var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})")
             if (!strongRegex.test(value)) {
-                details.error = true;
+                details.error = true
                 details.message = 'Password must have numbers, symbols, and alphabets of both cases, and consist of at least 8 characters'
             }
         }
         else if (target === 'confpass') {
             if (value !== userDetails.password) {
-                details.error = true;
+                details.error = true
                 details.message = 'Passwords must match'
             }
         }
@@ -91,24 +89,25 @@ export default ({navigation}) => {
             }
         </>
     )
-
     const handleSubmit = () => {
-        // setLevel((level+1)%3)
+        //setLevel((level+1)%3)
+        setLoading(true)
         switch (level) {
             case 0:
-                getOTP();
-                break;
+                getOTP()
+                break
             case 1:
-                validateOTP();
-                break;
+                validateOTP()
+                break
             default:
-                setNewPass();
-                break;
+                setNewPass()
+                break
         }
     }
 
     const getOTP = () => {
-        if (userDetails.email.error) {
+        if (userDetails.email.error || !userDetails.email.value.length) {
+            handleUserChange('email')(userDetails.email.value)
             alert('Email must be filled!')
         }
         else {
@@ -118,29 +117,27 @@ export default ({navigation}) => {
                     "email": userDetails.email.value
                 },
                 {
-                    headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Content-Type" : "application/json"
-                    }
+                    headers: AXIOS_HEADERS
                 }
             )
             .then(res => {
-                setLevel(1);
-                setLoading(false);
+                setLevel(1)
+                setLoading(false)
             })
             .catch(err => {
+                console.log(err)
                 setUserDetails({...userDetails, email: {
                     ...userDetails.email,
                     error: true,
                     message: 'Email does not exist!'
-                }});
-                setLoading(false);
+                }})
+                setLoading(false)
             })
         }
     }
-
     const validateOTP = () => {
-        if(userDetails.otp.error) {
+        if(userDetails.otp.error || !userDetails.otp.value.length) {
+            handleUserChange('otp')(userDetails.otp.value)
             alert('OTP must be filled')
         }
         else {
@@ -151,33 +148,34 @@ export default ({navigation}) => {
                     "otp": userDetails.otp.value
                 },
                 {
-                    headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Content-Type" : "application/json"
-                    }
+                    headers: AXIOS_HEADERS
                 }
             )
             .then(res => {
-                setLevel(2);
-                setLoading(false);
+                setLevel(2)
+                setLoading(false)
             })
             .catch(err => {
                 setUserDetails({...userDetails, otp: {
                     ...userDetails.otp,
                     error: true,
                     message: 'Invalid OTP!'
-                }});
-                setLoading(false);
+                }})
+                setLoading(false)
             })
         }
     }
-
     const setNewPass = () => {
-        if (userDetails.password.error || userDetails.confpass.error) {
+        if (
+            userDetails.password.error || userDetails.confpass.error || 
+            !userDetails.password.value.length || !userDetails.confpass.value.length
+        ) {
+            handleUserChange('password')(userDetails.password.value)
+            handleUserChange('confpass')(userDetails.confpass.value)
             alert('Password error, please rectify!')
         }
         else {
-            setLoading(true);
+            setLoading(true)
             Axios.post(
                 `${SERVER_URI}/user/forgot/`,
                 {
@@ -185,37 +183,44 @@ export default ({navigation}) => {
                     "new_password": userDetails.password.value
                 },
                 {
-                    headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Content-Type" : "application/json"
-                    }
+                    headers: AXIOS_HEADERS
                 }
             )
             .then(res => {
-                alert("Password reset successfully!");
-                navigation.navigate("Login");
-                setLoading(false);
+                alert("Password reset successfully!")
+                navigation.navigate("Login")
+                setLoading(false)
             })
             .catch(err => {
-                alert("Network Error, please try again!");
-                setLoading(false);
+                alert("Network Error, please try again!")
+                setLoading(false)
             })
         }
     }
 
     return(
-        <ScrollView style={{ flex: 1, paddingTop: 20, backgroundColor: theme.dark ? 'black' : 'white'}}>
+        <ScrollView style = {{flex: 1}} contentContainerStyle={{ justifyContent: 'center', alignItems: 'center'}}>
+            <SafeAreaView/>
+            <Title style={{fontSize: 40, paddingVertical: 40}}>
+                Forgot Password
+            </Title>
             {HelperTextInput('Enter your email to generate OTP', 'Email', userDetails.email, 'email', 0)}
             {HelperTextInput('Enter OTP received in email', 'OTP', userDetails.otp, 'otp', 1)}
             {HelperTextInput('Choose a password that is safe and easy to remember', 'Password', userDetails.password, 'password', 2)}
             {HelperTextInput('', 'Confirm Password', userDetails.confpass, 'confpass', 2)}
-            <Button 
-                mode='contained' 
-                style = {{alignSelf: 'center', width: '90%', marginTop: 15}}
-                onPress={handleSubmit}
-            >
-                {level === 0 ? "GET OTP" : level === 1 ? "VERIFY OTP" : "CHANGE PASSWORD"}
-            </Button>
+            {
+                loading
+                ?
+                <ActivityIndicator animating={true}/>
+                :
+                <Button 
+                    mode='contained' 
+                    style = {{alignSelf: 'center', width: '90%', marginTop: 15}}
+                    onPress={handleSubmit}
+                >
+                    {level === 0 ? "GET OTP" : level === 1 ? "VERIFY OTP" : "CHANGE PASSWORD"}
+                </Button>
+            }
         </ScrollView>
     )
 }

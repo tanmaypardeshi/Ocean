@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { IconButton, TextInput, ActivityIndicator, Avatar, useTheme, Text, Portal, Dialog, RadioButton, Button, Chip, Divider, Caption, Subheading, DataTable } from 'react-native-paper'
+import { IconButton, TextInput, ActivityIndicator, Avatar, useTheme, Text, Divider, Subheading, DataTable, FAB } from 'react-native-paper'
 import * as SecureStore from 'expo-secure-store';
 import { View, ScrollView } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Axios from 'axios';
-import { SERVER_URI } from '../../../config';
+import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network';
 
 const Stack = createStackNavigator();
 
@@ -12,15 +12,14 @@ const profileScreen = () => {
 
     const theme = useTheme();
     const [userDetails, setUserDetails] = React.useState(null);
-    const [showDialog, setShowDialog] = React.useState(false);
+    const [fabIcon, setFabIcon] = React.useState('pencil')
 
     React.useEffect(() => {
         SecureStore.getItemAsync("token")
         .then(token => {
             Axios.get(`${SERVER_URI}/user/profile/`, {
                 headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Content-Type" : "application/json",
+                    ...AXIOS_HEADERS,
                     "Authorization": `Bearer ${token}`
                 }
             })
@@ -46,40 +45,44 @@ const profileScreen = () => {
             editable={editable && true}
             theme={{ colors: {primary: 'transparent'} }}
             onChangeText={handleUserChange(target)}
-            // left={
-            //     <TextInput.Icon 
-            //         name='eye'
-            //         style={{marginTop: 30}}
-            //         onPress={() => setShowDialog(true)}
-            //     />
-            // }
-            right={
-                !editable && target === 'gender' &&
-                <TextInput.Icon 
-                    name='human-male-female'
-                    size={30}
-                    style={{marginTop: 30}}
-                    onPress={() => setShowDialog(true)}
-                />
-            }
             disabled={target==='age'}
         />
-    ) 
+    )
+    
+    const updateProfile = () => {
+        SecureStore.getItemAsync('token')
+        .then(token => {
+            setFabIcon('update')
+            return Axios.patch(
+                `${SERVER_URI}/user/profile/`,
+                {...userDetails.user, ...userDetails.tags},
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )
+        })
+        .then(res => setFabIcon('pencil'))
+        .catch(err => alert(err.message))
+    }
 
     return(
         userDetails !== null 
         ?
+        <>
         <ScrollView style={{ flex: 1, marginBottom: 34}}>
             <Avatar.Text
                 size={150}
-                label={userDetails.user.first_name.slice(0, 1) + userDetails.user.last_name.slice(0, 1)}
+                label={userDetails.user.first_name[0] + userDetails.user.last_name[0]}
                 style={{alignSelf: 'center', marginVertical: 20}}
             />
             <Divider/>
             <Subheading style={{marginLeft: '2.5%'}}>Public details</Subheading>
             {BigTextInput('First Name', 'first_name', true)}
             {BigTextInput('Last Name', 'last_name', true)}
-            {BigTextInput('Gender', 'gender', false)}
+            {BigTextInput('Gender', 'gender', true)}
             {BigTextInput('Age', 'age', false)}
             {BigTextInput('Country', 'country', true)}
             <Divider/>
@@ -106,26 +109,19 @@ const profileScreen = () => {
                     <DataTable.Cell>{userDetails.user.last_login}</DataTable.Cell>
                 </DataTable.Row>
             </DataTable>
-            
-            <Portal>
-                <Dialog visible={showDialog} onDismiss={() => setShowDialog(false)}>
-                    <Dialog.Title>Change gender</Dialog.Title>
-                    <Dialog.Content>
-                        <RadioButton.Group
-                            onValueChange={handleUserChange('gender')}
-                            value={userDetails.user.gender}
-                        >
-                            <RadioButton.Item label="Male" value="Male"/>
-                            <RadioButton.Item label="Female" value="Female"/>
-                            <RadioButton.Item label="Other" value="Other"/>
-                        </RadioButton.Group>
-                    </Dialog.Content>
-                    <Dialog.Actions>
-                        <Button onPress={() => setShowDialog(false)}>Done</Button>
-                    </Dialog.Actions>
-                </Dialog>
-            </Portal>
-        </ScrollView> 
+        </ScrollView>
+        <FAB
+            label={fabIcon === 'pencil' ? 'Update' : 'Updating'}
+            icon={fabIcon}
+            onPress={updateProfile}
+            style={{
+                position: 'absolute',
+                margin: 16,
+                right: 0,
+                bottom: 0
+            }}
+        />
+        </> 
         :
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <ActivityIndicator animating={true}/>

@@ -15,7 +15,7 @@ from transformers import (
 )
 
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
-model = AutoModelWithLMHead.from_pretrained("/home/tanmay/Code/Ocean/coral/bot/")
+model = AutoModelWithLMHead.from_pretrained(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bot'))
 
 
 @app.route("/", methods=["GET"])
