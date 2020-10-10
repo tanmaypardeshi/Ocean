@@ -9,22 +9,9 @@ from flask_mail import Message
 
 from .models import User
 
-from sklearn.model_selection import train_test_split
-from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
-from torch.utils.data.distributed import DistributedSampler
-from tqdm.notebook import tqdm, trange
-
 from transformers import (
-    MODEL_WITH_LM_HEAD_MAPPING,
-    WEIGHTS_NAME,
-    AdamW,
-    AutoConfig,
     AutoModelWithLMHead,
     AutoTokenizer,
-    PreTrainedModel,
-    PreTrainedTokenizer,
-    get_linear_schedule_with_warmup,
 )
 
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
@@ -72,30 +59,35 @@ def chat():
         check_key = user.password
         key = data['key']
         if bcrypt.check_password_hash(check_key, key):
-            message = data['message']
             counter = data['counter']
-            chat_history = data['chat_history']
-            print(message)
-            print(counter)
-            print(chat_history)
-            reply = Coral(message, counter, chat_history)
+            string1 = data['string1']
+            string2 = data['string2']
+            string3 = data['string3']
+            reply = Coral(counter, string1, string2, string3)
             return jsonify({'reply': reply}, 200)
         return jsonify({'reply': 'Not authenticated'}, 401)
     except Exception as e:
         return jsonify({'reply': e.__str__()}, 400)
 
 
-def Coral(text, step, prev_text):
-    new_user_input_ids = tokenizer.encode(text + tokenizer.eos_token, return_tensors='pt')
+def Coral(step, string1="", string2="", string3=""):
+    if step % 2 == 1:
+        new_user_input_ids1 = tokenizer.encode(string1 + tokenizer.eos_token, return_tensors='pt')
+        bot_input_ids = new_user_input_ids1
+        chat_history_ids = model.generate(
+            bot_input_ids, max_length=1000,
+            pad_token_id=tokenizer.eos_token_id,
+            top_p=0.92, top_k=50)
+        return tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
 
     if step % 2 == 0:
-        chat_history = tokenizer.encode(prev_text + tokenizer.eos_token, return_tensors='pt')
-
-    bot_input_ids = torch.cat([chat_history, new_user_input_ids], dim=-1) if step % 2 == 0 else new_user_input_ids
-
-    chat_history_ids = model.generate(
-        bot_input_ids, max_length=1000,
-        pad_token_id=tokenizer.eos_token_id,
-        top_p=0.92, top_k=50)
-
-    return tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+        new_user_input_ids1 = tokenizer.encode(string1 + tokenizer.eos_token, return_tensors='pt')
+        new_user_input_ids2 = tokenizer.encode(string2 + tokenizer.eos_token, return_tensors='pt')
+        new_user_input_ids3 = tokenizer.encode(string3 + tokenizer.eos_token, return_tensors='pt')
+        bot_input_ids = torch.cat([new_user_input_ids1, new_user_input_ids2], dim=-1)
+        bot_input_ids = torch.cat([bot_input_ids, new_user_input_ids3], dim=-1)
+        chat_history_ids = model.generate(
+            bot_input_ids, max_length=1000,
+            pad_token_id=tokenizer.eos_token_id,
+            top_p=0.92, top_k=50)
+        return tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
