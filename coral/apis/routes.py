@@ -1,10 +1,34 @@
+import os
 import random
 import secrets
+import torch
+
 from apis import app, db, bcrypt, mail
 from flask import jsonify, request, render_template
 from flask_mail import Message
 
 from .models import User
+
+from sklearn.model_selection import train_test_split
+from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
+from torch.utils.data.distributed import DistributedSampler
+from tqdm.notebook import tqdm, trange
+
+from transformers import (
+    MODEL_WITH_LM_HEAD_MAPPING,
+    WEIGHTS_NAME,
+    AdamW,
+    AutoConfig,
+    AutoModelWithLMHead,
+    AutoTokenizer,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    get_linear_schedule_with_warmup,
+)
+
+tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
+model = AutoModelWithLMHead.from_pretrained("/home/tanmay/Code/Ocean/coral/bot/")
 
 
 @app.route("/", methods=["GET"])
@@ -49,12 +73,29 @@ def chat():
         key = data['key']
         if bcrypt.check_password_hash(check_key, key):
             message = data['message']
-            messages = ['Okay Boomer', 'Hi there',
-                        'Nobody Cares', 'Sad Life',
-                        'I am gonna pretend I didnt see that']
-            msg = random.choice(messages)
-            return jsonify({'reply': msg}, 200)
+            counter = data['counter']
+            chat_history = data['chat_history']
+            print(message)
+            print(counter)
+            print(chat_history)
+            reply = Coral(message, counter, chat_history)
+            return jsonify({'reply': reply}, 200)
         return jsonify({'reply': 'Not authenticated'}, 401)
     except Exception as e:
         return jsonify({'reply': e.__str__()}, 400)
 
+
+def Coral(text, step, prev_text):
+    new_user_input_ids = tokenizer.encode(text + tokenizer.eos_token, return_tensors='pt')
+
+    if step % 2 == 0:
+        chat_history = tokenizer.encode(prev_text + tokenizer.eos_token, return_tensors='pt')
+
+    bot_input_ids = torch.cat([chat_history, new_user_input_ids], dim=-1) if step % 2 == 0 else new_user_input_ids
+
+    chat_history_ids = model.generate(
+        bot_input_ids, max_length=1000,
+        pad_token_id=tokenizer.eos_token_id,
+        top_p=0.92, top_k=50)
+
+    return tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)

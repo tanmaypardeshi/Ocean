@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
+from user.models import User
 from .models import Chat
 
 
@@ -36,13 +37,25 @@ class ChatView(generics.GenericAPIView):
             data = request.data
             text = data['text']
             chat = Chat(user=request.user, text=text, type=1)
+            user = User.objects.get(email=request.user)
+            if user.counter % 2 != 0    :
+                chat_history = ''
+            else:
+                obj = Chat.objects.filter(type=2).order_by('createdAt')
+                total = obj.count()
+                temp = obj[total - 1]
+                chat_history = temp.text
             chat.save()
             url = "http://127.0.0.1:5000/api/chat/"
             data = {
                 "email": "tanmaypardeshi@gmail.com",
                 "key": "7fce33c1921f253fc71df92912d274d5",
-                "message": text
+                "message": text,
+                "counter": user.counter,
+                "chat_history": chat_history
             }
+            user.counter = user.counter + 1
+            user.save()
             send = requests.post(url, json=data)
             chat = Chat(user=request.user, text=json.loads(send.text)[0]['reply'], type=2)
             chat.save()

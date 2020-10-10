@@ -27,6 +27,7 @@ coral/.idea
 coral/__pycache__
 coral/apis/__pycache__
 coral/apis/coral.db
+coral/bot/
 
 # macOS
 mobile-app/.DS_Store

@@ -18,6 +18,8 @@ class User(AbstractBaseUser):
     active = models.BooleanField(default=True)
     is_otp_verified = models.BooleanField(default=False)
 
+    counter = models.IntegerField(default=1)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 

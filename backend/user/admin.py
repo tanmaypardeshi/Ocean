@@ -16,7 +16,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         ('Login Info', {'fields': ('email', 'password')}),
         ('Primary Info', {'fields': ('first_name', 'last_name', 'gender', 'dob')}),
-        ('Secondary Info', {'fields': ('country',)}),
+        ('Secondary Info', {'fields': ('country', 'counter')}),
         ('Permissions', {'fields': ('active', 'staff', 'admin', 'is_otp_verified')}),
         ('Time', {'fields': ('date_joined', 'last_login',)}),
     )
