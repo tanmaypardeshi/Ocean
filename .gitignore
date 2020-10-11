@@ -1,5 +1,6 @@
 venv
 .idea
+.vscode
 backend/.idea
 backend/backend/__pycache__
 backend/user/__pycache__
