@@ -13,7 +13,7 @@ class Post(models.Model):
         ordering = ['published_at']
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name} - {self.title}"
+        return f"{self.user.first_name} {self.user.last_name} - {self.pk} {self.title}"
 
     def author(self):
         return f"{self.user.first_name} {self.user.last_name}"

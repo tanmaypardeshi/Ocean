@@ -354,6 +354,10 @@ def get_posts(posts, request):
     post_list = []
     objects = {}
     for post in posts:
+        tag_list = []
+        tags = Tag.objects.filter(post=post)
+        for tag in tags:
+            tag_list.append(tag.tag_name)
         try:
             Like.objects.get(post=post, user=request.user)
             is_liked = True
@@ -366,6 +370,7 @@ def get_posts(posts, request):
         objects['description'] = post.description
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
+        objects['tags'] = tag_list
         post_list.append(objects)
         objects = {}
     return post_list
