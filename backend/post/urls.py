@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (PostView, CategoryView, LikeView,
                     CommentView, UnlikeView, SinglePostView,
-                    MyPosts, MyLikes, MyComments, populate)
+                    MyPosts, MyLikes, MyComments, populate,)
 
 urlpatterns = [
     path('populate/', populate, name='populate'),
