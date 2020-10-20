@@ -14,34 +14,35 @@ from .models import Post, Tag, Like, Comment
 from .serializers import CommentSerializer
 # from .summariser import create_summary
 
-file = os.getcwd() + '/post/populate.txt'
-
-with open(file, 'rb') as f:
-    data = pickle.load(f)
-
-
-def populate(request):
-    if request.method == 'GET':
-        return render(request, 'post/populate.html')
-    else:
-        # for i in range(data.shape[0]):
-        #     try:
-        #         summary = create_summary(data['posts'][i])
-        #         user = User.objects.get(email=data['email'][i])
-        #         post = Post.objects.create(user=user,
-        #                                    title=data['title'][i],
-        #                                    description=data['posts'][i],
-        #                                    summary=summary)
-        #         post.save()
-        #         query_list = data['tags'][i]
-        #         for query in query_list:
-        #             tag = Tag.objects.get(tag_name=query)
-        #             post.post_tag.add(tag)
-        #         post.save()
-        #         print(f"{i} - Done with post {data['title'][i]}")
-        #     except Exception as e:
-        #         print(e.__str__())
-        return render(request, 'post/success.html')
+# file = os.getcwd() + '/post/populate.txt'
+#
+# with open(file, 'rb') as f:
+#     data = pickle.load(f)
+#
+#
+# def populate(request):
+#     if request.method == 'GET':
+#         return render(request, 'post/populate.html')
+#     else:
+#         for i in range(data.shape[0]):
+#             try:
+#                 summary = create_summary(data['posts'][i])
+#                 user = User.objects.get(email=data['email'][i])
+#                 post = Post.objects.create(user=user,
+#                                            title=data['title'][i],
+#                                            description=data['posts'][i],
+#                                            summary=summary)
+#                 post.save()
+#                 query_list = data['tags'][i]
+#                 for query in query_list:
+#                     tag = Tag.objects.get(tag_name=query)
+#                     post.post_tag.add(tag)
+#                 post.save()
+#                 print(f"{i} - Done with post {data['title'][i]}")
+#             except Exception as e:
+#                 print(e.__str__())
+#         return render(request, 'post/success.html')
+#
 
 
 class PostView(generics.GenericAPIView):
@@ -183,7 +184,7 @@ class CategoryView(generics.ListAPIView):
             post_list = get_posts(queryset, request)
             return Response({
                 'success': True,
-                'post_list':post_list}
+                'post_list': post_list}
             ,status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
