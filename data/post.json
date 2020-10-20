@@ -1,0 +1,170 @@
+[
+{
+    "model": "post.tag",
+    "pk": 1,
+    "fields": {
+        "tag_name": "productivity",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 2,
+    "fields": {
+        "tag_name": "self_help",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 3,
+    "fields": {
+        "tag_name": "self_improvement",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 4,
+    "fields": {
+        "tag_name": "personal_development",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 5,
+    "fields": {
+        "tag_name": "spirituality",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 6,
+    "fields": {
+        "tag_name": "motivation",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 7,
+    "fields": {
+        "tag_name": "positivity",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 8,
+    "fields": {
+        "tag_name": "career",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 9,
+    "fields": {
+        "tag_name": "discipline",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 10,
+    "fields": {
+        "tag_name": "relationships",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 11,
+    "fields": {
+        "tag_name": "success",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 12,
+    "fields": {
+        "tag_name": "depression",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 13,
+    "fields": {
+        "tag_name": "anxiety",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 14,
+    "fields": {
+        "tag_name": "ptsd",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 15,
+    "fields": {
+        "tag_name": "alcohol",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 16,
+    "fields": {
+        "tag_name": "internet_addiction",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 17,
+    "fields": {
+        "tag_name": "bipolar_disorder",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 18,
+    "fields": {
+        "tag_name": "social_anxiety_disorder",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 19,
+    "fields": {
+        "tag_name": "stress",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 20,
+    "fields": {
+        "tag_name": "sleep_disorder",
+        "post": []
+    }
+},
+{
+    "model": "post.tag",
+    "pk": 21,
+    "fields": {
+        "tag_name": "empathy_deficit_disorder",
+        "post": []
+    }
+}
+]
