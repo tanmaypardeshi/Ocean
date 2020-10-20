@@ -2,9 +2,10 @@ from django.urls import path
 
 from .views import (PostView, CategoryView, LikeView,
                     CommentView, UnlikeView, SinglePostView,
-                    MyPosts, MyLikes, MyComments, )
+                    MyPosts, MyLikes, MyComments, populate)
 
 urlpatterns = [
+    path('populate/', populate, name='populate'),
     path('myposts/', MyPosts.as_view(), name='my-posts'),
     path('mylikes/', MyLikes.as_view(), name='my-likes'),
     path('mycomments/', MyComments.as_view(), name='my-comments'),

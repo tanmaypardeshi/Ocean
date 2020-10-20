@@ -21,7 +21,7 @@ class Post(models.Model):
 
 
 class Tag(models.Model):
-    post = models.ManyToManyField(Post, related_name='post_tag')
+    post = models.ManyToManyField(Post, related_name='post_tag', blank=True)
     tag_name = models.CharField(max_length=30)
 
     class Meta:

@@ -11,7 +11,7 @@ backend/post/migrations
 backend/user/migrations
 backend/cheer/migrations
 backend/coral/migrations
-backend/post/*.txt
+backend/post/glove.6B.200d.txt
 backend/db.sqlite3
 
 mobile-app/node_modules/**/*

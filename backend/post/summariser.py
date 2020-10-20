@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from nltk.corpus import stopwords
 
 stop_words = stopwords.words('english')
-path = os.getcwd() + '/glove.6B.200d.txt'
+path = os.getcwd() + '/post/glove.6B.200d.txt'
 word_embeddings = {}
 
 f = open(path, encoding='utf-8')

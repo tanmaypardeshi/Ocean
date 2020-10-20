@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Populate the database</title>
+</head>
+<body>
+    <h1 align="center">
+        Populate the database
+    </h1>
+    <h2 align="center">
+        <form method="post">
+        {% csrf_token %}
+            <button type="submit" value="populate">Populate the Database</button>
+        </form>
+    </h2>
+</body>
+</html>
