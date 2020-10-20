@@ -7,6 +7,7 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
     title = models.TextField(default='')
     description = models.TextField(default='')
+    summary = models.TextField(default='')
     published_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
