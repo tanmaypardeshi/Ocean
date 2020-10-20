@@ -8,10 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-# from user.models import User
+from user.models import User
 from .models import Post, Tag, Like, Comment
 from .serializers import CommentSerializer
-# from .summariser import create_summary
+from .summariser import create_summary
 
 file = os.getcwd() + '/post/populate.txt'
 
@@ -23,22 +23,24 @@ def populate(request):
     if request.method == 'GET':
         return render(request, 'post/populate.html')
     else:
-        pass
-        # for i in range(3):
-        #     summary = create_summary(data['posts'][i])
-        #     user = User.objects.get(email=data['email'][i])
-        #     post = Post.objects.create(user=user,
-        #                                title=data['title'][i],
-        #                                description=data['posts'][i],
-        #                                summary=summary)
-        #     post.save()
-        #     query_list = data['tags'][i]
-        #     for query in query_list:
-        #         tag = Tag.objects.get(tag_name=query)
-        #         post.post_tag.add(tag)
-        #     post.save()
-        #     print(f"{i} - Done with post {data['title'][i]}")
-        # return render(request, 'post/success.html')
+        for i in range(data.shape[0]):
+            try:
+                summary = create_summary(data['posts'][i])
+                user = User.objects.get(email=data['email'][i])
+                post = Post.objects.create(user=user,
+                                           title=data['title'][i],
+                                           description=data['posts'][i],
+                                           summary=summary)
+                post.save()
+                query_list = data['tags'][i]
+                for query in query_list:
+                    tag = Tag.objects.get(tag_name=query)
+                    post.post_tag.add(tag)
+                post.save()
+                print(f"{i} - Done with post {data['title'][i]}")
+            except Exception as e:
+                print(e.__str__())
+        return render(request, 'post/success.html')
 
 
 class PostView(generics.GenericAPIView):
