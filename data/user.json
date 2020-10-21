@@ -50,7 +50,7 @@
         "dob": "2000-03-07",
         "gender": "Male",
         "country": "India",
-        "last_login": "2020-10-20T13:20:14.572Z",
+        "last_login": "2020-10-20T16:11:05.516Z",
         "date_joined": "2020-10-20T13:20:14.572Z",
         "admin": false,
         "staff": false,
@@ -101,114 +101,230 @@
 },
 {
     "model": "user.tag",
-    "pk": 1,
+    "pk": 5,
     "fields": {
-        "user": 2,
-        "productivity": true,
-        "self_help": true,
-        "self_improvement": true,
-        "personal_development": true,
-        "spirituality": true,
-        "motivation": true,
-        "positivity": true,
-        "career": true,
-        "discipline": true,
-        "relationships": true,
-        "success": true,
-        "depression": true,
-        "anxiety": true,
-        "ptsd": false,
-        "alcohol": false,
-        "internet_addiction": false,
-        "bipolar_disorder": false,
-        "social_anxiety_disorder": false,
-        "stress": false,
-        "sleep_disorder": false,
-        "empathy_deficit_disorder": false
+        "tag_name": "productivity",
+        "user": [
+            2,
+            3
+        ]
     }
 },
 {
     "model": "user.tag",
-    "pk": 2,
+    "pk": 6,
     "fields": {
-        "user": 3,
-        "productivity": true,
-        "self_help": true,
-        "self_improvement": true,
-        "personal_development": true,
-        "spirituality": true,
-        "motivation": true,
-        "positivity": true,
-        "career": true,
-        "discipline": true,
-        "relationships": true,
-        "success": true,
-        "depression": true,
-        "anxiety": true,
-        "ptsd": false,
-        "alcohol": false,
-        "internet_addiction": false,
-        "bipolar_disorder": false,
-        "social_anxiety_disorder": false,
-        "stress": false,
-        "sleep_disorder": false,
-        "empathy_deficit_disorder": false
+        "tag_name": "self_help",
+        "user": [
+            2,
+            3
+        ]
     }
 },
 {
     "model": "user.tag",
-    "pk": 3,
+    "pk": 7,
     "fields": {
-        "user": 4,
-        "productivity": true,
-        "self_help": true,
-        "self_improvement": true,
-        "personal_development": true,
-        "spirituality": true,
-        "motivation": true,
-        "positivity": true,
-        "career": true,
-        "discipline": true,
-        "relationships": true,
-        "success": true,
-        "depression": true,
-        "anxiety": true,
-        "ptsd": false,
-        "alcohol": false,
-        "internet_addiction": false,
-        "bipolar_disorder": false,
-        "social_anxiety_disorder": false,
-        "stress": false,
-        "sleep_disorder": false,
-        "empathy_deficit_disorder": false
+        "tag_name": "self_improvement",
+        "user": [
+            2,
+            5
+        ]
     }
 },
 {
     "model": "user.tag",
-    "pk": 4,
+    "pk": 8,
     "fields": {
-        "user": 5,
-        "productivity": true,
-        "self_help": true,
-        "self_improvement": true,
-        "personal_development": true,
-        "spirituality": true,
-        "motivation": true,
-        "positivity": true,
-        "career": true,
-        "discipline": true,
-        "relationships": true,
-        "success": true,
-        "depression": true,
-        "anxiety": true,
-        "ptsd": false,
-        "alcohol": false,
-        "internet_addiction": false,
-        "bipolar_disorder": false,
-        "social_anxiety_disorder": false,
-        "stress": false,
-        "sleep_disorder": false,
-        "empathy_deficit_disorder": false
+        "tag_name": "personal_development",
+        "user": [
+            2,
+            4,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 9,
+    "fields": {
+        "tag_name": "spirituality",
+        "user": [
+            2,
+            3
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 10,
+    "fields": {
+        "tag_name": "motivation",
+        "user": [
+            3,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 11,
+    "fields": {
+        "tag_name": "positivity",
+        "user": [
+            4,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 12,
+    "fields": {
+        "tag_name": "career",
+        "user": [
+            4
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 13,
+    "fields": {
+        "tag_name": "discipline",
+        "user": [
+            3,
+            4,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 14,
+    "fields": {
+        "tag_name": "relationships",
+        "user": [
+            3,
+            4
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 15,
+    "fields": {
+        "tag_name": "success",
+        "user": []
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 16,
+    "fields": {
+        "tag_name": "depression",
+        "user": [
+            2,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 17,
+    "fields": {
+        "tag_name": "anxiety",
+        "user": [
+            3,
+            4
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 18,
+    "fields": {
+        "tag_name": "ptsd",
+        "user": [
+            2,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 19,
+    "fields": {
+        "tag_name": "alcohol",
+        "user": [
+            2,
+            3,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 20,
+    "fields": {
+        "tag_name": "internet_addiction",
+        "user": [
+            2
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 21,
+    "fields": {
+        "tag_name": "bipolar_disorder",
+        "user": [
+            2,
+            4
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 22,
+    "fields": {
+        "tag_name": "social_anxiety_disorder",
+        "user": [
+            4,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 23,
+    "fields": {
+        "tag_name": "stress",
+        "user": [
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 24,
+    "fields": {
+        "tag_name": "sleep_disorder",
+        "user": [
+            2,
+            5
+        ]
+    }
+},
+{
+    "model": "user.tag",
+    "pk": 25,
+    "fields": {
+        "tag_name": "empathy_deficit_disorder",
+        "user": [
+            4,
+            5
+        ]
     }
 }
 ]

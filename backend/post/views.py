@@ -19,9 +19,9 @@ from .serializers import CommentSerializer
 from .similar import top_similar
 from .recommendation import recommendation_system
 
-
+#
 # from .summariser import create_summary
-
+#
 # file = os.getcwd() + '/post/populate.txt'
 #
 # with open(file, 'rb') as f:
@@ -57,13 +57,11 @@ class PostView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
 
-    # noinspection DuplicatedCode
     def get(self, request):
         try:
             posts = Post.objects.all().order_by('published_at').reverse()
             user = User.objects.get(email=request.user)
             tags = list(user.user_tag.all().values_list('tag_name', flat=True))
-            print(tags)
             df = pd.DataFrame(
                 columns=['id', 'likes', 'comments', 'tags', 'email', 'title', 'posts', 'summaries', 'date'])
             for post in posts:
@@ -176,7 +174,7 @@ class SinglePostView(generics.GenericAPIView):
         for s in sort_set:
             final = Post.objects.get(pk=s)
             df = df.append({'id': final.id, 'likes': Like.objects.filter(post=final).count(),
-                            'comments': Comment.objects.filter(post=final).count(), 'tags': list(final.post_tag.all()),
+                            'comments': Comment.objects.filter(post=final).count(), 'tags': list(final.post_tag.all().values_list('tag_name', flat=True)),
                             'email': final.user.email, 'title': final.title, 'posts': final.description,
                             'summaries': final.summary, 'date': final.published_at}, ignore_index=True)
         result = top_similar(summary, df)
