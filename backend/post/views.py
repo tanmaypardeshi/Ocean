@@ -1,7 +1,10 @@
 import os
 import pickle
 import random
+import pandas as pd
+from operator import itemgetter
 from django.shortcuts import render
+from django.db.models import Count
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -12,6 +15,9 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from user.models import User
 from .models import Post, Tag, Like, Comment
 from .serializers import CommentSerializer
+from .similar import top_similar
+
+
 # from .summariser import create_summary
 
 # file = os.getcwd() + '/post/populate.txt'
@@ -76,7 +82,7 @@ class PostView(generics.GenericAPIView):
             post = Post.objects.create(user=request.user,
                                        title=request.data['title'],
                                        description=request.data['description'])
-                                        #, summary = summary)
+            # , summary = summary)
             post.save()
             for queryset in queryset_list:
                 post.post_tag.add(queryset)
@@ -129,14 +135,39 @@ class PostView(generics.GenericAPIView):
 
 
 class SinglePostView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request, id):
         post = Post.objects.get(id=id)
+        summary = post.summary
+        tags = post.post_tag.all()
+        sort_set = set()
+        df = pd.DataFrame(columns=['id', 'likes', 'comments', 'tags', 'email', 'title', 'posts', 'summaries', 'date'])
+        for tag in tags:
+            sort_posts = Post.objects.filter(post_tag=tag)
+            sorting_list = []
+            sorting_objects = {}
+            for p in sort_posts:
+                sorting_objects['id'] = p.pk
+                sorting_objects['likes'] = Like.objects.filter(post=p).count()
+                sorting_list.append(sorting_objects)
+                sorting_list = sorted(sorting_list, key=itemgetter('likes'), reverse=True)
+                sorting_objects = {}
+            sort_set.add(sorting_list[0]['id'])
+            sort_set.add(sorting_list[1]['id'])
+        sort_set = list(sort_set)
+        for s in sort_set:
+            final = Post.objects.get(pk=s)
+            df = df.append({'id': final.id, 'likes': Like.objects.filter(post=final).count(),
+                            'comments': Comment.objects.filter(post=final).count(), 'tags': list(final.post_tag.all()),
+                            'email': final.user.email, 'title': final.title, 'posts': final.description,
+                            'summaries': final.summary, 'date': final.published_at}, ignore_index=True)
+        result = top_similar(summary, df)
+        print(result)
         objects = {}
         try:
-            Like.objects.get(post=post, user=request.user)
+            Like.objects.filter(post=post, user=request.user).first()
             is_liked = True
         except Like.DoesNotExist:
             is_liked = False
@@ -185,7 +216,7 @@ class CategoryView(generics.ListAPIView):
             return Response({
                 'success': True,
                 'post_list': post_list}
-            ,status=status.HTTP_200_OK)
+                , status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 'success': False,
@@ -235,7 +266,7 @@ class UnlikeView(APIView):
             like = Like.objects.get(post=post, user=user)
             like.delete()
             return Response({
-                'success':True,
+                'success': True,
                 'message': 'Unliked post'
             }, status=status.HTTP_200_OK)
         except:
@@ -246,8 +277,8 @@ class UnlikeView(APIView):
 
 
 class CommentView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     serializer_class = CommentSerializer
 
     def get(self, request, *args, **kwargs):
@@ -312,8 +343,8 @@ class CommentView(generics.ListAPIView):
 
 
 class MyPosts(generics.ListAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -332,8 +363,8 @@ class MyPosts(generics.ListAPIView):
 
 
 class MyLikes(generics.ListAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -360,8 +391,8 @@ class MyLikes(generics.ListAPIView):
 
 
 class MyComments(generics.ListAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -398,7 +429,7 @@ def get_posts(posts, request):
         for tag in tags:
             tag_list.append(tag.tag_name)
         try:
-            Like.objects.get(post=post, user=request.user)
+            Like.objects.filter(post=post, user=request.user).first()
             is_liked = True
         except Like.DoesNotExist:
             is_liked = False
