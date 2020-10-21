@@ -1,4 +1,5 @@
 import os
+import json
 import pickle
 import random
 import pandas as pd
@@ -16,6 +17,7 @@ from user.models import User
 from .models import Post, Tag, Like, Comment
 from .serializers import CommentSerializer
 from .similar import top_similar
+from .recommendation import recommendation_system
 
 
 # from .summariser import create_summary
@@ -55,9 +57,23 @@ class PostView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
 
+    # noinspection DuplicatedCode
     def get(self, request):
         try:
             posts = Post.objects.all().order_by('published_at').reverse()
+            user = User.objects.get(email=request.user)
+            tags = list(user.user_tag.all().values_list('tag_name', flat=True))
+            print(tags)
+            df = pd.DataFrame(
+                columns=['id', 'likes', 'comments', 'tags', 'email', 'title', 'posts', 'summaries', 'date'])
+            for post in posts:
+                df = df.append({'id': post.id, 'likes': Like.objects.filter(post=post).count(),
+                                'comments': Comment.objects.filter(post=post).count(),
+                                'tags': list(post.post_tag.all().values_list('tag_name', flat=True)),
+                                'email': post.user.email, 'title': post.title, 'posts': post.description,
+                                'summaries': post.summary, 'date': post.published_at}, ignore_index=True)
+            result = recommendation_system(tags, df)
+            print(result)
             post_list = get_posts(posts, request)
             return Response({
                 'success': True,
@@ -164,6 +180,7 @@ class SinglePostView(generics.GenericAPIView):
                             'email': final.user.email, 'title': final.title, 'posts': final.description,
                             'summaries': final.summary, 'date': final.published_at}, ignore_index=True)
         result = top_similar(summary, df)
+        result = result.to_dict('records')
         print(result)
         objects = {}
         try:

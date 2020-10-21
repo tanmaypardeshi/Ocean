@@ -54,31 +54,11 @@ class User(AbstractBaseUser):
 
 
 class Tag(models.Model):
-    user = models.OneToOneField(User, related_name='tags', on_delete=models.CASCADE)
-    productivity = models.BooleanField(default=False)
-    self_help = models.BooleanField(default=False)
-    self_improvement = models.BooleanField(default=False)
-    personal_development = models.BooleanField(default=False)
-    spirituality = models.BooleanField(default=False)
-    motivation = models.BooleanField(default=False)
-    positivity = models.BooleanField(default=False)
-    career = models.BooleanField(default=False)
-    discipline = models.BooleanField(default=False)
-    relationships = models.BooleanField(default=False)
-    success = models.BooleanField(default=False)
-    depression = models.BooleanField(default=False)
-    anxiety = models.BooleanField(default=False)
-    ptsd = models.BooleanField(default=False)
-    alcohol = models.BooleanField(default=False)
-    internet_addiction = models.BooleanField(default=False)
-    bipolar_disorder = models.BooleanField(default=False)
-    social_anxiety_disorder = models.BooleanField(default=False)
-    stress = models.BooleanField(default=False)
-    sleep_disorder = models.BooleanField(default=False)
-    empathy_deficit_disorder = models.BooleanField(default=False)
+    user = models.ManyToManyField(User, related_name='user_tag', blank=True)
+    tag_name = models.CharField(max_length=30, null=True)
 
     def __str__(self):
-        return self.user.email
+        return self.tag_name
 
 
 class OTP(models.Model):
