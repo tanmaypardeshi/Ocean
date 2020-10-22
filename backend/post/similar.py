@@ -17,4 +17,5 @@ def top_similar(query_summary, dataframe):
     dataframe = dataframe.sort_values(by=['cosine_similarity'], ascending=False)
     dataframe = dataframe.reset_index(drop=True)
     dataframe = dataframe.loc[1:2, :]
+    dataframe = dataframe.reset_index(drop=True)
     return dataframe

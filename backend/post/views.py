@@ -19,6 +19,7 @@ from .serializers import CommentSerializer
 from .similar import top_similar
 from .recommendation import recommendation_system
 
+
 #
 # from .summariser import create_summary
 #
@@ -71,8 +72,7 @@ class PostView(generics.GenericAPIView):
                                 'email': post.user.email, 'title': post.title, 'posts': post.description,
                                 'summaries': post.summary, 'date': post.published_at}, ignore_index=True)
             result = recommendation_system(tags, df)
-            print(result)
-            post_list = get_posts(posts, request)
+            post_list = get_posts(result, request)
             return Response({
                 'success': True,
                 'message': f'Fetched {len(post_list)} posts',
@@ -174,25 +174,32 @@ class SinglePostView(generics.GenericAPIView):
         for s in sort_set:
             final = Post.objects.get(pk=s)
             df = df.append({'id': final.id, 'likes': Like.objects.filter(post=final).count(),
-                            'comments': Comment.objects.filter(post=final).count(), 'tags': list(final.post_tag.all().values_list('tag_name', flat=True)),
+                            'comments': Comment.objects.filter(post=final).count(),
+                            'tags': list(final.post_tag.all().values_list('tag_name', flat=True)),
                             'email': final.user.email, 'title': final.title, 'posts': final.description,
                             'summaries': final.summary, 'date': final.published_at}, ignore_index=True)
         result = top_similar(summary, df)
-        result = result.to_dict('records')
-        print(result)
+        post_list = get_posts(result, request)
         objects = {}
         try:
-            Like.objects.filter(post=post, user=request.user).first()
+            Like.objects.get(post=post, user=request.user)
             is_liked = True
         except Like.DoesNotExist:
             is_liked = False
+        tag_list = []
+        tags = Tag.objects.filter(post=post)
+        for tag in tags:
+            tag_list.append(tag.tag_name)
         objects['id'] = post.id
         objects['first_name'] = post.user.first_name
         objects['last_name'] = post.user.last_name
         objects['title'] = post.title
-        objects['description'] = post.description
+        description = clean(post.description.replace("\n", ""))
+        objects['description'] = description
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
+        objects['tags'] = tag_list
+        objects['post_list'] = post_list
         return Response(objects, status=status.HTTP_200_OK)
 
     def delete(self, request, id):
@@ -435,16 +442,18 @@ class MyComments(generics.ListAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_posts(posts, request):
+def get_posts(result, request):
     post_list = []
     objects = {}
-    for post in posts:
+
+    for i in range(result.shape[0]):
+        post = Post.objects.get(pk=result['id'][i])
         tag_list = []
         tags = Tag.objects.filter(post=post)
         for tag in tags:
             tag_list.append(tag.tag_name)
         try:
-            Like.objects.filter(post=post, user=request.user).first()
+            Like.objects.get(post=post, user=request.user)
             is_liked = True
         except Like.DoesNotExist:
             is_liked = False
@@ -452,10 +461,20 @@ def get_posts(posts, request):
         objects['first_name'] = post.user.first_name
         objects['last_name'] = post.user.last_name
         objects['title'] = post.title
-        objects['description'] = post.description
+        description = clean(post.description.replace("\n", ""))
+        objects['description'] = description
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
         objects['tags'] = tag_list
         post_list.append(objects)
         objects = {}
     return post_list
+
+
+def clean(description):
+    description = description.replace("\\", "")
+    description = description.replace('\"', "")
+    description = description.replace("\r", "")
+    description = description.replace("  ", "")
+    description = description.replace("   ", "")
+    return description
