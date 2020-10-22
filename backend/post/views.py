@@ -1,11 +1,8 @@
 import os
-import json
 import pickle
-import random
 import pandas as pd
 from operator import itemgetter
 from django.shortcuts import render
-from django.db.models import Count
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -18,11 +15,8 @@ from .models import Post, Tag, Like, Comment
 from .serializers import CommentSerializer
 from .similar import top_similar
 from .recommendation import recommendation_system
+from .summariser import create_summary
 
-
-#
-# from .summariser import create_summary
-#
 # file = os.getcwd() + '/post/populate.txt'
 #
 # with open(file, 'rb') as f:
@@ -51,7 +45,6 @@ from .recommendation import recommendation_system
 #             except Exception as e:
 #                 print(e.__str__())
 #         return render(request, 'post/success.html')
-#
 
 
 class PostView(generics.GenericAPIView):
@@ -92,11 +85,11 @@ class PostView(generics.GenericAPIView):
             for tag_name in tag_list:
                 tag = Tag.objects.get(tag_name=tag_name)
                 queryset_list.append(tag)
-            # summary = create_summary(request.data['description'])
+            summary = create_summary(request.data['description'])
             post = Post.objects.create(user=request.user,
                                        title=request.data['title'],
-                                       description=request.data['description'])
-            # , summary = summary)
+                                       description=request.data['description'],
+                                       summary=summary)
             post.save()
             for queryset in queryset_list:
                 post.post_tag.add(queryset)
@@ -119,7 +112,7 @@ class PostView(generics.GenericAPIView):
                 post.post_tag.clear()
                 new_title = request.data['title']
                 new_description = request.data['description']
-                # new_summary = create_summary(new_description)
+                new_summary = create_summary(new_description)
                 tag = str(request.data['tag'])
                 tag_list = tag.split(' ')
                 queryset_list = []
@@ -128,7 +121,7 @@ class PostView(generics.GenericAPIView):
                     queryset_list.append(tag)
                 post.title = new_title
                 post.description = new_description
-                # post.summary = new_summary
+                post.summary = new_summary
                 post.save()
                 for queryset in queryset_list:
                     post.post_tag.add(queryset)

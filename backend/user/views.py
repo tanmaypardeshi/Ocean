@@ -9,7 +9,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.settings import api_settings
 
 from .models import (User, Tag, OTP, )
-from .serializers import (TagSerializer, LoginSerializer, EditSerializer,
+from .serializers import (RegisterSerializer, LoginSerializer, EditSerializer,
                           ForgotSerializer, ChangeSerializer, )
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -20,10 +20,18 @@ class UserView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        tag_serializer = TagSerializer(data=request.data)
-        if tag_serializer.is_valid():
-            tag_serializer.save()
-            user = User.objects.get(email=tag_serializer.data.pop('user')['email'])
+        tag = request.data['tags']
+        user_serializer = RegisterSerializer(data=request.data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+            user = User.objects.get(email=user_serializer.data.get('email'))
+            tag_list = tag.split(' ')
+            query_list = []
+            for tag_name in tag_list:
+                query_list.append(Tag.objects.get(tag_name=tag_name))
+            for queryset in query_list:
+                user.user_tag.add(queryset)
+            user.save()
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
 
@@ -70,7 +78,6 @@ class ProfileView(APIView):
     def get(self, request):
         try:
             user = User.objects.get(email=request.user)
-            tag = Tag.objects.get(user=request.user)
             last_login = str(user.last_login + datetime.timedelta(hours=5.5))
             date_joined = str(user.date_joined + datetime.timedelta(hours=5.5))
             last_login = f"{last_login[:10]} {last_login[11:19]}"
@@ -81,41 +88,16 @@ class ProfileView(APIView):
                 'status_code': status.HTTP_200_OK,
                 'message': 'Profile fetched',
                 'data': {
-                    'user': {
-                        'email': user.email,
-                        'first_name': user.first_name,
-                        'last_name': user.last_name,
-                        'dob': user.dob,
-                        'age': (datetime.date.today() - user.dob).days // 365,
-                        'gender': user.gender,
-                        'country': user.country,
-                        'last_login': last_login,
-                        'date_joined': date_joined
-                    },
-                    'tags': {
-                        "productivity": tag.productivity,
-                        "self_help": tag.self_help,
-                        "self_improvement": tag.self_improvement,
-                        "personal_development": tag.personal_development,
-                        "spirituality": tag.spirituality,
-                        "motivation": tag.motivation,
-                        "positivity": tag.positivity,
-                        "career": tag.career,
-                        "discipline": tag.discipline,
-                        "relationships": tag.relationships,
-                        "success": tag.success,
-                        "depression": tag.depression,
-                        "anxiety": tag.anxiety,
-                        "ptsd": tag.ptsd,
-                        "alcohol": tag.alcohol,
-                        "internet_addiction": tag.internet_addiction,
-                        "bipolar_disorder": tag.bipolar_disorder,
-                        "social_anxiety_disorder": tag.social_anxiety_disorder,
-                        "stress": tag.stress,
-                        "sleep_disorder": tag.sleep_disorder,
-                        "empathy_deficit_disorder": tag.empathy_deficit_disorder
-                    }
-
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'dob': user.dob,
+                    'age': (datetime.date.today() - user.dob).days // 365,
+                    'gender': user.gender,
+                    'country': user.country,
+                    'last_login': last_login,
+                    'date_joined': date_joined,
+                    'tags': list(user.user_tag.all().values_list('tag_name', flat=True))
                 }
             }
         except Exception as e:

@@ -9,7 +9,7 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
-class UserSerializer(ModelSerializer):
+class RegisterSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password', 'first_name', 'last_name',
@@ -25,21 +25,6 @@ class UserSerializer(ModelSerializer):
         user.country = validated_data['country']
         user.save()
         return user
-
-
-class TagSerializer(ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = Tag
-        fields = '__all__'
-
-    def create(self, validated_data):
-        user = UserSerializer.create(UserSerializer(), validated_data=validated_data.pop('user'))
-        tag = Tag(**validated_data)
-        tag.user = user
-        tag.save()
-        return tag
 
 
 class LoginSerializer(Serializer):
@@ -68,7 +53,6 @@ class EditSerializer(serializers.Serializer):
 
     def update(self, instance, data):
         user = instance
-        tag = Tag.objects.get(user=user)
         if user is None:
             raise serializers.ValidationError(
                 'A user with this email and password is not found.'
@@ -78,28 +62,14 @@ class EditSerializer(serializers.Serializer):
         user.dob = data['dob']
         user.gender = data['gender']
         user.country = data['country']
-        tag.productivity = data['productivity']
-        tag.self_help = data['self_help']
-        tag.self_improvement = data['self_improvement']
-        tag.personal_development = data['personal_development']
-        tag.spirituality = data['spirituality']
-        tag.motivation = data['motivation']
-        tag.positivity = data['positivity']
-        tag.career = data['career']
-        tag.discipline = data['discipline']
-        tag.relationships = data['relationships']
-        tag.success = data['success']
-        tag.depression = data['depression']
-        tag.anxiety = data['anxiety']
-        tag.ptsd = data['ptsd']
-        tag.alcohol = data['alcohol']
-        tag.internet_addiction = data['internet_addiction']
-        tag.bipolar_disorder = data['bipolar_disorder']
-        tag.social_anxiety_disorder = data['social_anxiety_disorder']
-        tag.stress = data['stress']
-        tag.sleep_disorder = data['sleep_disorder']
-        tag.empathy_deficit_disorder = data['empathy_deficit_disorder']
-        tag.save()
+        user.user_tag.clear()
+        tag = data['tags']
+        tag_list = tag.split(' ')
+        query_list = []
+        for tag_name in tag_list:
+            query_list.append(Tag.objects.get(tag_name=tag_name))
+        for queryset in query_list:
+            user.user_tag.add(queryset)
         user.save()
         return user
 
