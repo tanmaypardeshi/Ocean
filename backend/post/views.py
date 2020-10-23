@@ -227,7 +227,7 @@ class CategoryView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             queryset = self.get_queryset()
-            post_list = get_posts(queryset, request)
+            post_list = get_category(queryset, request)
             return Response({
                 'success': True,
                 'post_list': post_list}
@@ -364,7 +364,7 @@ class MyPosts(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             posts = Post.objects.filter(user=request.user)
-            post_list = get_posts(posts, request)
+            post_list = get_category(posts, request)
             return Response({
                 'success': True,
                 'post_list': post_list,
@@ -456,6 +456,32 @@ def get_posts(result, request):
         objects['title'] = post.title
         description = clean(post.description.replace("\n", ""))
         objects['description'] = description
+        objects['published_at'] = post.published_at
+        objects['is_liked'] = is_liked
+        objects['tags'] = tag_list
+        post_list.append(objects)
+        objects = {}
+    return post_list
+
+
+def get_category(posts, request):
+    post_list = []
+    objects = {}
+    for post in posts:
+        tag_list = []
+        tags = Tag.objects.filter(post=post)
+        for tag in tags:
+            tag_list.append(tag.tag_name)
+        try:
+            Like.objects.get(post=post, user=request.user)
+            is_liked = True
+        except Like.DoesNotExist:
+            is_liked = False
+        objects['id'] = post.id
+        objects['first_name'] = post.user.first_name
+        objects['last_name'] = post.user.last_name
+        objects['title'] = post.title
+        objects['description'] = post.description
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
         objects['tags'] = tag_list
