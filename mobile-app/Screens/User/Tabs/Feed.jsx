@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-import { IconButton, useTheme, Card, Avatar, Title, Paragraph, FAB, ActivityIndicator } from 'react-native-paper';
+import { IconButton, useTheme, Card, Avatar, Title, Paragraph, FAB, ActivityIndicator, Button, Portal, Dialog, TextInput } from 'react-native-paper';
 import { Alert, FlatList, StyleSheet, RefreshControl, View } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import Axios from 'axios'
@@ -22,12 +22,8 @@ const Feed = ({navigation}) => {
     const [posts, setPosts] = React.useState([])
     const [refreshing, setRefreshing] = React.useState(false)
     const [loading, setLoading] = React.useState(true)
-    const isVisible = useIsFocused()
-
-    // React.useEffect(() => {
-    //     if (isVisible && !posts.length)
-    //         getPosts()
-    // },[isVisible])
+    const [showComment, setShowComment] = React.useState(0)
+    const [comment, setComment] = React.useState('')
 
     useFocusEffect(React.useCallback(() => {
         if (!posts.length)
@@ -57,6 +53,59 @@ const Feed = ({navigation}) => {
         getPosts()
     }
 
+    const handleLike = (index, id) => {
+        SecureStore.getItemAsync('token')
+        .then(token => {
+            const urlEnd = posts[index].is_liked ? "unlike" : "like"
+            return Axios.post(
+                `${SERVER_URI}/post/${urlEnd}/`,
+                { id },
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )
+        })
+        .then(res => {
+            let tP = [...posts]
+            tP[index].is_liked = !posts[index].is_liked
+            setPosts(tP)
+        })
+        .catch(err => {
+            alert(err.message)
+        })
+    }
+
+    const handleComment = () => {
+        SecureStore.getItemAsync('token')
+        .then(token => {
+            let data = {
+                "parent_id": null,
+                "content": comment
+            }
+            console.log(data)
+            return Axios.post(
+                `${SERVER_URI}/post/comment/${showComment}/`,
+                data,
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )
+        })
+        .then(res => {
+            setShowComment(0)
+            setComment('')
+        })
+        .catch(err => {
+            alert(err.message)
+        })
+    }
+
     return(
         !loading ?
         <>
@@ -77,16 +126,30 @@ const Feed = ({navigation}) => {
                         title={item.first_name + " " + item.last_name}
                         subtitle={new Date(item.published_at).toLocaleString()}
                         left={props => <Avatar.Text {...props} label={item.first_name[0] + item.last_name[0]}/>}
-                        right={props => <IconButton {...props} icon='dots-vertical'/>}
+                        //right={props => <IconButton {...props} icon='dots-vertical'/>}
                     />
                     <Card.Content>
                         <Title>{item.title}</Title>
-                        <Paragraph>{item.description}</Paragraph>
+                        <Paragraph>{item.description.split(" ").slice(0,25).join(" ") + "..."}</Paragraph>
                     </Card.Content>
                     <Card.Actions style={{justifyContent: 'space-around'}}>
-                        <IconButton icon='thumb-up' color={item.is_liked ? theme.colors.primary : theme.colors.text}/>
-                        <IconButton icon='comment'/>
-                        <IconButton icon='share-variant'/>
+                        <Button
+                            icon='thumb-up'
+                            onPress={() => handleLike(index, item.id)}
+                            color={item.is_liked ? theme.colors.primary : theme.colors.text}
+                            children={item.is_liked ? 'Liked' : 'Like'}
+                        />
+                        <Button
+                            icon='comment'
+                            children='Comment'
+                            color={theme.colors.text}
+                            onPress={() => {setShowComment(item.id)}}
+                        />
+                        <Button
+                            icon='share-variant'
+                            children='Share'
+                            color={theme.colors.text}
+                        />
                     </Card.Actions>
                 </Card>
             }
@@ -94,7 +157,7 @@ const Feed = ({navigation}) => {
         <FAB
             label='POST'
             icon='plus'
-            onPress={() => navigation.navigate('New Post', { tag: ''})}
+            onPress={() => navigation.navigate('New Post', { tag: '', title: '', description: ''})}
             style={{
                 position: 'absolute',
                 margin: 16,
@@ -102,6 +165,37 @@ const Feed = ({navigation}) => {
                 bottom: 0
             }}
         />
+        <Portal>
+            <Dialog
+                visible={showComment > 0}
+                onDismiss={() => setShowComment(0)}
+            >
+                <Dialog.Title>Comment</Dialog.Title>
+                <Dialog.Content>
+                    <TextInput
+                        type='flat'
+                        placeholder='Your comment'
+                        style={{ backgroundColor: 'transparent' }}
+                        value={comment}
+                        onChangeText={setComment}
+                        multiline
+                    />
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button 
+                        onPress={() => setShowComment(0)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        disabled={comment.length === 0}
+                        onPress={handleComment}
+                    >
+                        Send
+                    </Button>
+                </Dialog.Actions>
+            </Dialog>
+        </Portal>
         </>
         :
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>

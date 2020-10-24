@@ -28,7 +28,7 @@ const DCS = (props) => {
     useFocusEffect(React.useCallback(() => {
         if (isDrawerOpen)
             getProfileData()
-    },[useIsDrawerOpen]))
+    },[isDrawerOpen]))
 
     const getProfileData = () => {
         setLoading(true)
@@ -54,7 +54,7 @@ const DCS = (props) => {
 
     const handleLogOut = () => {
         SecureStore.deleteItemAsync('token')
-        .then(() => props.navigation.navigate("Login"))
+        .then(() => props.navigation.navigate("Auth"))
         .catch(console.log)
     }
 
@@ -66,16 +66,16 @@ const DCS = (props) => {
                 <>
                     <Avatar.Text
                         size={64}
-                        label={profile.user.first_name[0] + profile.user.last_name[0]}
+                        label={profile.first_name[0] + profile.last_name[0]}
                     />
                     <Headline style={styles.headLine}>
-                        {profile.user.first_name + " " + profile.user.last_name}
+                        {profile.first_name + " " + profile.last_name}
                     </Headline>
                     <Caption>
-                        {profile.user.gender + " | " + profile.user.age}
+                        {profile.gender + " | " + profile.age}
                     </Caption>
                     <Caption>
-                        {profile.user.country}
+                        {profile.country}
                     </Caption>
                 </>
                 :
@@ -158,7 +158,7 @@ export default ({ navigation }) => {
 
     const handleLogOut = () => {
         SecureStore.deleteItemAsync('token')
-        .then(() => props.navigation.navigate("Login"))
+        .then(() => props.navigation.navigate("Auth"))
         .catch(console.log)
     }
 
@@ -171,7 +171,12 @@ export default ({ navigation }) => {
                     name={item.name}
                     component={item.component}
                     options={{
-                        drawerIcon: ({color}) => <MaterialCommunityIcons name={item.iconName} color={color}/>
+                        drawerIcon: ({color}) => 
+                        <MaterialCommunityIcons 
+                            name={item.iconName} 
+                            color={color}
+                            size={18}
+                        />
                     }}
                 />
             )

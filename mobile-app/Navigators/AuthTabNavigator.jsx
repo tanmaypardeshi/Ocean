@@ -52,11 +52,12 @@ export default () => {
                     name={item.name}
                     component={item.component}
                     options={{
-                        tabBarOptions: ({color}) =>
+                        tabBarIcon: ({color}) =>
                         <MaterialCommunityIcons
                             name={item.iconName}
                             color={color}
                             style={styles.icon}
+                            size={24}
                         />
                     }}
                 />
@@ -68,7 +69,6 @@ export default () => {
 
 const styles = StyleSheet.create({
     icon: {
-        marginTop: -3,
         alignSelf: 'center'
     }
 })

@@ -26,7 +26,7 @@ export default ({ navigation }) => {
         gender: '',
         country: ''
     })
-    const [loading, setLoading] = React.useState(true)
+    const [loading, setLoading] = React.useState(false)
     const [personality, setPersonality] = React.useState({
         productivity: false,
         self_help: false,
@@ -99,7 +99,9 @@ export default ({ navigation }) => {
     }
 
     const handlePersonalityChange = target => value => {
-        setPersonality({...personality, [target]: value})
+        const tP = {...personality}
+        tP[target] = value
+        setPersonality(tP)
     }
 
     const handleSubmit = () => {
@@ -180,24 +182,34 @@ export default ({ navigation }) => {
             <Caption style={{alignSelf: 'center', marginVertical: 10}}>Select topics of interest</Caption>
             <View style={styles.personalityView}>
             {
-                Object.keys(personality).filter(val => personality[val]).map((val, index) => (
-                    <Chip 
-                        key={index} 
-                        selected={true}
+            //     Object.keys(personality).filter(val => personality[val]).map((val, index) => (
+            //         <Chip 
+            //             key={index} 
+            //             selected={true}
+            //             style={{margin: 10}}
+            //             onPress={() => handlePersonalityChange(val)(!personality[val])}
+            //         >{val.split('_').join(' ')}</Chip>
+            //     ))
+            // }
+            // {
+            //     Object.keys(personality).filter(val => !personality[val]).map((val, index) => (
+            //         <Chip 
+            //             key={index} 
+            //             selected={false}
+            //             style={{margin: 10}}
+            //             onPress={() => handlePersonalityChange(val)(!personality[val])}
+            //         >{val.split('_').join(' ')}</Chip>
+            //     ))
+                Object.getOwnPropertyNames(personality).map((val, index) => 
+                    <Chip
+                        key={index}
+                        selected={personality[val]}
                         style={{margin: 10}}
-                        onPress={() => handlePersonalityChange(val, !personality[val])}
-                    >{val.split('_').join(' ')}</Chip>
-                ))
-            }
-            {
-                Object.keys(personality).filter(val => !personality[val]).map((val, index) => (
-                    <Chip 
-                        key={index} 
-                        selected={false}
-                        style={{margin: 10}}
-                        onPress={() => handlePersonalityChange(val, !personality[val])}
-                    >{val.split('_').join(' ')}</Chip>
-                ))
+                        onPress={() => handlePersonalityChange(val)(!personality[val])}
+                    >
+                        {val.split('_').join(' ')}
+                    </Chip>
+                )
             }
             </View>
             {

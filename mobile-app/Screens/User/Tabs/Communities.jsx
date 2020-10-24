@@ -59,9 +59,18 @@ const Communites = ({ navigation }) => {
             )    
         )
         .then(res => {
-            const tags = res.data.data.tags
-            let comms = Object.getOwnPropertyNames(tags).filter((name) => tags[name]).map((name) => ({name, status: true}))
-            comms.push(Object.getOwnPropertyNames(tags).filter((name) => !tags[name]).map((name) => ({name, status: false})))
+            // const tags = res.data.data.tags
+            // let comms = Object.getOwnPropertyNames(tags).filter((name) => tags[name]).map((name) => ({name, status: true}))
+            // comms.push(Object.getOwnPropertyNames(tags).filter((name) => !tags[name]).map((name) => ({name, status: false})))
+            // setMyComms(comms.flat())
+            let tlist = {...list};
+            Object
+            .getOwnPropertyNames(tlist)
+            .filter(name => res.data.data.tags.includes(name.toLowerCase()))
+            .forEach(name => tlist[name] = true);
+
+            let comms = Object.getOwnPropertyNames(tlist).filter(name => tlist[name]).map(name => ({name, status: true}))
+            comms.push(Object.getOwnPropertyNames(tlist).filter(name => !tlist[name]).map(name => ({name, status: false})))
             setMyComms(comms.flat())
             setRefreshing(false)
             
@@ -115,8 +124,7 @@ export default ({navigation}) => {
                 name="Community"
                 component={Community}
                 options={({ route }) => ({ 
-                    title: route.params.name,
-                    headerLeft: () => <IconButton icon='menu' onPress={() => navigation.toggleDrawer()}/> 
+                    title: route.params.name
                 })}
             />
             <Stack.Screen

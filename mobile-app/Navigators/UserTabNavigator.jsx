@@ -8,6 +8,7 @@ import Feed from '../Screens/User/Tabs/Feed'
 import Communities from '../Screens/User/Tabs/Communities'
 import Cheer from '../Screens/User/Tabs/Cheer'
 import Coral from '../Screens/User/Tabs/Coral'
+import { Caption } from 'react-native-paper';
 
 const Tab = createMaterialTopTabNavigator();
 const isIphoneX = Device.modelName.includes('iPhone X')
@@ -44,11 +45,12 @@ export default ({ navigation }) => {
             initialRouteName="Feed"
             tabBarPosition='bottom'
             tabBarOptions={{
-                showIcon: true,
                 style: {
                     backgroundColor: theme.colors.background,
                     paddingBottom: isIphoneX ? 34 : 0
-                }
+                },
+                showIcon: true,
+                showLabel: false
             }}
         >
         {
@@ -58,11 +60,12 @@ export default ({ navigation }) => {
                     name={item.name}
                     component={item.component}
                     options={{
-                        tabBarOptions: ({color}) =>
+                        tabBarIcon: ({color}) =>
                         <MaterialCommunityIcons
                             name={item.iconName}
                             color={color}
                             style={styles.icon}
+                            size={24}
                         />
                     }}
                 />

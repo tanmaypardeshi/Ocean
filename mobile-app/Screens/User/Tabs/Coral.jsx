@@ -38,7 +38,6 @@ const Coral = ({ navigation }) => {
     }
 
     const onSend = React.useCallback((messages = []) => {
-        console.log(messages[0])
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         getItemAsync('token')
         .then(token => 
@@ -88,6 +87,8 @@ const Coral = ({ navigation }) => {
                 props =>
                 <Composer
                     {...props}
+                    placeholder='Type a message'
+                    placeholderTextColor={theme.colors.disabled}
                     textInputStyle={{
                         color: theme.colors.text
                     }}

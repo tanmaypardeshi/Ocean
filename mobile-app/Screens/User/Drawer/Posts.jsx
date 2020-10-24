@@ -4,10 +4,11 @@ import { useIsFocused } from '@react-navigation/native'
 import Axios from 'axios'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
 import { useState } from 'react'
-import { FlatList, RefreshControl, View, StyleSheet } from 'react-native'
-import { Card, Avatar, Title, Paragraph, IconButton, ActivityIndicator, useTheme } from 'react-native-paper'
+import { FlatList, RefreshControl, View, StyleSheet, Alert } from 'react-native'
+import { Card, Avatar, Title, Paragraph, IconButton, ActivityIndicator, useTheme, Portal, Dialog, TextInput } from 'react-native-paper'
 import * as SecureStore from 'expo-secure-store'
 import Post from '../Tabs/Post'
+import NewPost from '../Tabs/NewPost'
 
 const Stack = createStackNavigator()
 
@@ -22,6 +23,8 @@ const MyPosts = ({ navigation }) => {
     const [posts, setPosts] = React.useState([])
     const [refreshing, setRefreshing] = React.useState(false)
     const [loading, setLoading] = React.useState(true)
+    const [showComment, setShowComment] = React.useState(0)
+    const [comment, setComment] = React.useState('')
     const isFocused = useIsFocused()
     const theme = useTheme()
 
@@ -81,8 +84,54 @@ const MyPosts = ({ navigation }) => {
         getPosts()
     }
 
+    const handleComment = () => {
+        SecureStore.getItemAsync('token')
+        .then(token => {
+            let data = {
+                "parent_id": null,
+                "content": comment
+            }
+            console.log(data)
+            return Axios.post(
+                `${SERVER_URI}/post/comment/${showComment}/`,
+                data,
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )
+        })
+        .then(res => {
+            setShowComment(0)
+            setComment('')
+        })
+        .catch(err => {
+            alert(err.message)
+        })
+    }
+
+    const handleDelete = (id) => {
+        SecureStore.getItemAsync("token")
+        .then(token => {
+            return Axios.delete(
+                `${SERVER_URI}/post/${id}/`,
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )
+        })
+        .then(res => handleRefresh())
+        .catch(err => alert(err.message))
+    }
+
     return(
         !loading ?
+        <>
         <FlatList
             data={posts}
             keyExtractor={(item, index) => index.toString()}
@@ -97,13 +146,10 @@ const MyPosts = ({ navigation }) => {
                     style={styles.cardStyle}
                 >
                     <Card.Title
-                        title={item.first_name + " " + item.last_name}
+                        title={item.title}
                         subtitle={new Date(item.published_at).toLocaleString()}
-                        left={props => <Avatar.Text {...props} label={item.first_name[0] + item.last_name[0]}/>}
-                        right={props => <IconButton {...props} icon='dots-vertical'/>}
                     />
                     <Card.Content>
-                        <Title>{item.title}</Title>
                         <Paragraph>{item.description}</Paragraph>
                     </Card.Content>
                     <Card.Actions style={{justifyContent: 'space-around'}}>
@@ -112,12 +158,66 @@ const MyPosts = ({ navigation }) => {
                             color={item.is_liked ? theme.colors.primary : theme.colors.text}
                             onPress={() => handleLike(index)}
                         />
-                        <IconButton icon='comment'/>
+                        <IconButton icon='comment' onPress={() => {setShowComment(item.id)}}/>
+                        <IconButton icon='pencil'/>
+                        <IconButton icon='delete' onPress={() => {
+                            Alert.alert(
+                                'Delete post',
+                                `Delete post with title: ${item.title}?`,
+                                [
+                                    {
+                                        text: 'CANCEL',
+                                        style: 'cancel',
+                                        onPress: () => {}
+                                    },
+                                    {
+                                        text: 'DELETE',
+                                        style: 'destructive',
+                                        onPress: () => handleDelete(item.id)
+                                    }
+                                ],
+                                {
+                                    onDismiss: () => {}
+                                }
+                            )
+                        }}/>
                         <IconButton icon='share-variant'/>
                     </Card.Actions>
                 </Card>
             }
         />
+        <Portal>
+            <Dialog
+                visible={showComment > 0}
+                onDismiss={() => setShowComment(0)}
+            >
+                <Dialog.Title>Comment</Dialog.Title>
+                <Dialog.Content>
+                    <TextInput
+                        type='flat'
+                        placeholder='Your comment'
+                        style={{ backgroundColor: 'transparent' }}
+                        value={comment}
+                        onChangeText={setComment}
+                        multiline
+                    />
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button 
+                        onPress={() => setShowComment(0)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        disabled={comment.length === 0}
+                        onPress={handleComment}
+                    >
+                        Send
+                    </Button>
+                </Dialog.Actions>
+            </Dialog>
+        </Portal>
+        </>
         :
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <ActivityIndicator animating={true}/>
@@ -135,6 +235,10 @@ export default ({ navigation }) => {
             <Stack.Screen
                 name="Post"
                 component={Post}
+            />
+            <Stack.Screen
+                name="Edit Post"
+                component={NewPost}
             />
         </Stack.Navigator>
     )

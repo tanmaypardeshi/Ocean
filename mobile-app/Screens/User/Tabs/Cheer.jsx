@@ -23,9 +23,6 @@ const cheerScreen = ({navigation}) => {
     const [refreshing, setRefreshing] = React.useState(false)
     const isFocused = useIsFocused()
 
-    // React.useEffect(() => {
-    //     if (isFocused && tasks.length === 0) {}
-    // },[isFocused])
     useFocusEffect(React.useCallback(() => {
         if (tasks.length === 0) 
             getTasks()

@@ -34,7 +34,7 @@ export default ({navigation}) => {
 
     const [level, setLevel] = React.useState(0)
     const [sec, setSec] = React.useState(true)
-    const [loading, setLoading] = React.useState(true)
+    const [loading, setLoading] = React.useState(false)
 
     const handleUserChange = target => value => {
         let details = {...userDetails[target], value}

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
-import { useTheme, FAB, IconButton, ActivityIndicator } from 'react-native-paper'
+import { useTheme, FAB, IconButton, ActivityIndicator, Card, Title, Paragraph, Avatar } from 'react-native-paper'
 import { useIsFocused, useFocusEffect } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
 import Axios from 'axios'
@@ -91,7 +91,11 @@ export default ({ route, navigation }) => {
         <FAB
             label='NEW'
             icon='plus'
-            onPress={() => navigation.navigate('New Post', { tag: route.params.name.toLowerCase().split(' ').join('_') })}
+            onPress={() => navigation.navigate('New Post', { 
+                tag: route.params.name.toLowerCase().split(' ').join('_'),
+                title: '',
+                description: '' 
+            })}
             style={{
                 position: 'absolute',
                 margin: 16,
