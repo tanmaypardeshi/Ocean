@@ -40,8 +40,8 @@ class ChatView(generics.GenericAPIView):
             user = User.objects.get(email=request.user)
             if user.counter % 2 != 0:
                 data = {
-                    "email": "kaustubhodak1@gmail.com",
-                    "key": "35af30d4feb65757fc3f130251f7a7fe",
+                    "email": "tanmaypardeshi@gmail.com",
+                    "key": "7fce33c1921f253fc71df92912d274d5",
                     "counter": user.counter,
                     "string1": text,
                     "string2": '',
@@ -51,8 +51,8 @@ class ChatView(generics.GenericAPIView):
                 string1 = get_text(1)
                 string2 = get_text(2)
                 data = {
-                    "email": "kaustubhodak1@gmail.com",
-                    "key": "35af30d4feb65757fc3f130251f7a7fe",
+                    "email": "tanmaypardeshi@gmail.com",
+                    "key": "7fce33c1921f253fc71df92912d274d5",
                     "counter": user.counter,
                     "string1": string1,
                     "string2": string2,
@@ -79,6 +79,21 @@ class ChatView(generics.GenericAPIView):
                 'success': False,
                 'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            user = User.objects.get(email=request.user)
+            chat = Chat.objects.filter(user=user)
+            chat.delete()
+            return  Response({
+                'success': True,
+                'message': 'Cleared Chat history'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return  Response({
+                'success': False,
+                'message': e.__str__()
+            },status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def get_chats(chats):
