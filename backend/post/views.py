@@ -1,8 +1,10 @@
 import os
 import pickle
+import json
 import pandas as pd
 from operator import itemgetter
 from django.shortcuts import render
+from django.core.paginator import Paginator
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -51,7 +53,7 @@ class PostView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         try:
             posts = Post.objects.all().order_by('published_at').reverse()
             user = User.objects.get(email=request.user)
@@ -65,7 +67,9 @@ class PostView(generics.GenericAPIView):
                                 'email': post.user.email, 'title': post.title, 'posts': post.description,
                                 'summaries': post.summary, 'date': post.published_at}, ignore_index=True)
             result = recommendation_system(tags, df)
-            post_list = get_posts(result, request)
+            paginator = Paginator(get_posts(result, request), 20)
+            page = paginator.page(int(self.kwargs['id']))
+            post_list = page.object_list
             return Response({
                 'success': True,
                 'message': f'Fetched {len(post_list)} posts',
@@ -76,6 +80,11 @@ class PostView(generics.GenericAPIView):
                 'success': False,
                 'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NewEditPostView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def post(self, request, *args, **kwargs):
         try:
@@ -227,11 +236,15 @@ class CategoryView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             queryset = self.get_queryset()
-            post_list = get_category(queryset, request)
+            paginator = Paginator(get_category(queryset, request), 10)
+            page = paginator.page(int(self.kwargs['id']))
+            post_list = page.object_list
+
             return Response({
                 'success': True,
-                'post_list': post_list}
-                , status=status.HTTP_200_OK)
+                'message': f"Fetched {len(post_list)} posts successfully",
+                'post_list': post_list
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 'success': False,
@@ -364,11 +377,14 @@ class MyPosts(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             posts = Post.objects.filter(user=request.user)
-            post_list = get_category(posts, request)
+            paginator = Paginator(get_category(posts, request), 10)
+            page = paginator.page(int(self.kwargs['id']))
+            post_list = page.object_list
             return Response({
                 'success': True,
+                'total posts': posts.count(),
+                'post count': f'Fetched {len(post_list)} posts successfully',
                 'post_list': post_list,
-                'post count': len(post_list)
             })
         except Exception as e:
             return Response({
@@ -392,11 +408,14 @@ class MyLikes(generics.ListAPIView):
                 objects['author'] = f"{like.post.user.first_name} {like.post.user.last_name}"
                 like_list.append(objects)
                 objects = {}
+            paginator = Paginator(like_list, 10)
+            page = paginator.page(int(self.kwargs['id']))
+            mylikes = page.object_list
             return Response({
                 'success': True,
-                'message': 'Fetched Likes Successfully',
-                'like_list': like_list,
-                'like count': len(like_list)
+                'total likes': likes.count(),
+                'message': f'Fetched {len(mylikes)}  likes successfully',
+                'like_list': mylikes,
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -423,10 +442,14 @@ class MyComments(generics.ListAPIView):
                 objects['published_at'] = comment.published_at
                 comment_list.append(objects)
                 objects = {}
+            paginator = Paginator(comment_list, 10)
+            page = paginator.page(int(self.kwargs['id']))
+            mycomments = page.object_list
             return Response({
                 'success': True,
-                'message': 'Fetched Comments Successfully',
-                'comment_list': comment_list
+                'total comments': comments.count(),
+                'message': f'Fetched {len(mycomments)} comments successfully',
+                'comment_list': mycomments
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({

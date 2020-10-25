@@ -5,6 +5,7 @@ from .models import Post, Tag, Like, Comment
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ['author', 'title']
+    ordering = ['published_at']
 
 
 admin.site.register(Tag)
