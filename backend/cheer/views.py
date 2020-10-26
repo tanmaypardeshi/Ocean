@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,16 +10,19 @@ from .models import Task, SubTask
 from user.models import User
 
 
-class TaskView(generics.GenericAPIView):
+class GetTaskView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
         try:
             tasks = Task.objects.all()
-            task_list = get_tasks(tasks, request)
+            paginatior = Paginator(get_tasks(tasks, request), 15)
+            page = paginatior.page(self.kwargs['id'])
+            task_list = page.object_list
             return Response({
                 'success': True,
+                'total tasks': tasks.count(),
                 'message': f'Fetched {len(task_list)} tasks',
                 'post_list': task_list
             }, status=status.HTTP_200_OK)
@@ -27,6 +31,11 @@ class TaskView(generics.GenericAPIView):
                 'success': False,
                 'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PostTaskView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
 
     def post(self, request, *args, **kwargs):
         try:
