@@ -5,7 +5,7 @@ import Axios from 'axios'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
 import { useState } from 'react'
 import { FlatList, RefreshControl, View, StyleSheet, Alert } from 'react-native'
-import { Card, Avatar, Title, Paragraph, IconButton, ActivityIndicator, useTheme, Portal, Dialog, TextInput } from 'react-native-paper'
+import { Card, Avatar, Title, Paragraph, IconButton, ActivityIndicator, useTheme, Portal, Dialog, TextInput, Caption, Button } from 'react-native-paper'
 import * as SecureStore from 'expo-secure-store'
 import Post from '../Tabs/Post'
 import NewPost from '../Tabs/NewPost'
@@ -21,23 +21,25 @@ const styles = StyleSheet.create({
 const MyPosts = ({ navigation }) => {
 
     const [posts, setPosts] = React.useState([])
-    const [refreshing, setRefreshing] = React.useState(false)
+    const [refreshing, setRefreshing] = React.useState(true)
     const [loading, setLoading] = React.useState(true)
     const [showComment, setShowComment] = React.useState(0)
     const [comment, setComment] = React.useState('')
+    const [page, setPage] = React.useState(1)
+    const [end, setEnd] = React.useState(false)
     const isFocused = useIsFocused()
     const theme = useTheme()
 
     React.useEffect(() => {
         if (isFocused && posts.length === 0)
-            getPosts()
+            getPosts(page, posts)
     },[isFocused])
 
-    const getPosts = () => {
+    const getPosts = (pageno, oldPosts) => {
         SecureStore.getItemAsync('token')
         .then(token => {
             return Axios.get(
-                `${SERVER_URI}/post/myposts/`,
+                `${SERVER_URI}/post/myposts/${pageno}`,
                 {
                     headers: {
                         ...AXIOS_HEADERS,
@@ -47,7 +49,9 @@ const MyPosts = ({ navigation }) => {
             )
         })
         .then(res => {
-            setPosts(res.data.post_list)
+            setPosts([...oldPosts, ...res.data.post_list])
+            if (res.data.post_list.length < 10 || !res.data.success)
+                setEnd(true)
         })
         .catch(err => {
             alert(err.message)
@@ -80,8 +84,17 @@ const MyPosts = ({ navigation }) => {
     }
 
     const handleRefresh = () => {
+        setEnd(false)
         setRefreshing(true)
-        getPosts()
+        setPage(1)
+        getPosts(1, [])
+    }
+
+    const handleEnd = () => {
+        if (!end && !loading) {
+            getPosts(page + 1, posts)
+            setPage(page + 1)
+        }
     }
 
     const handleComment = () => {
@@ -130,19 +143,38 @@ const MyPosts = ({ navigation }) => {
     }
 
     return(
-        !loading ?
         <>
         <FlatList
             data={posts}
             keyExtractor={(item, index) => index.toString()}
-            extraData={posts}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
+            }
+            onEndReached={handleEnd}
+            removeClippedSubviews={true}
+            ListFooterComponent={
+                !loading && 
+                <Card style={{justifyContent: 'center', alignItems: 'center', marginVertical: 10, paddingVertical: 10}}>
+                    {
+                        end 
+                        ?
+                        <Caption>Welcome to the bottom of Ocean :)</Caption>
+                        :
+                        <Caption>Fetching more content for you...</Caption>
+                    }
+                </Card>
+
             }
             renderItem={({ item, index }) => 
                 <Card
                     key={index}
                     onPress={() => navigation.navigate('Post', {item: {...item, post_id: item.id}})}
+                    onLongPress={() => navigation.push('Edit Post', { 
+                        id: item.id,
+                        tag: item.tags.join(' '), 
+                        title: item.title, 
+                        description: item.description}
+                    )}
                     style={styles.cardStyle}
                 >
                     <Card.Title
@@ -218,10 +250,6 @@ const MyPosts = ({ navigation }) => {
             </Dialog>
         </Portal>
         </>
-        :
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <ActivityIndicator animating={true}/>
-        </View>
     )
 }
 

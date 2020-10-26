@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
-import { useTheme, FAB, IconButton, ActivityIndicator, Card, Title, Paragraph, Avatar } from 'react-native-paper'
+import { useTheme, FAB, IconButton, ActivityIndicator, Card, Title, Paragraph, Avatar, Button, Caption } from 'react-native-paper'
 import { useIsFocused, useFocusEffect } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
 import Axios from 'axios'
@@ -16,25 +16,21 @@ export default ({ route, navigation }) => {
     const theme = useTheme() 
     const [posts, setPosts] = React.useState([])
     const [loading, setLoading] = React.useState(true)
-    const [refreshing, setRefreshing] = React.useState(false)
-    const isVisible = useIsFocused()
-
-    // React.useEffect(() => {
-    //     if (isVisible && !posts.length)
-    //         getPosts()
-    // },[isVisible])
+    const [refreshing, setRefreshing] = React.useState(true)
+    const [page, setPage] = React.useState(1)
+    const [end, setEnd] = React.useState(false)
 
     useFocusEffect(React.useCallback(() => {
         if (!posts.length)
-            getPosts()
+            getPosts(page, posts)
     },[]))
 
-    const getPosts = () => 
+    const getPosts = (pageno, oldPosts) => 
         SecureStore.getItemAsync("token")
         .then(token => {
             const comm = route.params.name.toLowerCase().split(' ').join('_')
             return Axios.get(
-            `${SERVER_URI}/post/${comm}/`,
+            `${SERVER_URI}/post/${comm}/${pageno}/`,
             {
                 headers: {
                     ...AXIOS_HEADERS,
@@ -42,7 +38,11 @@ export default ({ route, navigation }) => {
                 }
             }
         )})
-        .then(res => setPosts(res.data.post_list))
+        .then(res => {
+            setPosts([...oldPosts, ...res.data.post_list])
+            if (res.data.post_list.length < 10 || res.data.success)
+                setEnd(false)
+        })
         .catch(err => alert(err.message))
         .finally(() => {
             setLoading(false)
@@ -50,12 +50,20 @@ export default ({ route, navigation }) => {
         })
 
     const handleRefresh = () => {
+        setEnd(false)
         setRefreshing(true)
-        getPosts()
+        setPage(1)
+        getPosts(1, [])
+    }
+
+    const handleEnd = () => {
+        if (!end && !loading) {
+            getPosts(page + 1, posts)
+            setPage(page + 1)
+        }
     }
 
     return(
-        !loading ?
         <>
         <FlatList
             data={posts}
@@ -64,10 +72,23 @@ export default ({ route, navigation }) => {
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
             }
+            onEndReached={handleEnd}
+            ListFooterComponent={
+                !loading && 
+                <Card style={{justifyContent: 'center', alignItems: 'center', marginVertical: 10, paddingVertical: 10}}>
+                    {
+                        end 
+                        ?
+                        <Caption>Welcome to the bottom of Ocean :)</Caption>
+                        :
+                        <Caption>Fetching more content for you...</Caption>
+                    }
+                </Card>
+            }
             renderItem={({ item, index }) => 
                 <Card
                     key={index}
-                    onPress={() => navigation.navigate('Post', {item})}
+                    onPress={() => navigation.navigate('Post', {item: {...item, post_id: item.id}})}
                     style={styles.cardStyle}
                 >
                     <Card.Title
@@ -78,12 +99,26 @@ export default ({ route, navigation }) => {
                     />
                     <Card.Content>
                         <Title>{item.title}</Title>
-                        <Paragraph>{item.description}</Paragraph>
+                        <Paragraph>{item.description.split(" ").slice(0,25).join(" ") + "..."}</Paragraph>
                     </Card.Content>
                     <Card.Actions style={{justifyContent: 'space-around'}}>
-                        <IconButton icon='thumb-up' color={item.is_liked ? theme.colors.primary : theme.colors.text}/>
-                        <IconButton icon='comment'/>
-                        <IconButton icon='share-variant'/>
+                    <Button
+                            icon='thumb-up'
+                            // onPress={() => handleLike(index, item.id)}
+                            color={item.is_liked ? theme.colors.primary : theme.colors.text}
+                            children={item.is_liked ? 'Liked' : 'Like'}
+                        />
+                        <Button
+                            icon='comment'
+                            children='Comment'
+                            color={theme.colors.text}
+                            // onPress={() => {setShowComment(item.id)}}
+                        />
+                        <Button
+                            icon='share-variant'
+                            children='Share'
+                            color={theme.colors.text}
+                        />
                     </Card.Actions>
                 </Card>
             }
@@ -91,7 +126,8 @@ export default ({ route, navigation }) => {
         <FAB
             label='NEW'
             icon='plus'
-            onPress={() => navigation.navigate('New Post', { 
+            onPress={() => navigation.navigate('New Post', {
+                id: '', 
                 tag: route.params.name.toLowerCase().split(' ').join('_'),
                 title: '',
                 description: '' 
@@ -104,9 +140,5 @@ export default ({ route, navigation }) => {
             }}
         />
         </>
-        :
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <ActivityIndicator animating={true}/>
-        </View>
     )
 }

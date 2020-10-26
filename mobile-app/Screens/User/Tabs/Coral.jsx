@@ -7,17 +7,42 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { getItemAsync } from 'expo-secure-store'
 import Axios from 'axios'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
+import { Alert } from 'react-native'
 
 const Stack = createStackNavigator()
 
-const Coral = ({ navigation }) => {
+const Coral = ({ navigation, del }) => {
     const [messages, setMessages] = React.useState([])
     const theme = useTheme()
 
+
+    React.useEffect(() => {
+        if (del && messages.length > 0)
+            handleDelete()
+    },[del])
+
     useFocusEffect(React.useCallback(() => {
-        if (!messages.length)
+        if (messages.length === 0) {
             getMessages()
+        }
     },[]))
+
+    const handleDelete = () => 
+        getItemAsync("token")
+        .then(token => 
+            Axios.delete(
+                `${SERVER_URI}/coral/`,
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )    
+        )
+        .then(res => setMessages([]))
+        .catch(err => alert(err.message))
+        .finally(() => console.log('handleDelete called'))
 
     const getMessages = () => {
         getItemAsync('token')
@@ -116,16 +141,43 @@ const Coral = ({ navigation }) => {
 }
 
 export default ({ navigation }) => {
+
+    const [del, setDel] = React.useState(false);
+
     return(
         <Stack.Navigator>
             <Stack.Screen
                 name="Chat"
-                component={Coral}
+                // component={Coral}
                 options={{
                     title: 'Coral',
-                    headerLeft: () => <IconButton icon='menu' onPress={() => navigation.toggleDrawer()}/>
+                    headerLeft: () => <IconButton icon='menu' onPress={() => navigation.toggleDrawer()}/>,
+                    //headerRight: () => <IconButton icon='delete' onPress={() => setDel(del+1)}/>
+                    headerRight: () => <IconButton icon='delete' onPress={() => {
+                        Alert.alert(
+                            "Delete chat history?", 
+                            "Your complete chat history with Coral will be deleted. Proceed?",
+                            [
+                                {
+                                    text: 'Cancel',
+                                    style: 'cancel',
+                                    onPress: () => {}
+                                },
+                                {
+                                    text: 'Delete',
+                                    style: 'destructive',
+                                    onPress: () => {
+                                        setDel(true)
+                                        setDel(false)
+                                    }
+                                }
+                            ]    
+                        )
+                    }}/>
                 }}
-            />
+            >
+                {props => <Coral {...props} del={del}/>}
+            </Stack.Screen>
         </Stack.Navigator>
     )
 }

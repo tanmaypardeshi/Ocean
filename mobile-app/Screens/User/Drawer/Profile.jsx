@@ -30,13 +30,13 @@ const profileScreen = () => {
     },[]);
 
     const handleUserChange = target => value => {
-        setUserDetails({...userDetails, user: {...userDetails.user, [target]: value}})
+        setUserDetails({...userDetails, [target]: value})
     }
 
     const BigTextInput = (label, target, editable) => (
         <TextInput
             label={<Text style={{color: theme.colors.placeholder}}>{label}</Text>}
-            value={userDetails.user[target].toString()}
+            value={userDetails[target].toString()}
             underlineColor='none'
             style={{
                 backgroundColor: 'none',
@@ -53,9 +53,13 @@ const profileScreen = () => {
         SecureStore.getItemAsync('token')
         .then(token => {
             setFabIcon('update')
+            let newTags = ''
+            userDetails.tags.forEach(val =>
+                newTags = newTags + " " + val    
+            )
             return Axios.patch(
                 `${SERVER_URI}/user/profile/`,
-                {...userDetails.user, ...userDetails.tags},
+                {...userDetails, tags: newTags},
                 {
                     headers: {
                         ...AXIOS_HEADERS,
@@ -64,8 +68,8 @@ const profileScreen = () => {
                 }
             )
         })
-        .then(res => setFabIcon('pencil'))
         .catch(err => alert(err.message))
+        .finally(() => setFabIcon('pencil'))
     }
 
     return(
@@ -75,7 +79,7 @@ const profileScreen = () => {
         <ScrollView style={{ flex: 1, marginBottom: 34}}>
             <Avatar.Text
                 size={150}
-                label={userDetails.user.first_name[0] + userDetails.user.last_name[0]}
+                label={userDetails.first_name[0] + userDetails.last_name[0]}
                 style={{alignSelf: 'center', marginVertical: 20}}
             />
             <Divider/>
@@ -94,19 +98,19 @@ const profileScreen = () => {
                 </DataTable.Header>
                 <DataTable.Row>
                     <DataTable.Cell>Email</DataTable.Cell>
-                    <DataTable.Cell>{userDetails.user.email}</DataTable.Cell>
+                    <DataTable.Cell>{userDetails.email}</DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
                     <DataTable.Cell>Date of birth</DataTable.Cell>
-                    <DataTable.Cell>{userDetails.user.dob}</DataTable.Cell>
+                    <DataTable.Cell>{userDetails.dob}</DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
                     <DataTable.Cell>Date Joined</DataTable.Cell>
-                    <DataTable.Cell>{userDetails.user.date_joined}</DataTable.Cell>
+                    <DataTable.Cell>{userDetails.date_joined}</DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
                     <DataTable.Cell>Last login</DataTable.Cell>
-                    <DataTable.Cell>{userDetails.user.last_login}</DataTable.Cell>
+                    <DataTable.Cell>{userDetails.last_login}</DataTable.Cell>
                 </DataTable.Row>
             </DataTable>
         </ScrollView>

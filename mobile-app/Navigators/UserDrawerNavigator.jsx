@@ -31,7 +31,6 @@ const DCS = (props) => {
     },[isDrawerOpen]))
 
     const getProfileData = () => {
-        setLoading(true)
         SecureStore.getItemAsync('token')
         .then(token => {
             return Axios.get(
@@ -88,7 +87,7 @@ const DCS = (props) => {
             <DrawerItem
                 label='Logout'
                 onPress={handleLogOut}
-                icon={({color}) => <MaterialCommunityIcons name='logout' color={color}/>}
+                icon={({color}) => <MaterialCommunityIcons name='logout' color={color} size={18}/>}
             />
         </DrawerContentScrollView>
     )
@@ -158,7 +157,7 @@ export default ({ navigation }) => {
 
     const handleLogOut = () => {
         SecureStore.deleteItemAsync('token')
-        .then(() => props.navigation.navigate("Auth"))
+        .then(() => navigation.navigate("Auth"))
         .catch(console.log)
     }
 

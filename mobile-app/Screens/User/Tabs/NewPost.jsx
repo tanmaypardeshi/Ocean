@@ -8,8 +8,9 @@ import { useFocusEffect } from '@react-navigation/native';
 
 export default ({navigation, route}) => {
 
-    const [title, setTitle] = React.useState('');
-    const [description, setDescription] = React.useState('');
+    const [title, setTitle] = React.useState(route.params.title);
+    const [description, setDescription] = React.useState(route.params.description);
+    const [patch, setPatch] = React.useState(!!route.params.id)
     const [tags, setTags] = React.useState({
         productivity: false,
         self_help: false,
@@ -49,20 +50,36 @@ export default ({navigation, route}) => {
             const tag = selectedTags().slice(1)
             if (tag.length < 4)
                 throw new Error('Select atleast 1 tag')
-            return Axios.post(
-                `${SERVER_URI}/post/wall/`,
-                {
-                    title,
-                    description,
-                    tag
-                },
-                {
-                    headers: {
-                        ...AXIOS_HEADERS,
-                        "Authorization": `Bearer ${token}`
-                    }
+            // return Axios.post(
+            //     `${SERVER_URI}/post/wall/`,
+            //     {
+            //         title,
+            //         description,
+            //         tag
+            //     },
+            //     {
+            //         headers: {
+            //             ...AXIOS_HEADERS,
+            //             "Authorization": `Bearer ${token}`
+            //         }
+            //     }
+            // )
+            const data = {
+                title,
+                description,
+                tag
+            }
+            if (patch)
+                data = {...data, id: route.params.id}   
+            return Axios({
+                method: patch ? 'patch' : 'post',
+                url: `${SERVER_URI}/post/wall/`,
+                data,
+                headers: {
+                    ...AXIOS_HEADERS,
+                    "Authorization": `Bearer ${token}`
                 }
-            )    
+            }) 
         })
         .then(res => {
             navigation.goBack()

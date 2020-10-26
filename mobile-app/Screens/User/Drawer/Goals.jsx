@@ -5,25 +5,28 @@ import Axios from 'axios'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
 import { FlatList } from 'react-native-gesture-handler'
 import { RefreshControl, View } from 'react-native'
-import { Card, Button, ActivityIndicator } from 'react-native-paper'
+import { Card, Button, ActivityIndicator, Caption } from 'react-native-paper'
 import { createStackNavigator } from '@react-navigation/stack'
+import Goal from '../Tabs/Goal'
 
 const Goals = ({navigation}) => {
     const [goals, setGoals] = React.useState([])
-    const [refreshing, setRefreshing] = React.useState(false)
+    const [refreshing, setRefreshing] = React.useState(true)
     const [loading, setLoading] = React.useState(true)
+    const [page, setPage] = React.useState(1)
+    const [end, setEnd] = React.useState(false)
     const isFocused = useIsFocused()
 
     React.useEffect(() => {
         if (isFocused)
-            getMyGoals()
+            getMyGoals(page, goals)
     },[isFocused])
 
-    const getMyGoals = () => {
+    const getMyGoals = (pageno, oldGoals) => {
         getItemAsync('token')
         .then(token => 
             Axios.get(
-                `${SERVER_URI}/cheer/mytasks`,
+                `${SERVER_URI}/cheer/mytasks/${pageno}`,
                 {
                     headers: {
                         ...AXIOS_HEADERS,
@@ -33,7 +36,9 @@ const Goals = ({navigation}) => {
             )    
         )
         .then(res => {
-            setGoals(res.data.post_list)
+            setGoals([...oldGoals, ...res.data.post_list])
+            if (res.data.post_list < 10 || res.data.success)
+                setEnd(true)
         })
         .catch(err => alert(err.message))
         .finally(() => {
@@ -70,18 +75,39 @@ const Goals = ({navigation}) => {
     }
 
     const handleRefresh = () => {
+        setEnd(false)
         setRefreshing(true)
-        getMyGoals()
+        setPage(1)
+        getMyGoals(1, [])
+    }
+
+    const handleEnd = () => {
+        if (!end && !loading) {
+            getMyGoals(page + 1, goals)
+            setPage(page + 1)
+        }
     }
 
     return(
-        !loading ?
         <FlatList
             data={goals}
             extraData={goals}
             keyExtractor={(item, index) => index.toString()}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
+            }
+            onEndReached={handleEnd}
+            ListFooterComponent={
+                !loading && 
+                <Card style={{justifyContent: 'center', alignItems: 'center', marginVertical: 10, paddingVertical: 10}}>
+                    {
+                        end 
+                        ?
+                        <Caption>Welcome to the bottom of Ocean :)</Caption>
+                        :
+                        <Caption>Fetching more content for you...</Caption>
+                    }
+                </Card>
             }
             renderItem={({ item, index }) => 
                 <Card
@@ -113,10 +139,6 @@ const Goals = ({navigation}) => {
                 </Card>
             }
         />
-        :
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <ActivityIndicator animating={true}/>
-        </View>
     )
 }
 
@@ -128,6 +150,10 @@ export default ({ navigation }) => {
             <Stack.Screen
                 name="My Goals"
                 component={Goals}
+            />
+            <Stack.Screen
+                name="Goal"
+                component={Goal}
             />
         </Stack.Navigator>
     )
