@@ -26,12 +26,13 @@ class UserView(APIView):
         if user_serializer.is_valid():
             user_serializer.save()
             user = User.objects.get(email=user_serializer.data.get('email'))
-            tag_list = tag.split(' ')
-            query_list = []
-            for tag_name in tag_list:
-                query_list.append(Tag.objects.get(tag_name=tag_name))
-            for queryset in query_list:
-                user.user_tag.add(queryset)
+            if tag != '':
+                tag_list = tag.split(' ')
+                query_list = []
+                for tag_name in tag_list:
+                    query_list.append(Tag.objects.get(tag_name=tag_name))
+                for queryset in query_list:
+                    user.user_tag.add(queryset)
             user.save()
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
@@ -95,6 +96,7 @@ class ProfileView(APIView):
                     'country': user.country,
                     'last_login': last_login,
                     'date_joined': date_joined,
+                    'is_moderator': user.is_moderator,
                     'tags': list(user.user_tag.all().values_list('tag_name', flat=True))
                 }
             }

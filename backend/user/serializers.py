@@ -63,13 +63,14 @@ class EditSerializer(serializers.Serializer):
         user.gender = data['gender']
         user.country = data['country']
         user.user_tag.clear()
-        tag = data['tags']
-        tag_list = tag.split(' ')
-        query_list = []
-        for tag_name in tag_list:
-            query_list.append(Tag.objects.get(tag_name=tag_name))
-        for queryset in query_list:
-            user.user_tag.add(queryset)
+        if data['tags'] != '':
+            tag = data['tags']
+            tag_list = tag.split(' ')
+            query_list = []
+            for tag_name in tag_list:
+                query_list.append(Tag.objects.get(tag_name=tag_name))
+            for queryset in query_list:
+                user.user_tag.add(queryset)
         user.save()
         return user
 
