@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.settings import api_settings
 
+from .permissions import IsAdmin, IsStaff
 from .models import (User, Tag, OTP, )
 from .serializers import (RegisterSerializer, LoginSerializer, EditSerializer,
                           ForgotSerializer, ChangeSerializer, )
@@ -50,8 +51,39 @@ class UserView(APIView):
         return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
 
+class CreateModeratorView(APIView):
+    permission_classes = (IsAdmin, IsStaff, )
+
+    def post(self, request):
+        tag = request.data['tags']
+        user_serializer = RegisterSerializer(data=request.data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+            user = User.objects.get(email=user_serializer.data.get('email'))
+            user.is_moderator = True
+            if tag != '':
+                tag_list = tag.split(' ')
+                query_list = []
+                for tag_name in tag_list:
+                    query_list.append(Tag.objects.get(tag_name=tag_name))
+                for queryset in query_list:
+                    user.user_tag.add(queryset)
+            user.save()
+            response = {
+                'success': True,
+                'message': 'User registered successfully',
+            }
+
+            return Response(response, status=status.HTTP_201_CREATED)
+        response = {
+            'success': False,
+            'message': 'User Already Registered!',
+        }
+        return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+
+
 class LoginView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
     serializer_class = LoginSerializer
 
     def post(self, request):

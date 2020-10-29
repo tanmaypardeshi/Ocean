@@ -2,10 +2,11 @@ from django.urls import path
 
 from .views import (UserView, LoginView, ProfileView,
                     OTPView, VerifyOtp, ForgotPassword,
-                    ChangePassword, )
+                    ChangePassword, CreateModeratorView, )
 
 urlpatterns = [
     path('register/', UserView.as_view(), name='register'),
+    path('createmoderator/', CreateModeratorView.as_view(), name='create-mod'),
     path('login/', LoginView.as_view(), name='login'),
     path('profile/', ProfileView.as_view(), name='view'),
     path('otp/', OTPView.as_view(), name='otp'),

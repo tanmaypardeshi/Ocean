@@ -50,7 +50,6 @@ class LoginSerializer(Serializer):
 
 
 class EditSerializer(serializers.Serializer):
-
     def update(self, instance, data):
         user = instance
         if user is None:
