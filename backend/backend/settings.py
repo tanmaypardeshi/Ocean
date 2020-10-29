@@ -67,6 +67,17 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'ocean',
+#         'USER': 'root',
+#         'PASSWORD': 'java1234!',
+#         'HOST': 'localhost',
+#         'PORT': '5432'
+#     }
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
