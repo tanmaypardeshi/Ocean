@@ -10,12 +10,13 @@
         "dob": "2020-10-20",
         "gender": "Genderless",
         "country": "Konoha",
-        "last_login": "2020-10-22T12:17:48.634Z",
+        "last_login": "2020-10-29T13:58:27.938Z",
         "date_joined": "2020-10-20T13:16:24.392Z",
         "admin": true,
         "staff": true,
         "active": true,
         "is_otp_verified": false,
+        "is_moderator": false,
         "counter": 1
     }
 },
@@ -36,6 +37,7 @@
         "staff": false,
         "active": true,
         "is_otp_verified": false,
+        "is_moderator": false,
         "counter": 1
     }
 },
@@ -50,12 +52,13 @@
         "dob": "2000-03-07",
         "gender": "Male",
         "country": "India",
-        "last_login": "2020-10-20T16:11:05.516Z",
+        "last_login": "2020-10-29T14:20:11.355Z",
         "date_joined": "2020-10-20T13:20:14.572Z",
         "admin": false,
         "staff": false,
         "active": true,
         "is_otp_verified": false,
+        "is_moderator": false,
         "counter": 1
     }
 },
@@ -76,6 +79,7 @@
         "staff": false,
         "active": true,
         "is_otp_verified": false,
+        "is_moderator": false,
         "counter": 1
     }
 },
@@ -96,6 +100,7 @@
         "staff": false,
         "active": true,
         "is_otp_verified": false,
+        "is_moderator": false,
         "counter": 1
     }
 },

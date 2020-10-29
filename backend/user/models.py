@@ -17,6 +17,7 @@ class User(AbstractBaseUser):
     staff = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     is_otp_verified = models.BooleanField(default=False)
+    is_moderator = models.BooleanField(default=False)
 
     counter = models.IntegerField(default=1)
 
