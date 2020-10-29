@@ -16,13 +16,6 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
-def jwt_response_payload_handler(token, user=None, request=None):
-    return {
-        'token': token,
-        'bunny': 'fu fu'
-    }
-
-
 class UserView(APIView):
     permission_classes = (AllowAny,)
 
@@ -41,8 +34,6 @@ class UserView(APIView):
             user.save()
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
-            data = jwt_response_payload_handler(token, user, request)
-            print(data)
             response = {
                 'success': True,
                 'message': 'User registered successfully',
@@ -64,21 +55,12 @@ class LoginView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            try:
-                user = User.objects.get(email=serializer.data['email'])
-                data = jwt_response_payload_handler(serializer.data['token'], user, request)
-                response = {
-                    'success': True,
-                    'message': 'User logged in successfully',
-                    'token': serializer.data['token'],
-                }
-                return Response(response, status=status.HTTP_200_OK)
-            except Exception as e:
-                response = {
-                    'success': False,
-                    'message': e.__str__()
-                }
-                return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            response = {
+                'success': True,
+                'message': 'User logged in successfully',
+                'token': serializer.data['token'],
+            }
+            return Response(response, status=status.HTTP_200_OK)
         response = {
             'success': False,
             'message': 'Invalid Credentials',
