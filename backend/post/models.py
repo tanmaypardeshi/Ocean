@@ -48,3 +48,16 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.first_name} on post {self.post.pk}"
+
+
+class Delete(models.Model):
+    user = models.ForeignKey(User, related_name='moderator_delete', on_delete=models.CASCADE)
+    title = models.TextField(default='')
+    description = models.TextField(default='')
+    summary = models.TextField(default='')
+    published_at = models.DateTimeField(auto_now_add=True)
+    tags = models.TextField(default='')
+    reason = models.TextField(default='')
+
+    def __str__(self):
+        return f"{self.user.email} - {self.title}"

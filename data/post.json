@@ -8872,5 +8872,18 @@
         "content": "I think I don't agree with your opinion on this",
         "published_at": "2020-10-20T15:17:18.820Z"
     }
+},
+{
+    "model": "post.delete",
+    "pk": 1,
+    "fields": {
+        "user": 6,
+        "title": "Sleep disorder Empathy Deficit Disorder",
+        "description": "This is the description",
+        "summary": "summary",
+        "published_at": "2020-10-29T20:04:49.525Z",
+        "tags": "['empathy_deficit_disorder', 'sleep_disorder']",
+        "reason": "Not good enough"
+    }
 }
 ]

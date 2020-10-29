@@ -2,13 +2,15 @@ from django.urls import path
 
 from .views import (PostView, CategoryView, LikeView,
                     CommentView, UnlikeView, SinglePostView,
-                    MyPosts, MyLikes, MyComments, NewEditPostView, )
+                    MyPosts, MyLikes, MyComments, NewEditPostView,
+                    DeletePost, )
 
 urlpatterns = [
     # path('populate/', populate, name='populate'),
     path('wall/', NewEditPostView.as_view(), name='post-edit'),
     path('like/', LikeView.as_view(), name='like'),
     path('unlike/', UnlikeView.as_view(), name='unlike'),
+    path('moderate/', DeletePost.as_view(), name='delete-moderator'),
     path('myposts/<int:id>/', MyPosts.as_view(), name='my-posts'),
     path('mylikes/<int:id>/', MyLikes.as_view(), name='my-likes'),
     path('mycomments/<int:id>/', MyComments.as_view(), name='my-comments'),

@@ -13,10 +13,13 @@ from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from user.models import User
-from .models import Post, Tag, Like, Comment
+from user.permissions import IsModerator
+from .models import Post, Tag, Like, Comment, Delete
 from .serializers import CommentSerializer
 from .similar import top_similar
 from .recommendation import recommendation_system
+
+
 # from .summariser import create_summary
 
 # file = os.getcwd() + '/post/populate.txt'
@@ -456,6 +459,31 @@ class MyComments(generics.ListAPIView):
                 'success': False,
                 'message': e.__str__()
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeletePost(APIView):
+    authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (IsModerator,)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            post_id = request.data['id']
+            reason = request.data['reason']
+            post = Post.objects.get(pk=post_id)
+            tags = list(post.post_tag.all().values_list('tag_name', flat=True))
+            Delete.objects.create(user=request.user,
+                                   title=post.title, description=post.description, summary=post.summary,
+                                   published_at=post.published_at, tags=tags, reason=reason)
+            post.delete()
+            return Response({
+                'status': True,
+                'message': 'This response was successfully deleted!'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': e.__str__()
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
 
 def get_posts(result, request):
