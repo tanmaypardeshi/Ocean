@@ -10,13 +10,13 @@
         "dob": "2020-10-20",
         "gender": "None",
         "country": "Konoha",
-        "last_login": "2020-10-29T13:58:27.938Z",
+        "last_login": "2020-10-29T17:43:09.095Z",
         "date_joined": "2020-10-20T13:16:24.392Z",
         "admin": true,
         "staff": true,
         "active": true,
         "is_otp_verified": false,
-        "is_moderator": false,
+        "is_moderator": true,
         "counter": 1
     }
 },
@@ -52,7 +52,7 @@
         "dob": "2000-03-07",
         "gender": "Male",
         "country": "India",
-        "last_login": "2020-10-29T17:17:20.631Z",
+        "last_login": "2020-10-29T19:44:28.118Z",
         "date_joined": "2020-10-20T13:20:14.572Z",
         "admin": false,
         "staff": false,
@@ -115,7 +115,7 @@
         "dob": "2020-10-29",
         "gender": "None",
         "country": "None",
-        "last_login": "2020-10-29T16:11:51.522Z",
+        "last_login": "2020-10-29T19:48:38.907Z",
         "date_joined": "2020-10-29T15:05:17.782Z",
         "admin": false,
         "staff": false,
@@ -546,12 +546,37 @@
     }
 },
 {
+    "model": "user.user",
+    "pk": 27,
+    "fields": {
+        "password": "pbkdf2_sha256$216000$idwLd8PqlPdk$O4B1YQ9BJg67Mtkc2yX++ejKXHmJqpxf+EvzT1cgUpc=",
+        "email": "moderator22@gmail.com",
+        "first_name": "Moderator",
+        "last_name": "Moderator",
+        "dob": "2020-10-29",
+        "gender": "None",
+        "country": "None",
+        "last_login": "2020-10-29T17:47:23.690Z",
+        "date_joined": "2020-10-29T17:47:23.690Z",
+        "admin": false,
+        "staff": false,
+        "active": true,
+        "is_otp_verified": false,
+        "is_moderator": true,
+        "counter": 1
+    }
+},
+{
     "model": "user.tag",
     "pk": 5,
     "fields": {
         "tag_name": "productivity",
         "user": [
-            2
+            2,
+            20,
+            22,
+            23,
+            24
         ]
     }
 },
@@ -561,7 +586,11 @@
     "fields": {
         "tag_name": "self_help",
         "user": [
-            2
+            2,
+            4,
+            15,
+            18,
+            27
         ]
     }
 },
@@ -573,7 +602,10 @@
         "user": [
             2,
             3,
-            5
+            5,
+            8,
+            9,
+            12
         ]
     }
 },
@@ -584,8 +616,12 @@
         "tag_name": "personal_development",
         "user": [
             2,
+            3,
             4,
-            5
+            5,
+            15,
+            16,
+            17
         ]
     }
 },
@@ -595,7 +631,10 @@
     "fields": {
         "tag_name": "spirituality",
         "user": [
-            2
+            17,
+            18,
+            21,
+            22
         ]
     }
 },
@@ -605,7 +644,10 @@
     "fields": {
         "tag_name": "motivation",
         "user": [
-            5
+            5,
+            6,
+            7,
+            26
         ]
     }
 },
@@ -616,7 +658,11 @@
         "tag_name": "positivity",
         "user": [
             4,
-            5
+            5,
+            10,
+            12,
+            13,
+            27
         ]
     }
 },
@@ -647,7 +693,10 @@
     "fields": {
         "tag_name": "relationships",
         "user": [
-            4
+            4,
+            5,
+            16,
+            18
         ]
     }
 },
@@ -656,7 +705,12 @@
     "pk": 15,
     "fields": {
         "tag_name": "success",
-        "user": []
+        "user": [
+            15,
+            16,
+            17,
+            18
+        ]
     }
 },
 {
@@ -666,7 +720,11 @@
         "tag_name": "depression",
         "user": [
             2,
-            5
+            5,
+            11,
+            12,
+            13,
+            14
         ]
     }
 },
@@ -676,7 +734,11 @@
     "fields": {
         "tag_name": "anxiety",
         "user": [
-            4
+            4,
+            7,
+            8,
+            9,
+            16
         ]
     }
 },
@@ -687,7 +749,9 @@
         "tag_name": "ptsd",
         "user": [
             2,
-            5
+            5,
+            16,
+            18
         ]
     }
 },
@@ -698,7 +762,11 @@
         "tag_name": "alcohol",
         "user": [
             2,
-            5
+            5,
+            17,
+            18,
+            20,
+            22
         ]
     }
 },
@@ -708,7 +776,14 @@
     "fields": {
         "tag_name": "internet_addiction",
         "user": [
-            2
+            3,
+            5,
+            11,
+            13,
+            15,
+            16,
+            17,
+            18
         ]
     }
 },
@@ -718,9 +793,18 @@
     "fields": {
         "tag_name": "bipolar_disorder",
         "user": [
-            3,
+            2,
             4,
-            5
+            5,
+            10,
+            12,
+            13,
+            14,
+            19,
+            24,
+            25,
+            26,
+            27
         ]
     }
 },
@@ -731,7 +815,14 @@
         "tag_name": "social_anxiety_disorder",
         "user": [
             4,
-            5
+            5,
+            9,
+            11,
+            12,
+            13,
+            17,
+            25,
+            27
         ]
     }
 },
@@ -741,7 +832,12 @@
     "fields": {
         "tag_name": "stress",
         "user": [
-            5
+            3,
+            5,
+            6,
+            7,
+            25,
+            26
         ]
     }
 },
@@ -752,7 +848,10 @@
         "tag_name": "sleep_disorder",
         "user": [
             2,
-            5
+            5,
+            18,
+            19,
+            20
         ]
     }
 },
@@ -762,8 +861,12 @@
     "fields": {
         "tag_name": "empathy_deficit_disorder",
         "user": [
+            2,
+            3,
             4,
-            5
+            7,
+            8,
+            10
         ]
     }
 }

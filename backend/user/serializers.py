@@ -27,6 +27,12 @@ class RegisterSerializer(ModelSerializer):
         return user
 
 
+class ModeratorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name']
+
+
 class LoginSerializer(Serializer):
     email = serializers.EmailField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)

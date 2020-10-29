@@ -2,6 +2,7 @@ import random
 import datetime
 from django.core.mail import send_mail
 from rest_framework import status
+from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
@@ -11,8 +12,7 @@ from rest_framework_jwt.settings import api_settings
 from .permissions import IsAdmin, IsStaff
 from .models import (User, Tag, OTP, )
 from .serializers import (RegisterSerializer, LoginSerializer, EditSerializer,
-                          ForgotSerializer, ChangeSerializer, )
-
+                          ForgotSerializer, ChangeSerializer, ModeratorSerializer, )
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -52,7 +52,7 @@ class UserView(APIView):
 
 
 class CreateModeratorView(APIView):
-    permission_classes = (IsAdmin, IsStaff, )
+    permission_classes = (IsAdmin, IsStaff,)
 
     def post(self, request):
         tag = request.data['tags']
@@ -77,13 +77,40 @@ class CreateModeratorView(APIView):
             return Response(response, status=status.HTTP_201_CREATED)
         response = {
             'success': False,
-            'message': 'User Already Registered!',
+            'message': 'Already a moderator',
         }
-        return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetModerators(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+    serializer_class = ModeratorSerializer
+
+    def get_queryset(self):
+        tag_name = self.kwargs['tag']
+        tag = Tag.objects.get(tag_name=tag_name)
+        user = User.objects.filter(user_tag=tag, is_moderator=True)
+        return user
+
+    def get(self, request, *args, **kwargs):
+        try:
+            query_set = self.get_queryset()
+            serializer = self.serializer_class(query_set, many=True)
+            return Response({
+                'status': True,
+                'message': f'Fetched {len(serializer.data)} moderators',
+                'moderators': serializer.data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': e.__str__()
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
     serializer_class = LoginSerializer
 
     def post(self, request):

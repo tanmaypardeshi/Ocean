@@ -2,7 +2,8 @@ from django.urls import path
 
 from .views import (UserView, LoginView, ProfileView,
                     OTPView, VerifyOtp, ForgotPassword,
-                    ChangePassword, CreateModeratorView, )
+                    ChangePassword, CreateModeratorView,
+                    GetModerators,)
 
 urlpatterns = [
     path('register/', UserView.as_view(), name='register'),
@@ -13,4 +14,5 @@ urlpatterns = [
     path('verify/', VerifyOtp.as_view(), name='verify'),
     path('forgot/', ForgotPassword.as_view(), name='forgot'),
     path('change/', ChangePassword.as_view(), name='change'),
+    path('getmoderators/<str:tag>/', GetModerators.as_view(), name='moderators'),
 ]
