@@ -12,6 +12,7 @@ from .models import (User, Tag, OTP, )
 from .serializers import (RegisterSerializer, LoginSerializer, EditSerializer,
                           ForgotSerializer, ChangeSerializer, )
 
+
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
