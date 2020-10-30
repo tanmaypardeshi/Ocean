@@ -45,14 +45,14 @@
     "model": "user.user",
     "pk": 3,
     "fields": {
-        "password": "pbkdf2_sha256$216000$76E3sucgt7FN$qEqZBuNERiHdfO9rmAgsYyXR7CUTLZml1PuZtun24oc=",
+        "password": "pbkdf2_sha256$216000$oOi2QT2E3WD9$5c2jV7i3jw3cXCy/r/Ukfcx+gGWjQdQ/9aUcWgqPzR0=",
         "email": "tanmaypardeshi@gmail.com",
         "first_name": "Tanmay",
         "last_name": "Pardeshi",
         "dob": "2000-03-07",
         "gender": "Male",
         "country": "India",
-        "last_login": "2020-10-29T20:00:11.290Z",
+        "last_login": "2020-10-30T08:37:11.942Z",
         "date_joined": "2020-10-20T13:20:14.572Z",
         "admin": false,
         "staff": false,
@@ -115,7 +115,7 @@
         "dob": "2020-10-29",
         "gender": "None",
         "country": "None",
-        "last_login": "2020-10-29T20:03:56.222Z",
+        "last_login": "2020-10-30T08:26:09.400Z",
         "date_joined": "2020-10-29T15:05:17.782Z",
         "admin": false,
         "staff": false,
@@ -567,6 +567,48 @@
     }
 },
 {
+    "model": "user.user",
+    "pk": 29,
+    "fields": {
+        "password": "pbkdf2_sha256$216000$wHPgTQhb9WO1$sKB8rNRw81J8HiKK4bCAX49BwBxIbd9at8LP+e75Cys=",
+        "email": "moderator23@gmail.com",
+        "first_name": "Moderator",
+        "last_name": "Moderator",
+        "dob": "2020-10-29",
+        "gender": "None",
+        "country": "None",
+        "last_login": "2020-10-30T08:32:31.581Z",
+        "date_joined": "2020-10-30T08:32:31.581Z",
+        "admin": false,
+        "staff": false,
+        "active": true,
+        "is_otp_verified": false,
+        "is_moderator": true,
+        "counter": 1
+    }
+},
+{
+    "model": "user.user",
+    "pk": 30,
+    "fields": {
+        "password": "pbkdf2_sha256$216000$oNIzCDnc5Oyw$4Eta34cdJ1vgQWd80OmRyApAzaTRYTqthHaWzsJRXtE=",
+        "email": "moderator24@gmail.com",
+        "first_name": "Moderator",
+        "last_name": "Moderator",
+        "dob": "2020-10-29",
+        "gender": "None",
+        "country": "None",
+        "last_login": "2020-10-30T08:34:09.768Z",
+        "date_joined": "2020-10-30T08:34:09.768Z",
+        "admin": false,
+        "staff": false,
+        "active": true,
+        "is_otp_verified": false,
+        "is_moderator": true,
+        "counter": 1
+    }
+},
+{
     "model": "user.tag",
     "pk": 5,
     "fields": {
@@ -766,7 +808,8 @@
             17,
             18,
             20,
-            22
+            22,
+            30
         ]
     }
 },
@@ -783,7 +826,8 @@
             15,
             16,
             17,
-            18
+            18,
+            29
         ]
     }
 },
@@ -837,7 +881,9 @@
             6,
             7,
             25,
-            26
+            26,
+            29,
+            30
         ]
     }
 },
@@ -851,7 +897,8 @@
             5,
             18,
             19,
-            20
+            20,
+            30
         ]
     }
 },
@@ -868,6 +915,15 @@
             8,
             10
         ]
+    }
+},
+{
+    "model": "user.otp",
+    "pk": 1,
+    "fields": {
+        "user": 3,
+        "otp": 7745,
+        "counter": 1
     }
 }
 ]

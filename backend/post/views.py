@@ -1,6 +1,5 @@
 import os
 import pickle
-import json
 import pandas as pd
 from operator import itemgetter
 from django.shortcuts import render
@@ -20,7 +19,7 @@ from .similar import top_similar
 from .recommendation import recommendation_system
 
 
-# from .summariser import create_summary
+from .summariser import create_summary
 
 # file = os.getcwd() + '/post/populate.txt'
 #
@@ -97,11 +96,12 @@ class NewEditPostView(generics.GenericAPIView):
             for tag_name in tag_list:
                 tag = Tag.objects.get(tag_name=tag_name)
                 queryset_list.append(tag)
-            # summary = create_summary(request.data['description'])
+            summary = create_summary(request.data['description'])
             post = Post.objects.create(user=request.user,
                                        title=request.data['title'],
                                        description=request.data['description'],
-                                       summary='summary')
+                                       is_anonymous=request.data['is_anonymous'],
+                                       summary=summary)
             post.save()
             for queryset in queryset_list:
                 post.post_tag.add(queryset)
@@ -124,7 +124,8 @@ class NewEditPostView(generics.GenericAPIView):
                 post.post_tag.clear()
                 new_title = request.data['title']
                 new_description = request.data['description']
-                # new_summary = create_summary(new_description)
+                is_anonymous = request.data['is_anonymous']
+                new_summary = create_summary(new_description)
                 tag = str(request.data['tag'])
                 tag_list = tag.split(' ')
                 queryset_list = []
@@ -133,7 +134,8 @@ class NewEditPostView(generics.GenericAPIView):
                     queryset_list.append(tag)
                 post.title = new_title
                 post.description = new_description
-                post.summary = 'new_summary'
+                post.is_anonymous = is_anonymous
+                post.summary = new_summary
                 post.save()
                 for queryset in queryset_list:
                     post.post_tag.add(queryset)
@@ -203,6 +205,7 @@ class SinglePostView(generics.GenericAPIView):
         objects['description'] = description
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
+        objects['is_anonymous'] = post.is_anonymous
         objects['tags'] = tag_list
         objects['post_list'] = post_list
         return Response(objects, status=status.HTTP_200_OK)
@@ -324,11 +327,13 @@ class CommentView(generics.ListAPIView):
             user = request.user
             parent_id = request.data['parent_id']
             content = request.data['content']
+            is_anonymous = request.data['is_anonymous']
             comment = Comment.objects.create(
                 post=post,
                 user=user,
                 parent_id=parent_id,
-                content=content
+                content=content,
+                is_anonymous=is_anonymous
             )
             comment.save()
             return Response({
@@ -345,8 +350,10 @@ class CommentView(generics.ListAPIView):
         try:
             id = request.data['id']
             new_content = request.data['content']
+            is_anonymous = request.data['is_anonymous']
             comment = Comment.objects.get(id=id, user=request.user)
             comment.content = new_content
+            comment.is_anonymous = is_anonymous
             comment.save()
             return Response({
                 'success': True,
@@ -443,6 +450,7 @@ class MyComments(generics.ListAPIView):
                 objects['comment_id'] = comment.pk
                 objects['content'] = comment.content
                 objects['published_at'] = comment.published_at
+                objects['is_anonymous'] = comment.is_anonymous
                 comment_list.append(objects)
                 objects = {}
             paginator = Paginator(comment_list, 10)
@@ -472,8 +480,9 @@ class DeletePost(APIView):
             post = Post.objects.get(pk=post_id)
             tags = list(post.post_tag.all().values_list('tag_name', flat=True))
             Delete.objects.create(user=request.user,
-                                   title=post.title, description=post.description, summary=post.summary,
-                                   published_at=post.published_at, tags=tags, reason=reason)
+                                  title=post.title, description=post.description, summary=post.summary,
+                                  published_at=post.published_at, tags=tags, is_anonymous=post.is_anonymous,
+                                  reason=reason)
             post.delete()
             return Response({
                 'status': True,
@@ -509,6 +518,7 @@ def get_posts(result, request):
         objects['description'] = description
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
+        objects['is_anonymous'] = post.is_anonymous
         objects['tags'] = tag_list
         post_list.append(objects)
         objects = {}
@@ -535,6 +545,7 @@ def get_category(posts, request):
         objects['description'] = post.description
         objects['published_at'] = post.published_at
         objects['is_liked'] = is_liked
+        objects['is_anonymous'] = post.is_anonymous
         objects['tags'] = tag_list
         post_list.append(objects)
         objects = {}

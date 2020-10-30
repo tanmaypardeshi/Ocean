@@ -71,7 +71,7 @@ class CreateModeratorView(APIView):
             user.save()
             response = {
                 'success': True,
-                'message': 'User registered successfully',
+                'message': 'Moderator registered successfully',
             }
 
             return Response(response, status=status.HTTP_201_CREATED)

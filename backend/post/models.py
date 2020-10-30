@@ -9,6 +9,7 @@ class Post(models.Model):
     description = models.TextField(default='')
     summary = models.TextField(default='')
     published_at = models.DateTimeField(auto_now_add=True)
+    is_anonymous = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['published_at']
@@ -45,6 +46,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', blank=True, null=True, related_name='comment', on_delete=models.CASCADE)
     content = models.TextField(default='')
     published_at = models.DateTimeField(auto_now_add=True)
+    is_anonymous = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Comment by {self.user.first_name} on post {self.post.pk}"
@@ -56,6 +58,7 @@ class Delete(models.Model):
     description = models.TextField(default='')
     summary = models.TextField(default='')
     published_at = models.DateTimeField(auto_now_add=True)
+    is_anonymous = models.BooleanField(default=False)
     tags = models.TextField(default='')
     reason = models.TextField(default='')
 
