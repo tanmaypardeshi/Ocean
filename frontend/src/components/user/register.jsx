@@ -6,7 +6,6 @@ import { makeStyles } from '@material-ui/styles';
 import { Link as RRDLink, useHistory } from 'react-router-dom';
 import { Brightness4, Brightness7 } from '@material-ui/icons'
 import WavesIcon from '@material-ui/icons/Waves';
-import { Autocomplete } from '@material-ui/lab';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { useSnackbar } from 'notistack';
@@ -80,29 +79,31 @@ export default function Register() {
   const {dark, toggleTheme} = useContext(ThemeContext);
 
   const { enqueueSnackbar } = useSnackbar();
+
   const history = useHistory();
+  
   const [tags, setTags] = useState([
-    {color:'secondary', value:'productivity'},
-    {color:'secondary', value:'self_help'},
-    {color:'secondary', value:'self_improvement '},
-    {color:'secondary', value:'personal_development'},
-    {color:'secondary', value:'spirituality'},
-    {color:'secondary', value:'motivation'},
-    {color:'secondary', value:'positivity'},
-    {color:'secondary', value:'career'},
-    {color:'secondary', value:'discipline'},
-    {color:'secondary', value:'relationship'},
-    {color:'secondary', value:'success'},
-    {color:'secondary', value:'depression'},
-    {color:'secondary', value:'anxiety'},
-    {color:'secondary', value:'ptsd'},
-    {color:'secondary', value:'alcohol'},
-    {color:'secondary', value:'internet_addiction'},
-    {color:'secondary', value:'bipolar_disorder'},
-    {color:'secondary', value:'social_anxiety_disorder'},
-    {color:'secondary', value:'stress'},
-    {color:'secondary', value:'sleep_disorder'},
-    {color:'secondary', value:'empathy_deficit_disorder'}
+    {selected: false, value:'productivity'},
+    {selected: false, value:'self_help'},
+    {selected: false, value:'self_improvement '},
+    {selected: false, value:'personal_development'},
+    {selected: false, value:'spirituality'},
+    {selected: false, value:'motivation'},
+    {selected: false, value:'positivity'},
+    {selected: false, value:'career'},
+    {selected: false, value:'discipline'},
+    {selected: false, value:'relationship'},
+    {selected: false, value:'success'},
+    {selected: false, value:'depression'},
+    {selected: false, value:'anxiety'},
+    {selected: false, value:'ptsd'},
+    {selected: false, value:'alcohol'},
+    {selected: false, value:'internet_addiction'},
+    {selected: false, value:'bipolar_disorder'},
+    {selected: false, value:'social_anxiety_disorder'},
+    {selected: false, value:'stress'},
+    {selected: false, value:'sleep_disorder'},
+    {selected: false, value:'empathy_deficit_disorder'}
   ]);
   const [stage, setStage] = useState(0)
   const [details, setDetails] = useState({
@@ -226,16 +227,15 @@ export default function Register() {
                 return (
                   <Chip
                     id={index}
-                    label={tag.value}
+                    label={tag.value.split('_').join(' ')}
                     key={index}
-                    color="secondary"
+                    color={tag.selected ? "primary": "default"}
                     clickable
                     style={{fontSize:'16px'}}
                     onClick={() => {
                       let newTags = [...tags];
-                      newTags[index].color = "primary";
+                      newTags[index].selected = !newTags[index].selected;
                       setTags(newTags);
-                      setDetails({...details, tags: tags + ' ' + newTags[index].value});
                     }}
                   />
                 )})
