@@ -117,12 +117,25 @@ export default function Register() {
       "tags": ""
   });
 
-  const handleChange = () => {
-    
+  const handleChange = (event) => {
+    const et = event.target;
+    if(!!et.id) {
+      setDetails({...details, [et.id]: et.value})
+    }  else {
+      setDetails({...details, [et.name]: et.value});
+    }
   }
   
   const handleSubmit = e => {
       e.preventDefault();
+      let detail_tags = "";
+      tags.map((tag) => {
+          if(tag.selected) {
+              detail_tags += tag.value + " ";
+          }
+      });
+      setDetails({...details, tags: detail_tags.substring(0, detail_tags.length - 1)});
+      console.log(details);
       setStage((stage+1)%3);
   }
 
