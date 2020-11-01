@@ -129,7 +129,7 @@ export default function Register() {
   const handleSubmit = e => {
       e.preventDefault();
       let detail_tags = "";
-      tags.map((tag) => {
+      tags.map(tag => { 
           if(tag.selected) {
               detail_tags += tag.value + " ";
           }
@@ -180,6 +180,7 @@ export default function Register() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                value={details.email}
                 onChange={handleChange}
               />
               <TextField
@@ -191,6 +192,7 @@ export default function Register() {
                 label="Password"
                 type="password"
                 id="password"
+                value={details.password}
                 autoComplete="current-password"
                 onChange={handleChange}
               />
@@ -219,6 +221,7 @@ export default function Register() {
                 label="First name"
                 name="first_name"
                 autoComplete="first_name"
+                value={details.first_name}
                 autoFocus
                 onChange={handleChange}
               /> 
@@ -231,6 +234,7 @@ export default function Register() {
                 label="Last name"
                 name="last_name"
                 autoComplete="last_name"
+                value={details.last_name}
                 autoFocus
                 onChange={handleChange}
               />
@@ -309,9 +313,6 @@ export default function Register() {
              
               </>
             }
-            {
-              stage > 0 && <Button fullWidth color="primary" className={classes.submit} onClick={() => setStage(stage-1)}>Go back</Button>
-            }
             <Button
               type="submit"
               fullWidth
@@ -323,6 +324,9 @@ export default function Register() {
                   stage < 2 ? "Next" : "Submit"
               }
             </Button>
+            {
+              stage > 0 && <Button fullWidth color="primary" className={classes.submit} onClick={() => setStage(stage-1)}>Go back</Button>
+            }
           </form>
             <Grid container>
               <Grid item>
