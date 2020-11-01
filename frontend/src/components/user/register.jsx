@@ -15,7 +15,6 @@ import Axios from 'axios';
 
 
 import { ThemeContext } from '../../context/useTheme';
-import signup from '../../images/signup.svg'
 
 const tags = ['productivity', 'self_help', 'self_improvement ', 'personal_development',
               'spirituality','motivation','positivity','career', 'discipline','relationship',
@@ -36,12 +35,25 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  image: {
+    backgroundImage: theme.palette.type === "light" ? 
+    'url("https://images.unsplash.com/photo-1503803548695-c2a7b4a5b875?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80")' 
+    : 
+    'url("https://images.unsplash.com/photo-1566342088293-38debd381c63?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80")'
+    ,
+    backgroundRepeat: 'no-repeat',
+    backgroundColor:
+      theme.palette.type === 'light' ? theme.palette.grey[50] : theme.palette.grey[900],
+    backgroundSize: 'cover',
+    backgroundPosition: '30%'
+  },
   ocean: {
     fontFamily: "'Open Sans', sans-serif",
-    height: '40%',
+    height: '90%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    color: 'white'
   },
   form: {
     width: '100%', // Fix IE 11 issue.
@@ -105,7 +117,7 @@ export default function Register() {
   return (
     <Grid container component="main" className={classes.root}>
       <CssBaseline />
-      <Grid item xs={false} sm={4} md={8} alignContents="center" style={{backgroundColor: dark ? "rgba(0,0,0,0.5)" : "rgba(220,220,220,0.5)"}}>
+      <Grid item xs={false} sm={4} md={8} alignContents="center" className={classes.image}>
         <Hidden smDown>
           <Typography 
             component="h1" 
@@ -114,7 +126,6 @@ export default function Register() {
           >
             Ocean
           </Typography>
-          <img src={signup} alt="signup"/> 
         </Hidden>
       </Grid>
       <Grid item xs={12} sm={8} md={4} component={Paper} elevation={6} square>
