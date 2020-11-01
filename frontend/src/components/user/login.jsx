@@ -161,9 +161,14 @@ export default function Login() {
               Sign In
             </Button>
             <Grid container>
-              <Grid item>
+              <Grid item xs>
                 <Link component={RRDLink} to='/register'>
                   Don't have an account? Sign Up
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link component={RRDLink} to='/register'>
+                  Forgot Password?
                 </Link>
               </Grid>
             </Grid>
