@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import './App.css';
 import Routes from './components/Routes';
-import { colors, MuiThemeProvider, createMuiTheme } from '@material-ui/core';
+import { colors, MuiThemeProvider, createMuiTheme, CssBaseline } from '@material-ui/core';
 import { ThemeContext } from './context/useTheme';
 
 const lightPallete = {
@@ -30,6 +30,7 @@ function App() {
 
   return (
     <MuiThemeProvider theme={theme}>
+      <CssBaseline/>
       <Routes/>
     </MuiThemeProvider>
   );

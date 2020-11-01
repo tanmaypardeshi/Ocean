@@ -3,7 +3,7 @@ import { Fab, Hidden, Typography, Button, CssBaseline, TextField, Link, Paper, G
 import { Brightness4, Brightness7 } from '@material-ui/icons';
 import WavesIcon from '@material-ui/icons/Waves';
 import { makeStyles } from '@material-ui/styles';
-import { Link as RRDLink } from 'react-router-dom';
+import { Link as RRDLink, useHistory } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import Axios from 'axios';
 
@@ -65,6 +65,8 @@ export default function Login() {
   const classes = useStyles();
 
   const {dark, toggleTheme} = useContext(ThemeContext)
+
+  const history = useHistory()
 
   const { enqueueSnackbar } = useSnackbar()
 
@@ -170,6 +172,15 @@ export default function Login() {
               onClick={handleSubmit}
             >
               Sign In
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              className={classes.submit}
+              onClick={() => history.push('/home')}
+            >
+              superfastlogin
             </Button>
             <Grid container>
               <Grid item xs>
