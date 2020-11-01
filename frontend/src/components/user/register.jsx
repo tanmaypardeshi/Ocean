@@ -1,8 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { MenuItem, Fab, Hidden, Typography, Button, 
         CssBaseline, TextField, Link, Paper, Grid,
-        FormControl, FormControlLabel, RadioGroup,
-        Radio, FormLabel, Chip} from '@material-ui/core';
+        Chip} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Link as RRDLink, useHistory } from 'react-router-dom';
 import { Brightness4, Brightness7 } from '@material-ui/icons'
@@ -15,12 +14,6 @@ import Axios from 'axios';
 
 
 import { ThemeContext } from '../../context/useTheme';
-
-const tags = ['productivity', 'self_help', 'self_improvement ', 'personal_development',
-              'spirituality','motivation','positivity','career', 'discipline','relationship',
-              'success','depression','anxiety','ptsd','alcohol','internet_addiction', 
-              'bipolar_disorder','social_anxiety_disorde','stress','sleep_disorder',
-              'empathy_deficit_disorder']
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -88,7 +81,29 @@ export default function Register() {
 
   const { enqueueSnackbar } = useSnackbar();
   const history = useHistory();
-
+  const [tags, setTags] = useState([
+    {color:'secondary', value:'productivity'},
+    {color:'secondary', value:'self_help'},
+    {color:'secondary', value:'self_improvement '},
+    {color:'secondary', value:'personal_development'},
+    {color:'secondary', value:'spirituality'},
+    {color:'secondary', value:'motivation'},
+    {color:'secondary', value:'positivity'},
+    {color:'secondary', value:'career'},
+    {color:'secondary', value:'discipline'},
+    {color:'secondary', value:'relationship'},
+    {color:'secondary', value:'success'},
+    {color:'secondary', value:'depression'},
+    {color:'secondary', value:'anxiety'},
+    {color:'secondary', value:'ptsd'},
+    {color:'secondary', value:'alcohol'},
+    {color:'secondary', value:'internet_addiction'},
+    {color:'secondary', value:'bipolar_disorder'},
+    {color:'secondary', value:'social_anxiety_disorder'},
+    {color:'secondary', value:'stress'},
+    {color:'secondary', value:'sleep_disorder'},
+    {color:'secondary', value:'empathy_deficit_disorder'}
+  ]);
   const [stage, setStage] = useState(0)
   const [details, setDetails] = useState({
       "email": "",
@@ -101,10 +116,6 @@ export default function Register() {
       "tags": ""
   });
 
-  const handleClick = (event) => {
-      console.log(event.target.id);
-      console.log(event.target.value);
-  }
   const handleChange = () => {
     
   }
@@ -211,12 +222,21 @@ export default function Register() {
               />
               <div className={classes.chip}>
               {
-                tags.map((tag) => {
+                tags.map((tag,index) => {
                 return (
                   <Chip
-                    id={tag}
-                    label={tag}
-                    onClick={handleClick}
+                    id={index}
+                    label={tag.value}
+                    key={index}
+                    color="secondary"
+                    clickable
+                    style={{fontSize:'16px'}}
+                    onClick={() => {
+                      let newTags = [...tags];
+                      newTags[index].color = "primary";
+                      setTags(newTags);
+                      setDetails({...details, tags: tags + ' ' + newTags[index].value});
+                    }}
                   />
                 )})
               }
