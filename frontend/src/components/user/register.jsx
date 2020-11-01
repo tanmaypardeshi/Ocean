@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { MenuItem, Fab, Hidden, Typography, Button, 
         CssBaseline, TextField, Link, Paper, Grid,
         Chip} from '@material-ui/core';
@@ -11,7 +11,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import { useSnackbar } from 'notistack';
 import Axios from 'axios';
 
-
+import countries from './countries.json';
 import { ThemeContext } from '../../context/useTheme';
 
 const useStyles = makeStyles((theme) => ({
@@ -81,11 +81,12 @@ export default function Register() {
   const { enqueueSnackbar } = useSnackbar();
 
   const history = useHistory();
+
   
   const [tags, setTags] = useState([
     {selected: false, value:'productivity'},
     {selected: false, value:'self_help'},
-    {selected: false, value:'self_improvement '},
+    {selected: false, value:'self_improvement'},
     {selected: false, value:'personal_development'},
     {selected: false, value:'spirituality'},
     {selected: false, value:'motivation'},
@@ -109,9 +110,10 @@ export default function Register() {
   const [details, setDetails] = useState({
       "email": "",
       "password": "",
+      "confpass": "",
       "first_name": "",
       "last_name": "",
-      "dob": new Date(),
+      "dob": new Date().toISOString().slice(0,10),
       "gender": "",
       "country": "",
       "tags": ""
@@ -128,14 +130,58 @@ export default function Register() {
   
   const handleSubmit = e => {
       e.preventDefault();
-      let detail_tags = "";
-      tags.map(tag => { 
-          if(tag.selected) {
-              detail_tags += tag.value + " ";
+      if(stage === 2) {
+         if(!details.gender || !details.country) {
+          enqueueSnackbar('All fields must be filled!', { variant: 'error' })
+          return;
+         }
+         Axios.post(
+          "http://localhost:8000/api/user/register/",
+          details,
+          { 
+            headers: 
+            { 
+              'Content-Type': 'application/json' 
+            } 
           }
-      });
-      setDetails({...details, tags: detail_tags.substring(0, detail_tags.length - 1)});
-      console.log(details);
+        )
+        .then(res => {
+          enqueueSnackbar('Registration successful!', { variant: 'success' })
+          history.push('/wall');
+        })
+        .catch(err => {
+          enqueueSnackbar(err.message, { variant: 'error' });
+        })
+        
+      } else if (stage === 1) {
+        let detail_tags = "";
+        tags.map(tag => { 
+            if(tag.selected) {
+                detail_tags += tag.value + " ";
+            }
+            return detail_tags;
+        });
+        setDetails({...details, tags: detail_tags.substring(0, detail_tags.length - 1)});
+        if(!details.first_name || !details.last_name) {
+          enqueueSnackbar('All fields must be filled!', { variant: 'error' })
+          return;
+        } 
+      } else {
+        if(!details.email || !details.password) {
+          enqueueSnackbar('All fields must be filled!', { variant: 'error' })
+            return;
+        } 
+        if(details.password.length < 8) {
+          enqueueSnackbar('Password Length should be 8 characters', { variant: 'error' })
+            return;
+        }
+        if (details.password !== details.confpass) {
+          enqueueSnackbar('Password mismatch!', { variant: 'error' })
+          return;
+        }
+      }
+      
+    
       setStage((stage+1)%3);
   }
 
@@ -205,6 +251,7 @@ export default function Register() {
                 label="Confirm Password"
                 type="password"
                 id="confpass"
+                value={details.confpass}
                 autoComplete="confirm-password"
                 onChange={handleChange}
               />
@@ -285,13 +332,17 @@ export default function Register() {
                   label="Country"
                   name="country"
                   autoComplete="country"
+                  value={details.country}
                   autoFocus
                   select
                   onChange={handleChange}
                 >
-                  <MenuItem value="India">India</MenuItem>
-                  <MenuItem value="Pakistan">Pakistan</MenuItem>
-                  <MenuItem value="Konoha">Konoha</MenuItem>
+                {countries.map(country => {
+                  return (
+                    <MenuItem value={country.countryName}>{country.countryName}</MenuItem>
+                  )
+                })}
+                  
                 </TextField>
                 <TextField
                   variant="outlined"
@@ -302,6 +353,7 @@ export default function Register() {
                   label="Gender"
                   name="gender"
                   autoComplete="gender"
+                  value={details.gender}
                   autoFocus
                   select
                   onChange={handleChange}

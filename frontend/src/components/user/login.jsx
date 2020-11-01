@@ -64,6 +64,8 @@ export default function Login() {
 
   const classes = useStyles();
 
+  const history = useHistory();
+
   const {dark, toggleTheme} = useContext(ThemeContext)
 
   const history = useHistory()
@@ -73,7 +75,6 @@ export default function Login() {
   const [details, setDetails] = useState({
     email: '',
     password: '',
-    usertype: 'user'
   })
 
   const handleChange = e => {
@@ -87,11 +88,11 @@ export default function Login() {
   const handleSubmit = e => {
     e.preventDefault()
     if (!details.email || !details.password) {
-      alert("Please fill all fields to login")
+      enqueueSnackbar("Please fill all fields to login",  { variant: 'error' })
       return
     }
     Axios.post(
-      "http://localhost:8000/login",
+      "http://localhost:8000/api/user/login/",
       details,
       {
         headers: {
@@ -100,11 +101,11 @@ export default function Login() {
       }
     )
     .then(res => {
-      console.log(res.data)
-      enqueueSnackbar('Login Successful', { variant: 'success'})
+      console.log(res.data);
+      enqueueSnackbar('Login Successful', { variant: 'success'});
+      history.push('/wall')
     })
     .catch(err => {
-      console.log(err)
       enqueueSnackbar('Invalid credentials', {
         variant: 'error'
       })
@@ -189,7 +190,7 @@ export default function Login() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link component={RRDLink} to='/register'>
+                <Link component={RRDLink} to='/forgot'>
                   Forgot Password?
                 </Link>
               </Grid>
