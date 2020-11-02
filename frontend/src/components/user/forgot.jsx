@@ -143,7 +143,7 @@ export default function Forgot() {
             return;
         }
         Axios.post(
-            "http://localhost:8000/api/user/change/",
+            "http://localhost:8000/api/user/forgot/",
             details,
             { 
               headers: 
@@ -154,7 +154,7 @@ export default function Forgot() {
           )
           .then(res => {
             enqueueSnackbar(`Successful!`, { variant: 'success' })
-            history.push('login/');
+            history.push('/');
           })
           .catch(err => {
             enqueueSnackbar(err.message, { variant: 'error' });

@@ -79,7 +79,7 @@ class CreateModeratorView(APIView):
             'success': False,
             'message': 'Already a moderator',
         }
-        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GetModerators(generics.ListAPIView):

@@ -1,9 +1,10 @@
 import React from 'react';
 import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase } from '@material-ui/core';
-import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz } from '@material-ui/icons';
+import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import Routes from './Routes';
 import clsx from 'clsx'
+import { useHistory } from 'react-router-dom';
 
 const drawerWidth = 300;
 
@@ -127,12 +128,18 @@ export default function ClippedDrawer() {
 
   const classes = useStyles();
 
+  const history = useHistory();
+
   const { dark, toggleTheme } = React.useContext(ThemeContext)
 
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = () => setOpen(!open)
 
+  const handleLogout = () => {
+    document.cookie = "usertoken=; path=/;";
+    history.push('/');
+  }
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -168,6 +175,10 @@ export default function ClippedDrawer() {
           >
             {dark ? <Brightness7 /> : <Brightness4 />}
           </IconButton>
+          <IconButton onClick={handleLogout}>
+            <ExitToApp />
+          </IconButton>
+
         </Toolbar>
       </AppBar>
       <Drawer

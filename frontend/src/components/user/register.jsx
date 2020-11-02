@@ -12,6 +12,7 @@ import { useSnackbar } from 'notistack';
 import Axios from 'axios';
 
 import countries from './countries.json';
+import { setUserTokenCookie } from '../../cookie/cookie';
 import { ThemeContext } from '../../context/useTheme';
 
 const useStyles = makeStyles((theme) => ({
@@ -146,8 +147,9 @@ export default function Register() {
           }
         )
         .then(res => {
+          setUserTokenCookie(res.data.token);
           enqueueSnackbar('Registration successful!', { variant: 'success' })
-          history.push('/wall');
+          history.push('/home');
         })
         .catch(err => {
           enqueueSnackbar(err.message, { variant: 'error' });

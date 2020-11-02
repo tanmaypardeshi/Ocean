@@ -1,14 +1,17 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/styles'
-import { Card, TextField } from '@material-ui/core'
+import { TextField } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
+  text : {
 
+  }
 }))
 
 export default function Communities() {
+    const classes = useStyles();
     return(
-        <TextField
+        <TextField className={classes.text}
           id="outlined-multiline-static"
           label="Multiline"
           multiline

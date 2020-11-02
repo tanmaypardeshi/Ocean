@@ -9,6 +9,7 @@ import Axios from 'axios';
 
 
 import { ThemeContext } from '../../context/useTheme';
+import { setUserTokenCookie } from '../../cookie/cookie';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,8 +69,6 @@ export default function Login() {
 
   const {dark, toggleTheme} = useContext(ThemeContext)
 
-  const history = useHistory()
-
   const { enqueueSnackbar } = useSnackbar()
 
   const [details, setDetails] = useState({
@@ -101,9 +100,9 @@ export default function Login() {
       }
     )
     .then(res => {
-      console.log(res.data);
+      setUserTokenCookie(res.data.token);
       enqueueSnackbar('Login Successful', { variant: 'success'});
-      history.push('/wall')
+      history.push('/home');
     })
     .catch(err => {
       enqueueSnackbar('Invalid credentials', {
@@ -173,15 +172,6 @@ export default function Login() {
               onClick={handleSubmit}
             >
               Sign In
-            </Button>
-            <Button
-              fullWidth
-              variant="contained"
-              color="secondary"
-              className={classes.submit}
-              onClick={() => history.push('/home')}
-            >
-              superfastlogin
             </Button>
             <Grid container>
               <Grid item xs>
