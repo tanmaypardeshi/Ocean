@@ -10,7 +10,7 @@ import Axios from 'axios';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import { useSnackbar } from 'notistack';
-import {getCookie, getDetailsFromCookie} from '../../../cookie/cookie';
+import {getCookie} from '../../../cookie/cookie';
 
 const useStyles = makeStyles(theme => ({
   container : {
@@ -46,7 +46,6 @@ export default function Feed() {
     const [expanded, setExpanded] = useState(false);
     const [page, setPage] = useState(1);
     const [posts, setPosts] = useState([]);
-
 
     const getPosts = () => {
       setPage(page+1);
@@ -142,7 +141,7 @@ export default function Feed() {
         {
           posts.map(post => {
             return (
-              <Card className={classes.root}>
+              <Card className={classes.root} key={post.id}>
                 <CardHeader
                   avatar= {<Avatar aria-label="name" className={classes.avatar}>
                       {<Typography variant="h4">
