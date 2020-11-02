@@ -200,7 +200,7 @@ export default function ClippedDrawer() {
           <List className={classes.list}>
             {
               drawerItems.map((item, index) =>
-                <ListItem>
+                <ListItem key={index}>
                   <ListItemIcon>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.name} />
                 </ListItem>
