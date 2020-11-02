@@ -18,7 +18,7 @@ import { ThemeContext } from '../../context/useTheme';
 const useStyles = makeStyles((theme) => ({
   root: {
     height: '100vh',
-    fontSize: '18px'
+    // fontSize: '18px'
   },
   paper: {
     margin: theme.spacing(0, 4),

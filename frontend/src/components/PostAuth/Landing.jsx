@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase } from '@material-ui/core';
+import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid } from '@material-ui/core';
 import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import Routes from './Routes';
@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme) => ({
 
 const drawerItems = [
   {
-    name: 'Home',
+    name: 'Feed',
     icon: <Home />
   },
   {
@@ -132,7 +132,7 @@ export default function ClippedDrawer() {
 
   const { dark, toggleTheme } = React.useContext(ThemeContext)
 
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
 
   const toggleDrawer = () => setOpen(!open)
 
@@ -184,16 +184,16 @@ export default function ClippedDrawer() {
       <Drawer
         className={
           clsx(classes.drawer, {
-              [classes.drawerOpen]: open,
-              [classes.drawerClose]: !open,
-      })}
-      classes={{
+            [classes.drawerOpen]: open,
+            [classes.drawerClose]: !open,
+          })}
+        classes={{
           paper: clsx({
-              [classes.drawerOpen]: open,
-              [classes.drawerClose]: !open,
+            [classes.drawerOpen]: open,
+            [classes.drawerClose]: !open,
           }),
-      }}
-      variant="permanent"
+        }}
+        variant="permanent"
       >
         <Toolbar />
         <div className={classes.drawerContainer}>
@@ -211,7 +211,11 @@ export default function ClippedDrawer() {
       </Drawer>
       <main className={classes.content}>
         <Toolbar />
-        <Routes />
+        <Grid container spacing={1} direction="row">
+          <Grid item xs={12} md={8}>
+            <Routes />
+          </Grid>
+        </Grid>
       </main>
     </div>
   );

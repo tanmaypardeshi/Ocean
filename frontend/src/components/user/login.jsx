@@ -14,7 +14,7 @@ import { setUserTokenCookie } from '../../cookie/cookie';
 const useStyles = makeStyles((theme) => ({
   root: {
     height: '100vh',
-    fontSize: '18px'
+    // fontSize: '18px'
   },
   paper: {
     padding: theme.spacing(0, 4),
