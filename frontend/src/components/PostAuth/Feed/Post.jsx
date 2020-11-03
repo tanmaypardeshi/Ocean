@@ -1,89 +1,51 @@
-import React, { useState } from 'react'
-import { makeStyles } from '@material-ui/styles'
-import { Typography, Card, CardHeader, IconButton, Avatar, CardContent,
-          CardActions, Collapse } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { blue } from '@material-ui/core/colors'
-import clsx from 'clsx';
-
+import React from 'react'
+import { Typography, Card, CardHeader, Avatar, CardContent, makeStyles, CardActionArea } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        marginTop : '2%'
-    },
-    avatar : {
-        height:'70px',
-        width:'70px',
-        backgroundColor: blue[600]
-    },
-    expand: {
-        transform: 'rotate(0deg)',
-        marginLeft: 'auto',
-        transition: theme.transitions.create('transform', {
-        duration: theme.transitions.duration.shortest,
-        }),
-    },
-    expandOpen: {
-        transform: 'rotate(180deg)',
-    },
-    progress: {
-        marginLeft: '50%'
-    }
+  root: {
+    padding: theme.spacing(2),
+    boxShadow: 'none'
+  }
 }))
 
-const Post = ({data}) => {
-    const classes=useStyles();
-    const [expanded, setExpanded] = useState(false);
+const Post = ({ data }) => {
 
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
+  const navigate = location => {
+    const locarr = location.pathname.split('/')
+    locarr.pop()
+    locarr.push(data.id)
+    return locarr.join('/')
+  }
 
-    return (
-        <Card className={classes.root} key={data.id}>
+  return (
+    <Card key={data.id} className={useStyles().root}>
+      <CardActionArea component={Link} to={navigate}>
         <CardHeader
-          avatar= {<Avatar aria-label="name" className={classes.avatar}>
-              {<Typography variant="h4">
-                {data.is_anonymous ? 'AU' : data.first_name.charAt(0)}{data.last_name.charAt(0)}
-              </Typography>}
-            </Avatar>}
-          title={<Typography variant="h4">{data.first_name} {data.last_name}</Typography>}
-          subheader={<Typography color="textSecondary" variant="h5">{new Date(data.published_at).toLocaleString()}</Typography>}
+          avatar={
+            <Avatar>
+              {data.is_anonymous ? 'AU' : data.first_name.charAt(0)}{data.last_name.charAt(0)}
+            </Avatar>
+          }
+          title={data.first_name + " " + data.last_name}
+          subheader={new Date(data.published_at).toLocaleString()}
         />
         <CardContent>
-          <Typography variant="h4">{data.title}</Typography><br></br>
-          <Typography paragraph>
+          <Typography variant="h6">{data.title}</Typography><br />
+          {/* <Typography paragraph>
             {data.description.split(" ").slice(0,50).join(" ") + '....'}
-          </Typography>
-          <Typography paragraph color="primary" variant="h6">
-            {data.tags.map(tag => {
-              return (
-                <span>{`#${tag} `}</span>
+          </Typography> */}
+          <Typography paragraph color="primary" variant="body2">
+            {
+              data.tags.map((tag, index) =>
+                <span key={index}> #{tag}</span>
               )
-            })}
-            </Typography>    
+            }
+          </Typography>
         </CardContent>
-        <CardActions disableSpacing>
-          <IconButton
-            className={clsx(classes.expand, {
-              [classes.expandOpen]: expanded,
-            })}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMoreIcon />
-          </IconButton>
-        </CardActions>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography paragraph>
-              {data.description}
-            </Typography>                
-          </CardContent>
-        </Collapse>
-      </Card>
-    )
+      </CardActionArea>
+    </Card>
+  )
 }
 
 export default Post;

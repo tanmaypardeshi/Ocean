@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid } from '@material-ui/core';
 import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import Routes from './Routes';
 import clsx from 'clsx'
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 const drawerWidth = 300;
 
@@ -128,6 +128,8 @@ export default function ClippedDrawer() {
 
   const classes = useStyles();
 
+  const location = useLocation();
+
   const history = useHistory();
 
   const { dark, toggleTheme } = React.useContext(ThemeContext)
@@ -140,6 +142,7 @@ export default function ClippedDrawer() {
     document.cookie = "usertoken=; path=/;";
     history.push('/');
   }
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -197,11 +200,15 @@ export default function ClippedDrawer() {
       >
         <Toolbar />
         <div className={classes.drawerContainer}>
-          <List className={classes.list}>
+          <List>
             {
               drawerItems.map((item, index) =>
-                <ListItem key={index}>
-                  <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItem 
+                  key={index} 
+                  selected={location.pathname.includes(item.name.toLowerCase())}
+                  button
+                >
+                  <ListItemIcon className={classes.list}>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.name} />
                 </ListItem>
               )

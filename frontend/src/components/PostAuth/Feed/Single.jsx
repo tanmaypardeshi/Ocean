@@ -133,6 +133,7 @@ const Single = () => {
     }, [])
 
     return (
+      data.description && 
        <Container className={classes.root}>
            <div>
              {comments}
