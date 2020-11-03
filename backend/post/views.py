@@ -18,8 +18,8 @@ from .serializers import CommentSerializer
 from .similar import top_similar
 from .recommendation import recommendation_system
 
-
 from .summariser import create_summary
+
 
 # file = os.getcwd() + '/post/populate.txt'
 #
@@ -416,6 +416,8 @@ class MyLikes(generics.ListAPIView):
                 objects['post_id'] = like.post.pk
                 objects['post_title'] = like.post.title
                 objects['author'] = f"{like.post.user.first_name} {like.post.user.last_name}"
+                objects['is_liked'] = True
+                objects['is_anonymous'] = like.post.is_anonymous
                 like_list.append(objects)
                 objects = {}
             paginator = Paginator(like_list, 10)
@@ -446,7 +448,10 @@ class MyComments(generics.ListAPIView):
             for comment in comments:
                 objects['post_id'] = comment.post.pk
                 objects['post_title'] = comment.post.title
-                objects['author'] = f"{comment.post.user.first_name} {comment.post.user.last_name}"
+                if comment.post.is_anonymous:
+                    objects['author'] = "Anonymous User"
+                else:
+                    objects['author'] = f"{comment.post.user.first_name} {comment.post.user.last_name}"
                 objects['comment_id'] = comment.pk
                 objects['content'] = comment.content
                 objects['published_at'] = comment.published_at

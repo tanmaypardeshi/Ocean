@@ -4,13 +4,14 @@ import Feed from './Feed/VFeed'
 import Communities from './Communities/Communities'
 import CheerSquad from './CheerSquad/CheerSquad'
 import Single from './Feed/VSingle'
+import Profile from './Profile/Profile'
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default () => 
     <Switch>
         <Route path='/home/feed/:id' component={Single}/>
         <Route exact path='/home/feed' component={Feed}/>
-        {/* <Route path='/home/single' component={Single}/> */}
+        <Route path='/home/profile' component={Profile}/>
         <Route path='/home/communities' component={Communities}/>
         <Route path='/home/cheer' component={CheerSquad}/>
         <Redirect from='/home' to='/home/feed'/>

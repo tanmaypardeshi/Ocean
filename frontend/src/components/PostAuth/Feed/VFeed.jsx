@@ -88,7 +88,7 @@ export default function VFeed() {
                                 }
                                 </Avatar>
                             }
-                            title={post.first_name + post.last_name}
+                            title={post.is_anonymous ? 'Anonymous User' : `${post.first_name} ${post.last_name}`}
                             subheader={new Date(post.published_at).toLocaleString()}
                         />
                         <CardContent>
