@@ -1,6 +1,6 @@
 import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
-import Feed from './Feed/VFeed'
+import Feed from './Feed/Feed'
 import Communities from './Communities/Communities'
 import CheerSquad from './CheerSquad/CheerSquad'
 import Single from './Feed/Single'

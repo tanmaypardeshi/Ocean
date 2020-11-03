@@ -13,9 +13,6 @@ import { useSnackbar } from 'notistack';
 import {getCookie} from '../../../cookie/cookie';
 
 const useStyles = makeStyles(theme => ({
-  container : {
-    overflowY: 'scroll'
-  },
   root: {
     marginBottom : '2%'
   },
@@ -137,7 +134,7 @@ export default function Feed() {
     }, [])
   
     return(
-      <Container className={classes.container}>
+      <Container>
         {
           posts.map(post => {
             return (
