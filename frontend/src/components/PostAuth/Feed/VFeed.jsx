@@ -2,19 +2,46 @@ import React, { useState, useEffect } from 'react'
 import { useSnackbar } from 'notistack'
 import { getCookie } from '../../../cookie/cookie'
 import Axios from 'axios'
-import { Grid, Card, CardHeader, Avatar, CardContent, Typography, CardActions, IconButton, CardMedia, CircularProgress, CardActionArea } from '@material-ui/core'
+import { Grid, Card, CardHeader, Avatar, CardContent, Typography, CardActions, 
+    IconButton, CardMedia, CircularProgress, CardActionArea, makeStyles } from '@material-ui/core'
+import { Skeleton, SpeedDial, SpeedDialAction } from '@material-ui/lab'
 import { ThumbUpAlt } from '@material-ui/icons'
+import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
+import CreateIcon from '@material-ui/icons/Create'
+import ChatBubbleIcon from '@material-ui/icons/ChatBubble'
+import FileCopyIcon from '@material-ui/icons/FileCopyOutlined'
 import { blue } from '@material-ui/core/colors'
-import { Skeleton } from '@material-ui/lab'
 import ReactVisibilitySensor from 'react-visibility-sensor'
 import { Link } from 'react-router-dom'
 
+
+const useStyles = makeStyles((theme) => ({
+    speedDial: {
+      position: 'fixed',
+      '&.MuiSpeedDial-directionUp, &.MuiSpeedDial-directionLeft': {
+        bottom: theme.spacing(5),
+        right: theme.spacing(5),
+      },
+      '&.MuiSpeedDial-directionDown, &.MuiSpeedDial-directionRight': {
+        top: theme.spacing(5),
+        left: theme.spacing(5),
+      },
+    },
+  }));
+
 export default function VFeed() {
+    const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar()
+    const [open, setOpen] = useState(false)
     const [cookie, setCookie] = useState(null)
     const [page, setPage] = useState(0)
     const [end, setEnd] = useState(false)
     const [posts, setPosts] = useState([])
+
+    const actions = [
+        { icon: <ChatBubbleIcon />, name: 'Coral' },
+        { icon: <CreateIcon />, name:'New Post' }
+    ];
 
     useEffect(() => {
         setCookie(getCookie("usertoken"))
@@ -69,8 +96,34 @@ export default function VFeed() {
         })
     }
 
+    const handleClose = () => {
+        setOpen(false);
+      };
+    
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
     return(
         <Grid container item spacing={1} direction="column">
+        <SpeedDial
+          color="primary"
+          ariaLabel="Coral Create"
+          className={classes.speedDial}
+          icon={< KeyboardArrowUpIcon/>}
+          onClose={handleClose}
+          onOpen={handleOpen}
+          open={open}
+        >
+          {actions.map((action) => (
+            <SpeedDialAction
+              key={action.name}
+              icon={action.icon}
+              tooltipTitle={action.name}
+              onClick={handleClose}
+            />
+          ))}
+        </SpeedDial>
         {
             !!posts 
             ?
