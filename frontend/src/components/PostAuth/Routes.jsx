@@ -14,5 +14,5 @@ export default () =>
         <Route path='/home/profile' component={Profile}/>
         <Route path='/home/communities' component={Communities}/>
         <Route path='/home/cheer' component={CheerSquad}/>
-        <Redirect from='/home' to='/home/feed'/>
+        <Redirect from='/home' to='/home/feed'/>                                                                                                                                                                                                                                                                                                                                                                          
     </Switch>

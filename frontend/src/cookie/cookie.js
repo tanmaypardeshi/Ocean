@@ -18,9 +18,7 @@ export const getCookie = (cname) => {
 
 export const getDetailsFromCookie = () => {
     var cookie = getCookie("usertoken");
-    if(cookie !== '')
-        return (jwt_decode(cookie).identity.name);
-    return '';
+    return jwt_decode(cookie);
 }
 
 export const setUserTokenCookie = (cvalue) => {

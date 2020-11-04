@@ -98,9 +98,9 @@ export default function VFeed() {
                                 {post.description.split(" ").slice(0, 50).join(" ") + "..."}
                             </Typography>
                             <Typography color="primary">
-                            {post.tags.map((tag, index) => 
-                                <span key={index}> #{tag}</span>
-                            )}
+                                {post.tags.map((tag, index) => 
+                                    <span key={index}> #{tag}</span>
+                                )}
                             </Typography>
                         </CardContent>
                         </CardActionArea>

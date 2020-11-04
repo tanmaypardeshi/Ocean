@@ -136,10 +136,8 @@ class ProfileView(APIView):
     def get(self, request):
         try:
             user = User.objects.get(email=request.user)
-            last_login = str(user.last_login + datetime.timedelta(hours=5.5))
-            date_joined = str(user.date_joined + datetime.timedelta(hours=5.5))
-            last_login = f"{last_login[:10]} {last_login[11:19]}"
-            date_joined = f"{date_joined[:10]} {date_joined[11:19]}"
+            last_login = user.last_login + datetime.timedelta(hours=5.5)
+            date_joined = user.date_joined + datetime.timedelta(hours=5.5)
             status_code = status.HTTP_200_OK
             response = {
                 'success': True,

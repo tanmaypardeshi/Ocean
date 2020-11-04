@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Grid, Typography, Card, CardHeader, IconButton, Avatar, CardContent,
-		CardActions, CardActionArea, Hidden, Button, Tab, Tabs, Paper, makeStyles } from '@material-ui/core';
+		CardActions, CardActionArea, Hidden, Button, Tab, Tabs, Paper, makeStyles, LinearProgress } from '@material-ui/core';
 import { ThumbUpAlt } from '@material-ui/icons'
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import CakeIcon from '@material-ui/icons/Cake';
@@ -10,8 +10,7 @@ import Axios from 'axios';
 import { useSnackbar } from 'notistack';
 import { Link } from 'react-router-dom'
 
-import { getCookie } from '../../../cookie/cookie';
-import { ThemeContext } from '../../../context/useTheme';
+import { getCookie, getDetailsFromCookie } from '../../../cookie/cookie';
 
 
 const useStyles = makeStyles(theme => ({
@@ -46,13 +45,33 @@ export default function Profile() {
     const cookie = getCookie("usertoken");
     const [postpage, setPostPage] = useState(1);
     const [likepage, setLikePage] = useState(1);
-    const [commentpage, setCommentPage] = useState(1);
+		const [commentpage, setCommentPage] = useState(1);
+		
+		const [postloading, setPostLoading] = useState(true);
+		const [commentloading, setCommentLoading] = useState(true);
+		const [likeloading, setLikeLoading] = useState(true);
 
     const [myPosts, setMyPosts] = useState([]);
     const [myLikes, setMyLikes] = useState([]);
     const [myComments, setMyComments] = useState([]);
     
     const [value, setValue] = useState(0);
+
+		const [user, setUser] = useState({
+			"first_name": "",
+			"last_name": "",
+			"email": "",
+			"dob": "",
+			"country": "",
+			"date_joined": "",
+			"last_login": "",
+			"is_moderator": false,
+			"gender": "",
+			"tags": [],
+
+		})
+		const userdata = getDetailsFromCookie();
+		console.log(userdata);
 
 		const toggleLike = ({ currentTarget }) => {
 			const index = currentTarget.id
@@ -80,7 +99,7 @@ export default function Profile() {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
-        if(parseInt(newValue) === 0) {
+        if(parseInt(newValue) === 0) {	
             Axios.get(
                 `http://localhost:8000/api/post/myposts/${postpage}`,
                 {
@@ -91,10 +110,11 @@ export default function Profile() {
                 }
             )
             .then(response => {
-                setMyPosts(response.data.post_list);
+								setMyPosts(response.data.post_list);
+								setPostLoading(false);
             })
             .catch(err => {
-                console.log(err);
+							enqueueSnackbar('Could not fetch posts', {variant: 'error'});
             })
         } else if(parseInt(newValue) === 1) {
             Axios.get(
@@ -107,10 +127,11 @@ export default function Profile() {
                 }
             )
             .then(response => {
-                setMyLikes(response.data.like_list);
+								setMyLikes(response.data.like_list);
+								setLikeLoading(false);
             })
             .catch(err => {
-                console.log(err);
+							enqueueSnackbar('Could not fetch likes', {variant: 'error'});
             })
         } else if(parseInt(newValue) === 2) {
             Axios.get(
@@ -124,10 +145,10 @@ export default function Profile() {
             )
             .then(response => {
                 setMyComments(response.data.comment_list)
-                console.log(response.data.comment_list);
-            })
+								setCommentLoading(false);
+						})
             .catch(err => {
-                console.log(err);
+							enqueueSnackbar('Could not fetch comments', {variant: 'error'});
             })
         } 
     };
@@ -144,10 +165,28 @@ export default function Profile() {
         )
         .then(response => {
 						setMyPosts(response.data.post_list);
+						setPostLoading(false);
         })
         .catch(err => {
-            console.log(err);
-        })
+					enqueueSnackbar('Could not fetch posts', {variant: 'error'});
+				})
+				
+				Axios.get(
+					'http://localhost:8000/api/user/profile/',
+					{
+						headers: {
+							"Content-Type": "application/json",
+							"Authorization": `Bearer ${cookie}`
+						}
+					}
+				)
+				.then(response => {
+					setUser(response.data.data);
+				})
+				.catch(error => {
+					enqueueSnackbar('Could not fetch profile', {variant: 'error'});
+				})
+
      }, [])
     
     return (
@@ -163,24 +202,58 @@ export default function Profile() {
                 />
                 <Hidden smDown>
                     <CardContent>
-                        <Typography display="inline" variant="h4">Tanmay Pardeshi | </Typography>
-                        <Typography display="inline" color="textSecondary" variant="h4"> tanmaypardeshi@gmail.com</Typography>
+                      <Grid container spacing={3}>
+							<Grid item xs={6}>
+								<Typography variant="h6">{user.first_name} {user.last_name}, {user.gender} </Typography>
+								<Typography color="textSecondary" variant="h6"> {user.email} </Typography>
+								{
+									user.is_moderator ? 
+									<>
+									<Typography variant="h6">
+										Moderator for channels:
+									</Typography>												
+									<Typography>
+										{user.tags.map((tag, index) => 
+												<span key={index}> {tag}</span>
+										)}
+									</Typography>
+									</>
+									:
+									<>
+									<Typography variant="h6">
+										Tags followed:																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
+									</Typography>
+									<Typography color="primary">
+										{user.tags.map((tag, index) => 
+											<span key={index}> #{tag}</span>
+										)}
+										</Typography>
+									</>
+								}												
+							</Grid>
+							<Grid item xs={6}>
+								<Typography variant="h6"> Date joined : {new Date(user.date_joined).toLocaleString()} </Typography>	
+								<Typography variant="h6"> Last Login : {new Date(user.last_login).toLocaleString()} </Typography>	
+							</Grid>
+						</Grid>																					
                     </CardContent>
                 </Hidden>
                 <Hidden smUp>
                     <CardContent>
-                        <Typography variant="h6">Tanmay Pardeshi</Typography>
-                        <Typography color="textSecondary" variant="h6"> tanmaypardeshi@gmail.com</Typography>
+						<Typography variant="h6">{user.first_name} {user.last_name}, {user.gender} </Typography>
+						<Typography color="textSecondary" variant="h6"> {user.email} </Typography>
+						<Typography variant="body1"> Date joined : {new Date(user.date_joined).toLocaleString()} </Typography>	
+						<Typography variant="body1"> Last Login : {new Date(user.last_login).toLocaleString()} </Typography>											
                     </CardContent>
                 </Hidden>
                 <IconButton style={{paddingTop:'0%'}}>
-                    <LocationOnIcon/>
-                    India
+                    <LocationOnIcon/>&nbsp;
+                    <Typography variant="body1">{user.country}</Typography>
                 </IconButton>
                 <br/>
                 <IconButton style={{paddingTop:'0%'}}>
-                    <CakeIcon/>
-                    7th March 2020
+                    <CakeIcon/>&nbsp;
+                    <Typography variant="body1">{user.dob}</Typography>
                 </IconButton>
             </Card>
             <Paper square>
@@ -199,7 +272,10 @@ export default function Profile() {
                 {
                     parseInt(value) === 0 ? 
                     <>
-											{
+										{
+											postloading ?
+											<LinearProgress style={{width: '100%'}}/>
+											:											
 												myPosts.map((post,index) => {
 													return(
 														<Grid item key={index}>
@@ -220,7 +296,7 @@ export default function Profile() {
 																		/>
 																		<CardContent>
 																				<Typography variant="h6">{post.title}</Typography>
-																				<br/>
+																				<Typography paragraph variant="body1">{ post.is_anonymous ? '(Posted Anonymously)' : '(Not Posted Anonymously)'}</Typography>	
 																				<Typography paragraph variant="body2">
 																						{post.description.split(" ").slice(0, 50).join(" ") + "..."}
 																				</Typography>
@@ -229,7 +305,7 @@ export default function Profile() {
 																						<span key={index}> #{tag}</span>
 																				)}
 																				</Typography>
-																				<Typography paragraph variant="body2">{ post.is_anonymous ? 'Posted Anonymously' : 'Not an anonymous post'}</Typography>		
+																				
 																		</CardContent>
 																		</CardActionArea>
 																		<CardActions>
@@ -250,6 +326,9 @@ export default function Profile() {
                     parseInt(value) === 1 ?
 										<>
 											{
+												likeloading ?
+													<LinearProgress style={{width: '100%'}}/>
+												:			
 												myLikes.map((like,index) => {
 													return(
 														<Grid item key={index}>
@@ -265,7 +344,7 @@ export default function Profile() {
 																						}
 																						</Avatar>
 																				}
-																				title={like.author}
+																				title={like.is_anonymous ? 'Anonymous User' : like.author}
 																		/>
 																		<CardContent>
 																				<Typography variant="h6">Post Title: {like.post_title}</Typography>
@@ -281,6 +360,9 @@ export default function Profile() {
 										parseInt(value) === 2 ?
 										<>
 										{
+											commentloading ?
+												<LinearProgress style={{width: '100%'}}/>
+											:	
 											myComments.map((comment,index) => {
 												return(
 													<Grid item key={index}>
@@ -294,16 +376,17 @@ export default function Profile() {
 																					}
 																					</Avatar>
 																			}
-																			title={`Post Author : ${comment.author}`}
+																			title={<Typography variant="h6">{`Post Author : ${comment.author}`}</Typography>}
 																	/>
 																	<CardContent>
 																				<Typography variant="h6">{`Post title : ${comment.post_title}`}</Typography>
 																				<br/>
-																				<Typography paragraph variant="body2">
+																				<Typography paragraph variant="body1">
 																						{`Comment : ${comment.content}`}
 																				</Typography>
-																				<Typography paragraph variant="body2">{` Commented at: ${new Date(comment.published_at).toLocaleString()}`}</Typography>		
-																				<Typography paragraph variant="body2">{ comment.is_anonymous ? 'Commented Anonymously' : 'Not an anonymous comment'}</Typography>																	
+																				<Typography paragraph variant="body1">{ comment.is_anonymous ? '(Commented Anonymously)' : '(Not Commented Anonymously)'}</Typography>																	
+																				<Typography paragraph variant="body1">{` Commented at: ${new Date(comment.published_at).toLocaleString()}`}</Typography>		
+																				
 																		</CardContent>
 																	</CardActionArea>
 															</Card>
