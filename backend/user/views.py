@@ -169,7 +169,7 @@ class ProfileView(APIView):
 
     def patch(self, request):
         serializer = EditSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.update(User.objects.get(email=request.user), request.data)
             response = {
                 'success': True,

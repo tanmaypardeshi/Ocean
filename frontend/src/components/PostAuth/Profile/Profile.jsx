@@ -11,6 +11,7 @@ import { useSnackbar } from 'notistack';
 import { Link } from 'react-router-dom'
 
 import { getCookie, getDetailsFromCookie } from '../../../cookie/cookie';
+import Edit from './Edit'
 
 
 const useStyles = makeStyles(theme => ({
@@ -42,7 +43,8 @@ const useStyles = makeStyles(theme => ({
 export default function Profile() {
 		const classes = useStyles();
 		const { enqueueSnackbar } = useSnackbar()
-    const cookie = getCookie("usertoken");
+		const cookie = getCookie("usertoken");
+		const [edit, setEdit] = useState(false);
     const [postpage, setPostPage] = useState(1);
     const [likepage, setLikePage] = useState(1);
 		const [commentpage, setCommentPage] = useState(1);
@@ -62,6 +64,7 @@ export default function Profile() {
 			"last_name": "",
 			"email": "",
 			"dob": "",
+			"age" : "",
 			"country": "",
 			"date_joined": "",
 			"last_login": "",
@@ -71,8 +74,7 @@ export default function Profile() {
 
 		})
 		const userdata = getDetailsFromCookie();
-		console.log(userdata);
-
+	
 		const toggleLike = ({ currentTarget }) => {
 			const index = currentTarget.id
 			const action = myPosts[index].is_liked ? 'unlike' : 'like'
@@ -97,102 +99,109 @@ export default function Profile() {
 			})
 	}
 
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-        if(parseInt(newValue) === 0) {	
-            Axios.get(
-                `http://localhost:8000/api/post/myposts/${postpage}`,
-                {
-                    headers : {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${cookie}`
-                    }
-                }
-            )
-            .then(response => {
-								setMyPosts(response.data.post_list);
-								setPostLoading(false);
-            })
-            .catch(err => {
-							enqueueSnackbar('Could not fetch posts', {variant: 'error'});
-            })
-        } else if(parseInt(newValue) === 1) {
-            Axios.get(
-                `http://localhost:8000/api/post/mylikes/${likepage}`,
-                {
-                    headers : {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${cookie}`
-                    }
-                }
-            )
-            .then(response => {
-								setMyLikes(response.data.like_list);
-								setLikeLoading(false);
-            })
-            .catch(err => {
-							enqueueSnackbar('Could not fetch likes', {variant: 'error'});
-            })
-        } else if(parseInt(newValue) === 2) {
-            Axios.get(
-                `http://localhost:8000/api/post/mycomments/${commentpage}`,
-                {
-                    headers : {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${cookie}`
-                    }
-                }
-            )
-            .then(response => {
-                setMyComments(response.data.comment_list)
-								setCommentLoading(false);
-						})
-            .catch(err => {
-							enqueueSnackbar('Could not fetch comments', {variant: 'error'});
-            })
-        } 
-    };
+	const handleChange = (event, newValue) => {
+			setValue(newValue);
+			if(parseInt(newValue) === 0) {	
+					Axios.get(
+							`http://localhost:8000/api/post/myposts/${postpage}`,
+							{
+									headers : {
+											"Content-Type": "application/json",
+											"Authorization": `Bearer ${cookie}`
+									}
+							}
+					)
+					.then(response => {
+							setMyPosts(response.data.post_list);
+							setPostLoading(false);
+					})
+					.catch(err => {
+						enqueueSnackbar('Could not fetch posts', {variant: 'error'});
+					})
+			} else if(parseInt(newValue) === 1) {
+					Axios.get(
+							`http://localhost:8000/api/post/mylikes/${likepage}`,
+							{
+									headers : {
+											"Content-Type": "application/json",
+											"Authorization": `Bearer ${cookie}`
+									}
+							}
+					)
+					.then(response => {
+							setMyLikes(response.data.like_list);
+							setLikeLoading(false);
+					})
+					.catch(err => {
+						enqueueSnackbar('Could not fetch likes', {variant: 'error'});
+					})
+			} else if(parseInt(newValue) === 2) {
+					Axios.get(
+							`http://localhost:8000/api/post/mycomments/${commentpage}`,
+							{
+									headers : {
+											"Content-Type": "application/json",
+											"Authorization": `Bearer ${cookie}`
+									}
+							}
+					)
+					.then(response => {
+							setMyComments(response.data.comment_list)
+							setCommentLoading(false);
+					})
+					.catch(err => {
+						enqueueSnackbar('Could not fetch comments', {variant: 'error'});
+					})
+			} 
+	};
 
-    useEffect(() => {
-        Axios.get(
-            `http://localhost:8000/api/post/myposts/${postpage}`,
-            {
-                headers : {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${cookie}`
-                }
-            }
-        )
-        .then(response => {
-						setMyPosts(response.data.post_list);
-						setPostLoading(false);
-        })
-        .catch(err => {
-					enqueueSnackbar('Could not fetch posts', {variant: 'error'});
-				})
-				
-				Axios.get(
-					'http://localhost:8000/api/user/profile/',
-					{
-						headers: {
-							"Content-Type": "application/json",
-							"Authorization": `Bearer ${cookie}`
+	const handleEdit = () => {
+		setEdit(!edit);
+	}
+
+
+	useEffect(() => {
+		Axios.get(
+				`http://localhost:8000/api/post/myposts/${postpage}`,
+				{
+						headers : {
+								"Content-Type": "application/json",
+								"Authorization": `Bearer ${cookie}`
 						}
-					}
-				)
-				.then(response => {
-					setUser(response.data.data);
-				})
-				.catch(error => {
-					enqueueSnackbar('Could not fetch profile', {variant: 'error'});
-				})
+				}
+		)
+		.then(response => {
+				setMyPosts(response.data.post_list);
+				setPostLoading(false);
+		})
+		.catch(err => {
+			enqueueSnackbar('Could not fetch posts', {variant: 'error'});
+		})
+		
+		Axios.get(
+			'http://localhost:8000/api/user/profile/',
+			{
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${cookie}`
+				}
+			}
+		)
+		.then(response => {
+			setUser(response.data.data);
+		})
+		.catch(error => {
+			enqueueSnackbar('Could not fetch profile', {variant: 'error'});
+		})
 
-     }, [])
+	}, [])
     
     return (
         <>
             <Card className={classes.root}>
-                <Button className={classes.button}>EDIT PROFILE</Button>
+                <Button className={classes.button} onClick={handleEdit}>EDIT PROFILE</Button>
+								<Edit first_name={user.first_name} last_name={user.last_name} 
+									dob={user.dob} gender={user.gender} country={user.country} toggle={handleEdit} edit={edit} />
                 <CardHeader
                     avatar={
                     <Avatar aria-label="recipe"className={classes.avatar}>
@@ -203,49 +212,49 @@ export default function Profile() {
                 <Hidden smDown>
                     <CardContent>
                       <Grid container spacing={3}>
-							<Grid item xs={6}>
-								<Typography variant="h6">{user.first_name} {user.last_name}, {user.gender} </Typography>
+												<Grid item xs={6}>
+													<Typography variant="h6">{user.first_name} {user.last_name}, {user.gender}, {user.age} </Typography>
+													<Typography color="textSecondary" variant="h6"> {user.email} </Typography>
+													{
+														user.is_moderator ? 
+														<>
+														<Typography variant="h6">
+															Moderator for channels:
+														</Typography>												
+														<Typography>
+															{user.tags.map((tag, index) => 
+																	<span key={index}> {tag}</span>
+															)}
+														</Typography>
+														</>
+														:
+														<>
+														<Typography variant="h6">
+															Tags followed:																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
+														</Typography>
+														<Typography color="primary">
+															{user.tags.map((tag, index) => 
+																<span key={index}> #{tag}</span>
+															)}
+															</Typography>
+														</>
+													}												
+										</Grid>
+										<Grid item xs={6}>
+											<Typography variant="body1" align="right" style={{marginRight: '8%'}}> Date joined : {new Date(user.date_joined).toLocaleString()} </Typography>	
+											<Typography variant="body1" align="right" style={{marginRight: '8%'}}> Last Login : {new Date(user.last_login).toLocaleString()} </Typography>	
+										</Grid>
+								</Grid>																					
+							</CardContent>
+						</Hidden>
+						<Hidden smUp>
+							<CardContent>
+								<Typography variant="h6">{user.first_name} {user.last_name}, {user.gender}, {user.age} </Typography>
 								<Typography color="textSecondary" variant="h6"> {user.email} </Typography>
-								{
-									user.is_moderator ? 
-									<>
-									<Typography variant="h6">
-										Moderator for channels:
-									</Typography>												
-									<Typography>
-										{user.tags.map((tag, index) => 
-												<span key={index}> {tag}</span>
-										)}
-									</Typography>
-									</>
-									:
-									<>
-									<Typography variant="h6">
-										Tags followed:																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
-									</Typography>
-									<Typography color="primary">
-										{user.tags.map((tag, index) => 
-											<span key={index}> #{tag}</span>
-										)}
-										</Typography>
-									</>
-								}												
-							</Grid>
-							<Grid item xs={6}>
-								<Typography variant="h6"> Date joined : {new Date(user.date_joined).toLocaleString()} </Typography>	
-								<Typography variant="h6"> Last Login : {new Date(user.last_login).toLocaleString()} </Typography>	
-							</Grid>
-						</Grid>																					
-                    </CardContent>
-                </Hidden>
-                <Hidden smUp>
-                    <CardContent>
-						<Typography variant="h6">{user.first_name} {user.last_name}, {user.gender} </Typography>
-						<Typography color="textSecondary" variant="h6"> {user.email} </Typography>
-						<Typography variant="body1"> Date joined : {new Date(user.date_joined).toLocaleString()} </Typography>	
-						<Typography variant="body1"> Last Login : {new Date(user.last_login).toLocaleString()} </Typography>											
-                    </CardContent>
-                </Hidden>
+								<Typography variant="body1"> Date joined : {new Date(user.date_joined).toLocaleString()} </Typography>	
+								<Typography variant="body1"> Last Login : {new Date(user.last_login).toLocaleString()} </Typography>											
+							</CardContent>
+						</Hidden>
                 <IconButton style={{paddingTop:'0%'}}>
                     <LocationOnIcon/>&nbsp;
                     <Typography variant="body1">{user.country}</Typography>

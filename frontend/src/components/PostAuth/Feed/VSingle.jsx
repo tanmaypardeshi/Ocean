@@ -71,7 +71,6 @@ export default function Single() {
             )
         })
         .then(res => {
-            console.log(res.data)
             setComments(res.data)
             setLoading(false)
         })
