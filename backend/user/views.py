@@ -31,7 +31,10 @@ class UserView(APIView):
                 tag_list = tag.split(' ')
                 query_list = []
                 for tag_name in tag_list:
-                    query_list.append(Tag.objects.get(tag_name=tag_name))
+                    try:
+                        query_list.append(Tag.objects.get(tag_name=tag_name))
+                    except Tag.DoesNotExist:
+                        pass
                 for queryset in query_list:
                     user.user_tag.add(queryset)
             user.save()

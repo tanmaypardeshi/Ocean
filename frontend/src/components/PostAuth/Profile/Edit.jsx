@@ -6,7 +6,6 @@ import countries from '../../user/countries.json'
 import { makeStyles } from '@material-ui/styles'
 import Axios from 'axios';
 import { useSnackbar } from 'notistack';
-import { useHistory } from 'react-router-dom'
 import { getCookie } from '../../../cookie/cookie'
 
 const useStyles = makeStyles(theme => ({
@@ -20,11 +19,10 @@ const useStyles = makeStyles(theme => ({
 	}
 }))
 
-const Edit = ({ user, toggle, edit }) => {
+const Edit = ({ user, setUser, toggle, edit }) => {
 
 
 	const classes = useStyles();
-	const history = useHistory();
 	const cookie = getCookie("usertoken");
 	const { enqueueSnackbar } = useSnackbar();
 	const [details, setDetails] = useState({
@@ -78,7 +76,6 @@ const Edit = ({ user, toggle, edit }) => {
 			}
 			return detail_tags;
 		});
-		console.log(detail_tags);
 		Axios.patch(
 			"http://localhost:8000/api/user/profile/",
 			{
@@ -87,7 +84,7 @@ const Edit = ({ user, toggle, edit }) => {
 				"dob": details.dob,
 				"gender": details.gender,
 				"country": details.country,
-				"tags": detail_tags.substring(0, detail_tags.length - 1)
+				"tags": detail_tags
 			},
 			{
 				headers:
@@ -97,13 +94,20 @@ const Edit = ({ user, toggle, edit }) => {
 				}
 			}
 		)
-			.then(res => {
-				enqueueSnackbar('Edited successfully!', { variant: 'success' });
-				history.push('/home/profile');
+		.then(res => {
+			enqueueSnackbar('Edited successfully!', { variant: 'success' });
+			setUser({...user,
+				"first_name": details.first_name,
+				"last_name" : details.last_name,
+				"dob": details.dob,
+				"gender": details.gender,
+				"country": details.country,
+				"tags": detail_tags.trim.split(' ')
 			})
-			.catch(err => {
-				enqueueSnackbar(err.message, { variant: 'error' });
-			})
+		})
+		.catch(err => {
+			enqueueSnackbar(err.message, { variant: 'error' });
+		})
 
 		toggle();
 
