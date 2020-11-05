@@ -2,13 +2,6 @@ import React from 'react'
 import { Typography, Card, CardHeader, Avatar, CardContent, makeStyles, CardActionArea } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: theme.spacing(2),
-    boxShadow: 'none'
-  }
-}))
-
 const Post = ({ data }) => {
 
   const navigate = location => {
@@ -19,7 +12,7 @@ const Post = ({ data }) => {
   }
 
   return (
-    <Card key={data.id} className={useStyles().root}>
+    <Card key={data.id}>
       <CardActionArea component={Link} to={navigate}>
         <CardHeader
           avatar={

@@ -1,10 +1,15 @@
 import React, { useEffect } from 'react';
 import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid } from '@material-ui/core';
-import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp } from '@material-ui/icons';
+import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp, Delete } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import Routes from './Routes';
 import clsx from 'clsx'
 import { useHistory, useLocation } from 'react-router-dom';
+import { addResponseMessage, Widget, addUserMessage, markAllAsRead } from 'react-chat-widget';
+import 'react-chat-widget/lib/styles.css'
+import Axios from 'axios';
+import { getCookie } from '../../cookie/cookie';
+import { useSnackbar } from 'notistack';
 
 const drawerWidth = 300;
 
@@ -117,10 +122,6 @@ const drawerItems = [
   {
     name: 'Cheer Squad',
     icon: <Whatshot />
-  },
-  {
-    name: 'More',
-    icon: <MoreHoriz />
   }
 ]
 
@@ -134,6 +135,8 @@ export default function ClippedDrawer() {
 
   const { dark, toggleTheme } = React.useContext(ThemeContext)
 
+  const { enqueueSnackbar } = useSnackbar()
+
   const [open, setOpen] = React.useState(true);
 
   const toggleDrawer = () => setOpen(!open)
@@ -141,6 +144,52 @@ export default function ClippedDrawer() {
   const handleLogout = () => {
     document.cookie = "usertoken=; path=/;";
     history.push('/');
+  }
+
+  useEffect(() => {
+    Axios.get(`http://localhost:8000/api/coral/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getCookie("usertoken")}`
+      }
+    })
+    .then(res => {
+      res.data.chats.reverse().forEach(obj => {
+        if (obj.user._id === 1)
+          addUserMessage(obj.text)
+        else
+          addResponseMessage(obj.text)
+      })
+      markAllAsRead()
+    })
+    .catch(error => {
+      enqueueSnackbar('Could not fetch chats', {variant: 'error'});
+    })
+
+  },[])
+
+  const handleNewUserMessage = newMessage => {
+    // addResponseMessage('Whatever')
+    Axios.post(
+      `http://localhost:8000/api/coral/`,
+      {
+        "createdAt": new Date().toISOString(),
+        "text": newMessage,
+        "user": { "_id": 1 }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getCookie("usertoken")}`
+        }
+      }
+    )
+    .then(res => {
+      addResponseMessage(res.data.text)
+    })
+    .catch(err => {
+      addResponseMessage(err.message)
+    })
   }
 
   return (
@@ -205,7 +254,8 @@ export default function ClippedDrawer() {
               drawerItems.map((item, index) =>
                 <ListItem 
                   key={index} 
-                  selected={location.pathname.includes(item.name.toLowerCase())}
+                  selected={location.pathname.includes(item.name.split(" ")[0].toLowerCase())}
+                  onClick={() => history.push(`/home/${item.name.split(" ")[0].toLowerCase()}`)}
                   button
                 >
                   <ListItemIcon className={classes.list}>{item.icon}</ListItemIcon>
@@ -219,11 +269,15 @@ export default function ClippedDrawer() {
       <main className={classes.content}>
         <Toolbar />
         <Grid container spacing={1} direction="row">
-          <Grid item xs={12} md={8}>
             <Routes />
-          </Grid>
         </Grid>
       </main>
+      <Widget
+        handleNewUserMessage={handleNewUserMessage}
+        title='Coral'
+        subtitle='Your companion for your journey through Ocean'
+        showTimeStamp={false}
+      />
     </div>
   );
 }

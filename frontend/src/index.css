@@ -11,3 +11,53 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.rcw-conversation-container .rcw-header {
+  background-color: #212121 !important;
+}
+
+.rcw-conversation-container {
+  box-shadow: none !important;
+}
+
+.rcw-messages-container {
+  background-color: #424242 !important;
+}
+
+.rcw-client .rcw-message-text {
+  background-color: #212121 !important;
+  color:#fafafa !important;
+}
+
+.rcw-response .rcw-message-text {
+  background-color: #1778F2 !important;
+  color: #fafafa !important;
+}
+
+.rcw-sender {
+  background-color: #636363 !important;
+}
+
+.rcw-new-message {
+  background-color: #636363 !important;
+  color: #fafafa !important;
+}
+
+.rcw-new-message::-webkit-input-placeholder {
+  color: #fafafa !important;
+}
+
+.rcw-send {
+  background-color: #636363 !important;
+}
+
+.rcw-launcher {
+  background-color: #1778F2 !important;
+  box-shadow: none !important;
+}
+
+/* .quick-buttons-container {
+  background-color: #424242 !important;
+  display: flex;
+} */
