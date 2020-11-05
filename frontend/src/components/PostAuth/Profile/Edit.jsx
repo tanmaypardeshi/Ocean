@@ -107,7 +107,7 @@ const Edit = ({ user, setUser, toggle, edit }) => {
 		})
 		.catch(err => {
 			
-			alert(err.message, { variant: 'error' });
+			enqueueSnackbar(err.message, { variant: 'error' });
 		})
 
 		toggle();
