@@ -12,7 +12,7 @@ export default () =>
         <Route path='/home/feed/:id' component={Single}/>
         <Route exact path='/home/feed' component={Feed}/>
         <Route path='/home/profile' component={Profile}/>
-        <Route path='/home/communities' component={Communities}/>
+        <Route path='/home/communities/:tag' component={Communities}/>
         <Route path='/home/cheer' component={CheerSquad}/>
         <Redirect from='/home' to='/home/feed'/>                                                                                                                                                                                                                                                                                                                                                                          
     </Switch>

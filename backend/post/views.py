@@ -94,8 +94,11 @@ class NewEditPostView(generics.GenericAPIView):
             tag_list = tag.split(' ')
             queryset_list = []
             for tag_name in tag_list:
-                tag = Tag.objects.get(tag_name=tag_name)
-                queryset_list.append(tag)
+                try:
+                    tag = Tag.objects.get(tag_name=tag_name)
+                    queryset_list.append(tag)
+                except Tag.DoesNotExist:
+                    pass
             summary = create_summary(request.data['description'])
             post = Post.objects.create(user=request.user,
                                        title=request.data['title'],
@@ -130,8 +133,11 @@ class NewEditPostView(generics.GenericAPIView):
                 tag_list = tag.split(' ')
                 queryset_list = []
                 for tag_name in tag_list:
-                    tag = Tag.objects.get(tag_name=tag_name)
-                    queryset_list.append(tag)
+                    try:
+                        tag = Tag.objects.get(tag_name=tag_name)
+                        queryset_list.append(tag)
+                    except Tag.DoesNotExist:
+                        pass
                 post.title = new_title
                 post.description = new_description
                 post.is_anonymous = is_anonymous
