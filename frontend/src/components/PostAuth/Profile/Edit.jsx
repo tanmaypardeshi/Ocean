@@ -102,11 +102,12 @@ const Edit = ({ user, setUser, toggle, edit }) => {
 				"dob": details.dob,
 				"gender": details.gender,
 				"country": details.country,
-				"tags": detail_tags.trim.split(' ')
+				"tags": detail_tags.split(' ')
 			})
 		})
 		.catch(err => {
-			enqueueSnackbar(err.message, { variant: 'error' });
+			
+			alert(err.message, { variant: 'error' });
 		})
 
 		toggle();
