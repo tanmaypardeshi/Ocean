@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react'
 import { useSnackbar } from 'notistack'
 import { getCookie } from '../../../cookie/cookie'
 import Axios from 'axios'
-import { Grid, Card, CardHeader, Avatar, CardContent, Typography, CardActions, 
-    IconButton, CardMedia, CircularProgress, CardActionArea, makeStyles } from '@material-ui/core'
+import { Grid, Card, CardHeader, Avatar, CardContent, Typography, CardActions, Paper,
+        IconButton, CardMedia, CircularProgress, CardActionArea, makeStyles, Hidden,
+        Toolbar, Drawer } from '@material-ui/core'
 import { Skeleton, SpeedDial, SpeedDialAction } from '@material-ui/lab'
 import { ThumbUpAlt } from '@material-ui/icons'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import CreateIcon from '@material-ui/icons/Create'
+import DeleteIcon from '@material-ui/icons/Delete'
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble'
-import FileCopyIcon from '@material-ui/icons/FileCopyOutlined'
 import { blue } from '@material-ui/core/colors'
 import ReactVisibilitySensor from 'react-visibility-sensor'
 import { Link, useParams } from 'react-router-dom'
+import Moderate from './Moderate';
 
 const useStyles = makeStyles((theme) => ({
   speedDial: {
@@ -26,6 +28,20 @@ const useStyles = makeStyles((theme) => ({
       left: theme.spacing(5),
     },
   },
+  drawer: {
+    width: 400,
+    flexShrink: 0
+  },
+  drawerPaper: {
+      width: 400
+  },
+  drawerContainer: {
+      overflow: 'none'
+  },
+  container: {
+      flexGrow: 1,
+      padding: theme.spacing(3)
+  }
 }));
 
 
@@ -37,6 +53,8 @@ export default function Communities() {
   const [page, setPage] = useState(0)
   const [end, setEnd] = useState(false)
   const [posts, setPosts] = useState([])
+  const [moderators, setModerators] = useState([])
+  const [deletepost, setDelete] = useState(false);
 
   const actions = [
       { icon: <ChatBubbleIcon />, name: 'Coral' },
@@ -45,8 +63,7 @@ export default function Communities() {
 
   const { tag } = useParams();
 
-  console.log(tag);
-
+ 
   useEffect(() => {
       setCookie(getCookie("usertoken"))
   },[])
@@ -56,6 +73,28 @@ export default function Communities() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[cookie])
 
+  useEffect(() => {
+    getMods()
+  }, [cookie])
+
+
+  const getMods = () => {
+    Axios.get(
+      `http://localhost:8000/api/user/getmoderators/${tag}/`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookie}`
+        }
+      }
+    )
+    .then(response => {
+      setModerators(response.data.moderators);
+    })
+    .catch(error => {
+      alert(error.message);
+    })
+  }
   const getPosts = (page) => {
       if (cookie) {
           Axios.get(
@@ -100,6 +139,18 @@ export default function Communities() {
       })
   }
 
+  const handleChange = () => {
+
+  }
+
+  const handleModerator = () => {
+
+  }
+
+  const handleDelete = () => {
+    setDelete(!deletepost);
+  }
+
   const handleClose = () => {
       setOpen(false);
     };
@@ -110,6 +161,34 @@ export default function Communities() {
 
   return(
       <Grid container item spacing={1} direction="column">
+      <Hidden mdDown>
+        <Drawer
+            className={classes.drawer}
+            variant="permanent"
+            classes={{
+                paper: classes.drawerPaper
+            }}
+            anchor="right"
+        >
+            <Toolbar/>
+            <Typography variant="h5" style={{margin: '4% 3% 0% 3%'}}>
+              Moderators for this channel
+            </Typography>
+            {
+              moderators.map((moderator, index) => 
+                <Paper elevation={3} key={index} style={{margin:'3% 4% 3% 4%', padding:'3%'}}>
+                  <Typography variant="body1">
+                    Moderator Name: {moderator.first_name} {moderator.last_name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Moderator Email: {moderator.email}
+                  </Typography>
+                </Paper>
+              )
+            }
+            
+        </Drawer>
+      </Hidden>
       <SpeedDial
         color="primary"
         ariaLabel="Coral Create"
@@ -168,6 +247,10 @@ export default function Communities() {
                                       color: post.is_liked ? blue[600]: 'grey'
                                   }}
                               />
+                          </IconButton>
+                          <IconButton id={index} onClick={handleDelete}>
+                              <DeleteIcon/>
+                              <Moderate id={post.id} deletepost={deletepost} toggle={handleDelete} />
                           </IconButton>
                       </CardActions>
                   </Card>
