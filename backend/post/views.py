@@ -2,6 +2,8 @@ import os
 import pickle
 import pandas as pd
 from operator import itemgetter
+
+from django.core.mail import send_mail
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from rest_framework import generics
@@ -494,6 +496,16 @@ class DeletePost(APIView):
                                   title=post.title, description=post.description, summary=post.summary,
                                   published_at=post.published_at, tags=tags, is_anonymous=post.is_anonymous,
                                   reason=reason)
+            try:
+                send_mail(
+                    f'Your post "{post.title}" was deleted',
+                    f"""Dear {post.user.first_name} {post.user.last_name},\nThe moderators have deleted your post with title {post.title}.\nThe reason to delete this post was the following:\n {reason}.""",
+                    'credenzuser@gmail.com',
+                    [f"{post.user.email}"],
+                    fail_silently=False
+                )
+            except:
+                pass
             post.delete()
             return Response({
                 'status': True,

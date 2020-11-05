@@ -40,10 +40,10 @@ class ChatView(generics.GenericAPIView):
             user = User.objects.get(email=request.user)
             if user.counter % 2 != 0:
                 data = {
-                    # "email": "tanmaypardeshi@gmail.com",
-                    # "key": "7fce33c1921f253fc71df92912d274d5",
-                    "email": "kaustubhodak1@gmail.com",
-                    "key": "35af30d4feb65757fc3f130251f7a7fe",
+                    "email": "tanmaypardeshi@gmail.com",
+                    "key": "7fce33c1921f253fc71df92912d274d5",
+                    # "email": "kaustubhodak1@gmail.com",
+                    # "key": "35af30d4feb65757fc3f130251f7a7fe",
                     "counter": user.counter,
                     "string1": text,
                     "string2": '',
@@ -53,10 +53,10 @@ class ChatView(generics.GenericAPIView):
                 string1 = get_text(1)
                 string2 = get_text(2)
                 data = {
-                    # "email": "tanmaypardeshi@gmail.com",
-                    # "key": "7fce33c1921f253fc71df92912d274d5",
-                    "email": "kaustubhodak1@gmail.com",
-                    "key": "35af30d4feb65757fc3f130251f7a7fe",
+                    "email": "tanmaypardeshi@gmail.com",
+                    "key": "7fce33c1921f253fc71df92912d274d5",
+                    # "email": "kaustubhodak1@gmail.com",
+                    # "key": "35af30d4feb65757fc3f130251f7a7fe",
                     "counter": user.counter,
                     "string1": string1,
                     "string2": string2,

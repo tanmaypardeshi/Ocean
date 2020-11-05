@@ -92,7 +92,7 @@ export default function VFeed() {
         selectedTags.forEach(tag => {data.tag = data.tag += tag + ' '})
         console.log(data);
         Axios.post(
-            `http://localhost:8000/api/post/wall`,
+            `http://localhost:8000/api/post/wall/`,
             data,
             {
                 headers: {
