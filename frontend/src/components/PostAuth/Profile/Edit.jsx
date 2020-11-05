@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Chip } from '@material-ui/core'
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Chip, Select, InputLabel, Input } from '@material-ui/core'
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 import countries from '../../user/countries.json'
@@ -7,55 +7,25 @@ import { makeStyles } from '@material-ui/styles'
 import Axios from 'axios';
 import { useSnackbar } from 'notistack';
 import { getCookie } from '../../../cookie/cookie'
+import tags from '../Tags'
 
 const useStyles = makeStyles(theme => ({
-	chip: {
-		display: 'flex',
-		justifyContent: 'center',
-		flexWrap: 'wrap',
-		'& > *': {
-			margin: theme.spacing(0.5),
-		}
-	}
+	chips: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    chip: {
+        margin: 2,
+    },
 }))
 
 const Edit = ({ user, setUser, toggle, edit }) => {
 
-
 	const classes = useStyles();
 	const cookie = getCookie("usertoken");
 	const { enqueueSnackbar } = useSnackbar();
-	const [details, setDetails] = useState({
-		"first_name": "",
-		"last_name": "",
-		"dob": "",
-		"gender": "",
-		"country": "",
-	})
-
-	const [tags, setTags] = useState([
-		{ selected: false, value: 'productivity' },
-		{ selected: false, value: 'self_help' },
-		{ selected: false, value: 'self_improvement' },
-		{ selected: false, value: 'personal_development' },
-		{ selected: false, value: 'spirituality' },
-		{ selected: false, value: 'motivation' },
-		{ selected: false, value: 'positivity' },
-		{ selected: false, value: 'career' },
-		{ selected: false, value: 'discipline' },
-		{ selected: false, value: 'relationship' },
-		{ selected: false, value: 'success' },
-		{ selected: false, value: 'depression' },
-		{ selected: false, value: 'anxiety' },
-		{ selected: false, value: 'ptsd' },
-		{ selected: false, value: 'alcohol' },
-		{ selected: false, value: 'internet_addiction' },
-		{ selected: false, value: 'bipolar_disorder' },
-		{ selected: false, value: 'social_anxiety_disorder' },
-		{ selected: false, value: 'stress' },
-		{ selected: false, value: 'sleep_disorder' },
-		{ selected: false, value: 'empathy_deficit_disorder' }
-	]);
+	const [details, setDetails] = useState(user)
+	const [selectedTags, setSelectedTags] = useState(user.tags)
 
 	const handleChange = (event) => {
 		const et = event.target;
@@ -70,12 +40,7 @@ const Edit = ({ user, setUser, toggle, edit }) => {
 		e.preventDefault();
 
 		let detail_tags = "";
-		tags.map(tag => {
-			if (tag.selected) {
-				detail_tags += tag.value + " ";
-			}
-			return detail_tags;
-		});
+		selectedTags.forEach(tag => {detail_tags += tag + ' '})
 		Axios.patch(
 			"http://localhost:8000/api/user/profile/",
 			{
@@ -102,7 +67,7 @@ const Edit = ({ user, setUser, toggle, edit }) => {
 				"dob": details.dob,
 				"gender": details.gender,
 				"country": details.country,
-				"tags": detail_tags.split(' ')
+				"tags": detail_tags.split(' ').filter(str => str.length > 0)
 			})
 		})
 		.catch(err => {
@@ -114,16 +79,6 @@ const Edit = ({ user, setUser, toggle, edit }) => {
 
 	}
 
-	useEffect(() => {
-		setDetails(user);
-		tags.map(tag1 => {
-			user.tags.forEach(tag2 => {
-				if (tag1.value === tag2) {
-					tag1.selected = true;
-				}
-			});
-		});
-	}, [user, tags]);
 	return (
 		<Dialog
 			aria-labelledby="form-dialog-title"
@@ -212,30 +167,35 @@ const Edit = ({ user, setUser, toggle, edit }) => {
 						<MenuItem value="Other">Other</MenuItem>
 					</TextField>
 					{
-						user.is_moderator ?
-							null
-							:
-							<div className={classes.chip}>
+						user.is_moderator ? null :
+						<>
+						<InputLabel id="tag" margin="normal">Communities</InputLabel>
+						<Select
+							id="tag"
+							variant="outlined"
+							multiline
+							multiple
+							value={selectedTags}
+							onChange={e => setSelectedTags(e.target.value)}
+							input={<Input id="select-multiple-chip"/>}
+							fullWidth
+							renderValue={selected => 
+								<div className={classes.chips}>
 								{
-									tags.map((tag, index) => {
-										return (
-											<Chip
-												id={index}
-												label={tag.value.split('_').join(' ')}
-												key={index}
-												color={tag.selected ? "primary" : "default"}
-												clickable
-												style={{ fontSize: '16px' }}
-												onClick={() => {
-													let newTags = [...tags];
-													newTags[index].selected = !newTags[index].selected;
-													setTags(newTags);
-												}}
-											/>
-										)
-									})
+									selected.map(value => <Chip key={value} label={value.split('_').join(' ')} className={classes.chip}/>)
 								}
-							</div>
+								</div>
+							}
+						>
+						{
+							tags.map((name, index) => 
+								<MenuItem key={index} value={name}>
+									{name.split('_').join(' ')}
+								</MenuItem>
+							)
+						}
+						</Select>
+						</>
 					}
 				</DialogContent>
 				<DialogActions>

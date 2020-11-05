@@ -16,47 +16,48 @@ import {
   Paper,
   makeStyles,
   LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  CardMedia,
 } from "@material-ui/core";
-import { ThumbUpAlt } from "@material-ui/icons";
+import { Delete, LocalOffer, ThumbDownAlt, ThumbUpAlt, Wc } from "@material-ui/icons";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import CakeIcon from "@material-ui/icons/Cake";
-import { blue } from "@material-ui/core/colors";
-
+import EditIcon from "@material-ui/icons/Edit"
+import { blue, red } from "@material-ui/core/colors";
+import Edit from './Edit'
 import Axios from "axios";
 import { useSnackbar } from "notistack";
 import { Link } from "react-router-dom";
 
 import { getCookie } from "../../../cookie/cookie";
-import Edit from "./Edit";
+import { Skeleton } from "@material-ui/lab";
+import ReactVisibilitySensor from "react-visibility-sensor";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    marginBottom: "2%",
+const useStyles = makeStyles(theme => ({
+  scrollable: {
+    [theme.breakpoints.up('sm')]: {
+        height: 'calc(100vh - 72px)',
+        overflow: 'auto',
+        '&::-webkit-scrollbar': {
+            display: 'none'
+        }
+    }
   },
-  avatar: {
-    backgroundColor: blue[600],
-    color: "white",
-    [theme.breakpoints.up("md")]: {
-      height: "2.5em",
-      width: "2.5em",
-      fontSize: "4em",
+  delete: {
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.text.primary,
+    '&:hover': {
+      backgroundColor: theme.palette.error.dark
     },
-    height: "2em",
-    width: "2em",
-    fontSize: "3em",
-  },
-  button: {
-    backgroundColor: blue[600],
-    float: "right",
-    margin: "6%",
-    [theme.breakpoints.down("md")]: {
-      marginTop: "11%",
-    },
-  },
-}));
+  }
+}))
+
 
 export default function Profile() {
-  const classes = useStyles();
+  const classes = useStyles()
   const { enqueueSnackbar } = useSnackbar();
   const cookie = getCookie("usertoken");
   const [edit, setEdit] = useState(false);
@@ -71,6 +72,10 @@ export default function Profile() {
   const [myPosts, setMyPosts] = useState([]);
   const [myLikes, setMyLikes] = useState([]);
   const [myComments, setMyComments] = useState([]);
+
+  const [postEnd, setPostEnd] = useState(false)
+  const [likeEnd, setLikeEnd] = useState(false)
+  const [commentEnd, setCommentEnd] = useState(false)
 
   const [value, setValue] = useState(0);
 
@@ -114,48 +119,12 @@ export default function Profile() {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    if (parseInt(newValue) === 0) {
-      Axios.get(`http://localhost:8000/api/post/myposts/${postpage}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${cookie}`,
-        },
-      })
-        .then((response) => {
-          setMyPosts(response.data.post_list);
-          setPostLoading(false);
-        })
-        .catch((err) => {
-          enqueueSnackbar("Could not fetch posts", { variant: "error" });
-        });
-    } else if (parseInt(newValue) === 1) {
-      Axios.get(`http://localhost:8000/api/post/mylikes/${likepage}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${cookie}`,
-        },
-      })
-        .then((response) => {
-          setMyLikes(response.data.like_list);
-          setLikeLoading(false);
-        })
-        .catch((err) => {
-          enqueueSnackbar("Could not fetch likes", { variant: "error" });
-        });
-    } else if (parseInt(newValue) === 2) {
-      Axios.get(`http://localhost:8000/api/post/mycomments/${commentpage}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${cookie}`,
-        },
-      })
-        .then((response) => {
-          setMyComments(response.data.comment_list);
-          setCommentLoading(false);
-        })
-        .catch((err) => {
-          enqueueSnackbar("Could not fetch comments", { variant: "error" });
-        });
+    if (parseInt(newValue) === 0 && postloading) {
+      getMyPosts(1)
+    } else if (parseInt(newValue) === 1 && likeloading) {
+      getMyLikes(1)
+    } else if (parseInt(newValue) === 2 && commentloading) {
+      getMyComments(1)
     }
   };
 
@@ -164,19 +133,8 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    Axios.get(`http://localhost:8000/api/post/myposts/${postpage}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cookie}`,
-      },
-    })
-      .then((response) => {
-        setMyPosts(response.data.post_list);
-        setPostLoading(false);
-      })
-      .catch((err) => {
-        enqueueSnackbar("Could not fetch posts", { variant: "error" });
-      });
+
+    getMyPosts(1)
 
     Axios.get("http://localhost:8000/api/user/profile/", {
       headers: {
@@ -190,111 +148,144 @@ export default function Profile() {
       .catch((error) => {
         enqueueSnackbar("Could not fetch profile", { variant: "error" });
       });
-  }, [cookie, enqueueSnackbar, postpage]);
+
+  }, []);
+
+
+  const getMyPosts = (page) => {
+    Axios.get(`http://localhost:8000/api/post/myposts/${page}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookie}`,
+      },
+    })
+      .then((response) => {
+        setPostPage(page)
+        setMyPosts([...myPosts, ...response.data.post_list]);
+        setPostLoading(false);
+        if (response.data.post_list.length < 10)
+          setPostEnd(true)
+      })
+      .catch((err) => {
+        enqueueSnackbar("Could not fetch posts", { variant: "error" });
+      });
+  }
+
+  const getMyLikes = (page) => {
+    Axios.get(`http://localhost:8000/api/post/mylikes/${page}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookie}`,
+      },
+    })
+      .then((response) => {
+        setLikePage(page)
+        setMyLikes([...myLikes, ...response.data.like_list]);
+        setLikeLoading(false);
+        if (response.data.like_list.length < 10)
+          setLikeEnd(true)
+      })
+      .catch((err) => {
+        enqueueSnackbar("Could not fetch likes", { variant: "error" });
+      });
+  }
+
+  const getMyComments = (page) => {
+    Axios.get(`http://localhost:8000/api/post/mycomments/${page}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookie}`,
+      },
+    })
+      .then((response) => {
+        setCommentPage(page)
+        setMyComments([...myComments, ...response.data.comment_list]);
+        setCommentLoading(false);
+        if (response.data.comment_list.length < 10)
+          setCommentEnd(true)
+      })
+      .catch((err) => {
+        enqueueSnackbar("Could not fetch comments", { variant: "error" });
+      });
+  }
 
   return (
-    <>
-      <Card className={classes.root}>
-        <Button className={classes.button} onClick={handleEdit}>
-          EDIT PROFILE
-        </Button>
-        <Edit user={user} setUser={setUser} toggle={handleEdit} edit={edit} />
+    <Grid container item spacing={1}>
+    <Grid container item direction="column" xs={12} md={4} spacing={1}>
+    <Grid item>
+      <Card>
         <CardHeader
+          title={user.first_name + " " + user.last_name}
+          subheader={user.email}
           avatar={
-            <Avatar aria-label="recipe" className={classes.avatar}>
-              {user.first_name.charAt(0)}
-              {user.last_name.charAt(0)}
+            <Avatar>
+              {user.first_name[0] + user.last_name[0]}
             </Avatar>
           }
+          titleTypographyProps={{variant: 'h4'}}
+          subheaderTypographyProps={{variant: 'h6'}}
         />
-        <Hidden smDown>
-          <CardContent>
-            <Grid container spacing={3}>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  {user.first_name} {user.last_name}, {user.gender}, {user.age}{" "}
-                </Typography>
-                <Typography color="textSecondary" variant="h6">
-                  {" "}
-                  {user.email}{" "}
-                </Typography>
-                {user.is_moderator ? (
-                  <>
-                    <Typography variant="h6">
-                      Moderator for channels:
-                    </Typography>
-                    <Typography>
-                      {user.tags.map((tag, index) => (
-                        <span key={index}> #{tag}</span>
-                      ))}
-                    </Typography>
-                  </>
-                ) : (
-                  <>
-                    <Typography variant="h6">Tags followed:</Typography>
-                    <Typography color="primary">
-						{user.tags.map((tag, index) => (
-                        	<span key={index}> #{tag}</span>
-                      	))}
-					  </Typography>
-                  </>
-                )}
-              </Grid>
-              <Grid item xs={6}>
-                <Typography
-                  variant="body1"
-                  align="right"
-                  style={{ marginRight: "8%" }}
-                >
-                  {" "}
-                  Date joined : {new Date(
-                    user.date_joined
-                  ).toLocaleString()}{" "}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  align="right"
-                  style={{ marginRight: "8%" }}
-                >
-                  {" "}
-                  Last Login : {new Date(user.last_login).toLocaleString()}{" "}
-                </Typography>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Hidden>
-        <Hidden smUp>
-          <CardContent>
-            <Typography variant="h6">
-              {user.first_name} {user.last_name}, {user.gender}, {user.age}{" "}
-            </Typography>
-            <Typography color="textSecondary" variant="h6">
-              {" "}
-              {user.email}{" "}
-            </Typography>
-            <Typography variant="body1">
-              {" "}
-              Date joined : {new Date(user.date_joined).toLocaleString()}{" "}
-            </Typography>
-            <Typography variant="body1">
-              {" "}
-              Last Login : {new Date(user.last_login).toLocaleString()}{" "}
-            </Typography>
-          </CardContent>
-        </Hidden>
-        <IconButton style={{ paddingTop: "0%" }}>
-          <LocationOnIcon />
-          &nbsp;
-          <Typography variant="body1">{user.country}</Typography>
-        </IconButton>
-        <br />
-        <IconButton style={{ paddingTop: "0%" }}>
-          <CakeIcon />
-          &nbsp;
-          <Typography variant="body1">{user.dob}</Typography>
-        </IconButton>
       </Card>
-      <Paper square>
+    </Grid>
+    <Grid item >
+      <Card>
+      <List dense>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>
+              <CakeIcon/>
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary={user.age + " years old"}
+            secondary={user.dob}
+          />
+        </ListItem>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>
+              <LocationOnIcon/>
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary={user.country}
+            secondary={user.gender}
+          />
+        </ListItem>
+      </List>
+      </Card>
+    </Grid>
+    <Grid item>
+      <Card>
+        <CardHeader
+          title={`${user.is_moderator ? 'Moderating' : 'Following'} communities`}
+        />
+        <List dense>
+        {
+          user.tags.map((tag, index) =>
+            <ListItem key={index}>
+              <ListItemText primary={tag}/>
+            </ListItem>
+          )
+        }
+        </List>
+      </Card>
+    </Grid>
+    <Grid item>
+      <Button onClick={handleEdit} fullWidth variant="contained" color="primary">
+        Edit Profile
+      </Button>
+      {user.tags.length > 0 && <Edit user={user} setUser={setUser} toggle={handleEdit} edit={edit} /> }
+    </Grid>
+    <Grid item>
+      <Button fullWidth variant="contained" className={classes.delete}>
+        Delete Coral Chat history
+      </Button>
+    </Grid>
+  </Grid>
+  <Grid container item xs={12} md={8} direction="column" spacing={1}>
+    <Grid item>
+      <Paper style={{ width: "100%" }}>
         <Tabs
           variant="fullWidth"
           value={value}
@@ -307,79 +298,164 @@ export default function Profile() {
           <Tab label="My Likes" />
           <Tab label="My Comments" />
         </Tabs>
-        {parseInt(value) === 0 ? (
-          <>
-            {postloading ? (
-              <LinearProgress style={{ width: "100%" }} />
-            ) : (
-              myPosts.map((post, index) => {
-                return (
-                  <Grid item key={index}>
-                    <Card>
-                      <CardActionArea
-                        component={Link}
-                        to={`/home/feed/${post.id}`}
-                      >
-                        <CardHeader
-                          avatar={
-                            <Avatar>
-                              {post.is_anonymous
-                                ? "AU"
-                                : post.first_name[0] + post.last_name[0]}
-                            </Avatar>
-                          }
-                          title={
-                            post.is_anonymous
-                              ? "Anonymous User"
-                              : post.first_name + post.last_name
-                          }
-                          subheader={new Date(
-                            post.published_at
-                          ).toLocaleString()}
-                        />
-                        <CardContent>
-                          <Typography variant="h6">{post.title}</Typography>
-                          <Typography paragraph variant="body1">
-                            {post.is_anonymous
-                              ? "(Posted Anonymously)"
-                              : "(Not Posted Anonymously)"}
-                          </Typography>
-                          <Typography paragraph variant="body2">
-                            {post.description
-                              .split(" ")
-                              .slice(0, 50)
-                              .join(" ") + "..."}
-                          </Typography>
-                          <Typography color="primary">
-                            {post.tags.map((tag, index) => (
-                              <span key={index}> #{tag}</span>
-                            ))}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
-                      <CardActions>
-                        <IconButton id={index} onClick={toggleLike}>
-                          <ThumbUpAlt
-                            style={{
-                              color: post.is_liked ? blue[600] : "grey",
-                            }}
-                          />
-                        </IconButton>
-                      </CardActions>
-                    </Card>
-                  </Grid>
-                );
-              })
-            )}
-          </>
-        ) : parseInt(value) === 1 ? (
-          <>
-            {likeloading ? (
-              <LinearProgress style={{ width: "100%" }} />
-            ) : (
-              myLikes.map((like, index) => {
-                return (
-                  <Grid item key={index}>
+      </Paper>
+    </Grid>
+    <Grid container item spacing={1} className={classes.scrollable}>
+        {
+        parseInt(value) === 0 ? 
+            postloading ? 
+              <Grid item xs={12}>
+                <Card>
+                  <CardHeader
+                    avatar={
+                      <Skeleton variant="circle">
+                        <Avatar/>
+                      </Skeleton>
+                    }
+                    title={
+                      <Skeleton variant="text" width="80%"/>
+                    }
+                    subheader={
+                      <Skeleton variant="text" width="40%"/>
+                    }
+                  />
+                  <CardContent>
+                    <Skeleton variant="h1" width="100%" />
+                    <br />
+                    <Skeleton variant="h6" width="50%" />
+                  </CardContent>
+                  <CardActions>
+                    <Skeleton variant="h6" width="25%" />
+                  </CardActions>
+                </Card>
+              </Grid>
+             : 
+             <>
+             {
+              myPosts.map((post, index) => 
+              <Grid item key={index}>
+                <Card>
+                  <CardActionArea
+                    component={Link}
+                    to={`/home/feed/${post.id}`}
+                  >
+                    <CardHeader
+                      avatar={
+                        <Avatar>
+                          {post.is_anonymous
+                            ? "AU"
+                            : post.first_name[0] + post.last_name[0]}
+                        </Avatar>
+                      }
+                      title={post.title}
+                      subheader={new Date(
+                        post.published_at
+                      ).toLocaleString()}
+                    />
+                    <CardContent>
+                      <Typography paragraph variant="body2">
+                        {post.description
+                          .split(" ")
+                          .slice(0, 50)
+                          .join(" ") + "..."}
+                      </Typography>
+                      <Typography color="primary">
+                        {post.tags.map((tag, index) => (
+                          <span key={index}> #{tag}</span>
+                        ))}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                  <CardActions>
+                    <IconButton id={index} onClick={toggleLike}>
+                      <ThumbUpAlt
+                          style={{
+                              color: post.is_liked ? blue[600] : 'grey'
+                          }}
+                      />
+                    </IconButton>
+                    <IconButton>
+                      <EditIcon/>
+                    </IconButton>
+                    <IconButton>
+                      <Delete/>
+                    </IconButton>
+                  </CardActions>
+                </Card>
+              </Grid>
+            )
+            }
+            <Grid item xs={12}>
+            {
+              postEnd && !postloading?
+              <Card>
+                      <CardMedia
+                          style={{ height: 300 }}
+                          image="https://images.unsplash.com/photo-1502726299822-6f583f972e02?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80"
+                      />
+                      <CardContent style={{ textAlign: 'center' }}>
+                          All done for now! Welcome to the bottom of Ocean!
+              </CardContent>
+                  </Card>
+              :
+              <Card>
+                <ReactVisibilitySensor onChange={visible => {
+                  if (visible) getMyPosts(postpage + 1)
+                }}>
+                  <CardHeader
+                    avatar={
+                      <Skeleton variant="circle">
+                        <Avatar/>
+                      </Skeleton>
+                    }
+                    title={
+                      <Skeleton variant="text" width="80%"/>
+                    }
+                    subheader={
+                      <Skeleton variant="text" width="40%"/>
+                    }
+                  />
+                  </ReactVisibilitySensor>
+                  <CardContent>
+                    <Skeleton variant="h1" width="100%" />
+                    <br />
+                    <Skeleton variant="h6" width="50%" />
+                  </CardContent>
+                  <CardActions>
+                    <Skeleton variant="h6" width="25%" />
+                  </CardActions>
+                </Card>
+            }
+            </Grid>
+            </>
+         : 
+         parseInt(value) === 1 ? 
+          likeloading ? 
+          <Grid item xs={12}>
+            <Card>
+              <CardHeader
+                avatar={
+                  <Skeleton variant="circle">
+                    <Avatar/>
+                  </Skeleton>
+                }
+                title={
+                  <Skeleton variant="text" width="80%"/>
+                }
+                subheader={
+                  <Skeleton variant="text" width="40%"/>
+                }
+              />
+              <CardActions>
+                    <Skeleton variant="h6" width="25%" />
+                  </CardActions>
+            </Card>
+          </Grid>
+             : 
+             <>
+             {
+              myLikes.map((like, index) => 
+              <Grid item xs={12} key={index}>
                     <Card>
                       <CardActionArea
                         component={Link}
@@ -394,31 +470,88 @@ export default function Profile() {
                                   like.author.split(" ")[1].charAt(0)}
                             </Avatar>
                           }
-                          title={
-                            like.is_anonymous ? "Anonymous User" : like.author
-                          }
+                          title={like.post_title}
+                          subheader={like.is_anonymous ? "Anonymous User" : like.author}
                         />
-                        <CardContent>
-                          <Typography variant="h6">
-                            Post Title: {like.post_title}
-                          </Typography>
-                          <br />
-                        </CardContent>
                       </CardActionArea>
+                      <CardActions>
+                      <IconButton>
+                        <ThumbDownAlt/>
+                      </IconButton>
+                    </CardActions>
                     </Card>
                   </Grid>
-                );
-              })
-            )}
-          </>
-        ) : parseInt(value) === 2 ? (
-          <>
-            {commentloading ? (
-              <LinearProgress style={{ width: "100%" }} />
-            ) : (
-              myComments.map((comment, index) => {
-                return (
-                  <Grid item key={index}>
+                )
+                }
+                <Grid item xs={12}>
+                {
+                 likeEnd && !likeloading?
+                 <Card>
+                 <CardMedia
+                     style={{ height: 300 }}
+                     image="https://images.unsplash.com/photo-1502726299822-6f583f972e02?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80"
+                 />
+                 <CardContent style={{ textAlign: 'center' }}>
+                     All done for now! Welcome to the bottom of Ocean!
+         </CardContent>
+             </Card>
+             :
+             <Card>
+               <ReactVisibilitySensor onChange={visible => {
+                  if (visible) getMyLikes(likepage + 1)
+                }}>
+              <CardHeader
+                avatar={
+                  <Skeleton variant="circle">
+                    <Avatar/>
+                  </Skeleton>
+                }
+                title={
+                  <Skeleton variant="text" width="80%"/>
+                }
+                subheader={
+                  <Skeleton variant="text" width="40%"/>
+                }
+              />
+              </ReactVisibilitySensor>
+              <CardActions>
+                    <Skeleton variant="h6" width="25%" />
+                  </CardActions>
+            </Card>
+                }
+                </Grid>
+                </>
+         : 
+          commentloading ? 
+          <Grid item xs={12}>
+              <Card>
+                <CardHeader
+                  avatar={
+                    <Skeleton variant="circle">
+                      <Avatar/>
+                    </Skeleton>
+                  }
+                  title={
+                    <Skeleton variant="text" width="80%"/>
+                  }
+                  subheader={
+                    <>
+                    <Skeleton variant="text" width="40%"/>
+                    <Skeleton variant="text" width="40%"/>
+                    <Skeleton variant="text" width="40%"/>
+                    </>
+                  }
+                />
+                <CardActions>
+                    <Skeleton variant="h6" width="25%" />
+                  </CardActions>
+              </Card>
+            </Grid>
+             : 
+             <>
+             {
+              myComments.map((comment, index) => 
+              <Grid item xs={12} key={index}>
                     <Card>
                       <CardActionArea
                         component={Link}
@@ -427,41 +560,84 @@ export default function Profile() {
                         <CardHeader
                           avatar={
                             <Avatar>
-                              {comment.author.split(" ")[0].charAt(0) +
-                                comment.author.split(" ")[1].charAt(0)}
+                              {
+                              !comment.is_anonymous 
+                              ?
+                              comment.author.split(" ")[0].charAt(0) + comment.author.split(" ")[1].charAt(0)
+                              :
+                              "AU"
+                              }
                             </Avatar>
                           }
-                          title={
-                            <Typography variant="h6">{`Post Author : ${comment.author}`}</Typography>
+                          title={comment.content}
+                          subheader={
+                            <Typography variant="caption">
+                                Time:&nbsp;&nbsp; {new Date(comment.published_at).toLocaleString()}
+                                <br/>
+                                Post:&nbsp;&nbsp;&nbsp; {comment.post_title}
+                                <br/>
+                                Author: {comment.author}
+                            </Typography>
                           }
                         />
-                        <CardContent>
-                          <Typography variant="h6">{`Post title : ${comment.post_title}`}</Typography>
-                          <br />
-                          <Typography paragraph variant="body1">
-                            {`Comment : ${comment.content}`}
-                          </Typography>
-                          <Typography paragraph variant="body1">
-                            {comment.is_anonymous
-                              ? "(Commented Anonymously)"
-                              : "(Not Commented Anonymously)"}
-                          </Typography>
-                          <Typography
-                            paragraph
-                            variant="body1"
-                          >{` Commented at: ${new Date(
-                            comment.published_at
-                          ).toLocaleString()}`}</Typography>
-                        </CardContent>
                       </CardActionArea>
+                      <CardActions>
+                        <IconButton>
+                          <EditIcon/>
+                        </IconButton>
+                        <IconButton>
+                          <Delete/>
+                        </IconButton>
+                      </CardActions>
                     </Card>
                   </Grid>
-                );
-              })
-            )}
-          </>
-        ) : null}
-      </Paper>
-    </>
+                )
+                }
+                <Grid item xs={12}>
+                {
+                  commentEnd && !commentloading ?
+                  <Card>
+                  <CardMedia
+                      style={{ height: 300 }}
+                      image="https://images.unsplash.com/photo-1502726299822-6f583f972e02?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80"
+                  />
+                  <CardContent style={{ textAlign: 'center' }}>
+                      All done for now! Welcome to the bottom of Ocean!
+          </CardContent>
+              </Card>
+              :
+              <Card>
+                <ReactVisibilitySensor onChange={visible => {
+                  if (visible) getMyComments(commentpage + 1)
+                }}>
+                <CardHeader
+                  avatar={
+                    <Skeleton variant="circle">
+                      <Avatar/>
+                    </Skeleton>
+                  }
+                  title={
+                    <Skeleton variant="text" width="80%"/>
+                  }
+                  subheader={
+                    <>
+                    <Skeleton variant="text" width="40%"/>
+                    <Skeleton variant="text" width="40%"/>
+                    <Skeleton variant="text" width="40%"/>
+                    </>
+                  }
+                />
+                </ReactVisibilitySensor>
+                <CardActions>
+                    <Skeleton variant="h6" width="25%" />
+                  </CardActions>
+              </Card>
+                }
+                </Grid>
+                </>
+        }
+        </Grid>
+    </Grid>
+    </Grid>
   );
 }

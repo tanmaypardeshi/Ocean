@@ -94,7 +94,7 @@ export default function Register() {
     {selected: false, value:'positivity'},
     {selected: false, value:'career'},
     {selected: false, value:'discipline'},
-    {selected: false, value:'relationship'},
+    {selected: false, value:'relationships'},
     {selected: false, value:'success'},
     {selected: false, value:'depression'},
     {selected: false, value:'anxiety'},

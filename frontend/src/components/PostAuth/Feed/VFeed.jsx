@@ -328,6 +328,7 @@ export default function VFeed() {
                     id="tag"
                     variant="outlined"
                     multiple
+                    multiline
                     value={selectedTags}
                     onChange={e => setSelectedTags(e.target.value)}
                     input={<Input id="select-multiple-chip"/>}

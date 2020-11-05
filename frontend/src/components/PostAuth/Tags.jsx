@@ -8,7 +8,7 @@ const tags = [
     'positivity',
     'career',
     'discipline',
-    'relationship',
+    'relationships',
     'success',
     'depression',
     'anxiety',
