@@ -1,15 +1,16 @@
 import React, { useEffect } from 'react';
-import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid } from '@material-ui/core';
-import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp, Delete } from '@material-ui/icons';
+import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse } from '@material-ui/core';
+import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp, Delete, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import Routes from './Routes';
 import clsx from 'clsx'
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { addResponseMessage, Widget, addUserMessage, markAllAsRead } from 'react-chat-widget';
 import 'react-chat-widget/lib/styles.css'
 import Axios from 'axios';
 import { getCookie } from '../../cookie/cookie';
 import { useSnackbar } from 'notistack';
+import tags from './Tags';
 
 const drawerWidth = 300;
 
@@ -103,6 +104,9 @@ const useStyles = makeStyles((theme) => ({
   },
   list: {
     paddingLeft: theme.spacing(1)
+  },
+  nested: {
+    paddingLeft: theme.spacing(4)
   }
 }));
 
@@ -115,10 +119,10 @@ const drawerItems = [
     name: 'Profile',
     icon: <AccountCircle />
   },
-  {
-    name: 'Communities',
-    icon: <People />
-  },
+  // {
+  //   name: 'Communities',
+  //   icon: <People />
+  // },
   {
     name: 'Cheer Squad',
     icon: <Whatshot />
@@ -130,16 +134,18 @@ export default function ClippedDrawer() {
   const classes = useStyles();
 
   const location = useLocation();
-
   const history = useHistory();
+  const params = useParams();
 
   const { dark, toggleTheme } = React.useContext(ThemeContext)
 
   const { enqueueSnackbar } = useSnackbar()
 
   const [open, setOpen] = React.useState(true);
-
   const toggleDrawer = () => setOpen(!open)
+
+  const [openComm, setOpenComm] = React.useState(false)
+  const toggleComm = () => setOpenComm(!openComm)
 
   const handleLogout = () => {
     document.cookie = "usertoken=; path=/;";
@@ -147,6 +153,7 @@ export default function ClippedDrawer() {
   }
 
   useEffect(() => {
+    console.log(location)
     Axios.get(`http://localhost:8000/api/coral/`, {
         headers: {
           'Content-Type': 'application/json',
@@ -263,6 +270,32 @@ export default function ClippedDrawer() {
                 </ListItem>
               )
             }
+            <ListItem
+              selected={location.pathname.includes('communities')}
+              button
+              onClick={toggleComm}
+            >
+              <ListItemIcon className={classes.list}><People/></ListItemIcon>
+              <ListItemText primary="Communities"/>
+              { openComm ? <ExpandLess/> : <ExpandMore/>}
+            </ListItem>
+            <Collapse in={openComm} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding dense>
+                {
+                  tags.map((tag, index) => 
+                    <ListItem 
+                      button 
+                      onClick={() => history.push(`/home/communities/${tag}`)} 
+                      selected={location.pathname.includes(tag)}
+                      className={classes.nested} 
+                      key={index}
+                    >
+                      <ListItemText primary={tag.split('_').join(' ')}/>
+                    </ListItem>
+                  )
+                }
+              </List>
+            </Collapse>
           </List>
         </div>
       </Drawer>

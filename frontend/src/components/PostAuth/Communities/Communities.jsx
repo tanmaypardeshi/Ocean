@@ -22,7 +22,7 @@ import {
   Dialog,
   DialogTitle,
   DialogActions,
-  DialogContent, 
+  DialogContent,
   TextField,
   Button
 } from "@material-ui/core";
@@ -37,37 +37,20 @@ import ReactVisibilitySensor from "react-visibility-sensor";
 import { Link, useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
-  speedDial: {
-    position: "fixed",
-    "&.MuiSpeedDial-directionUp, &.MuiSpeedDial-directionLeft": {
-      bottom: theme.spacing(5),
-      right: theme.spacing(5),
-    },
-    "&.MuiSpeedDial-directionDown, &.MuiSpeedDial-directionRight": {
-      top: theme.spacing(5),
-      left: theme.spacing(5),
-    },
-  },
-  drawer: {
-    width: 400,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: 400,
-  },
-  drawerContainer: {
-    overflow: "none",
-  },
-  container: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-  },
+  scrollable: {
+    [theme.breakpoints.up('sm')]: {
+      height: 'calc(100vh - 72px)',
+      overflow: 'auto',
+      '&::-webkit-scrollbar': {
+        display: 'none'
+      }
+    }
+  }
 }));
 
 export default function Communities() {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
-  const [open, setOpen] = useState(false);
   const [cookie, setCookie] = useState(null);
   const [mod, setMod] = useState(null);
   const [page, setPage] = useState(0);
@@ -75,12 +58,8 @@ export default function Communities() {
   const [posts, setPosts] = useState([]);
   const [moderators, setModerators] = useState([]);
   const [postId, setPostId] = useState(-1);
-  const [reason , setReason] = useState('');
-
-  const actions = [
-    { icon: <ChatBubbleIcon />, name: "Coral" },
-    { icon: <CreateIcon />, name: "New Post" },
-  ];
+  const [reason, setReason] = useState('');
+  const [loading, setLoading] = useState(true)
 
   const { tag } = useParams();
 
@@ -91,12 +70,11 @@ export default function Communities() {
   }, []);
 
   useEffect(() => {
-    getPosts(1);
-  }, [cookie, mod]);
-
-  useEffect(() => {
-    getMods();
-  }, [cookie, mod]);
+    if (cookie !== null && mod !== null) {
+      getPosts(1);
+      getMods();
+    }
+  }, [cookie, mod, tag]);
 
   const getMods = () => {
     Axios.get(`http://localhost:8000/api/user/getmoderators/${tag}/`, {
@@ -116,9 +94,13 @@ export default function Communities() {
           Authorization: `Bearer ${cookie}`,
         },
       }).then((response) => {
-        setPosts([...posts, ...response.data.post_list]);
-        setEnd(response.data.post_list.length < 20);
+        if (page === 1)
+          setPosts(response.data.post_list)
+        else
+          setPosts([...posts, ...response.data.post_list]);
+        setEnd(response.data.post_list.length < 10);
         setPage(page);
+        setLoading(false)
       });
     }
   };
@@ -148,87 +130,35 @@ export default function Communities() {
   };
 
   const handleSubmit = () => {
-      Axios.post(
-          'http://localhost:8000/api/post/moderate/',
-          {
-              'id': postId,
-              'reason': reason
-          },
-          {
-            headers : {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${cookie}`
-            }
-          },
-      ).then(res => {
-          enqueueSnackbar(res.data.messaage, {variant:'success'})
-          setPostId(-1);
-      }).catch(err => {
-          enqueueSnackbar(err.messaage, {variant:'error'})
-      })
+    Axios.post(
+      'http://localhost:8000/api/post/moderate/',
+      {
+        'id': postId,
+        'reason': reason
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookie}`
+        }
+      },
+    ).then(res => {
+      enqueueSnackbar(res.data.messaage, { variant: 'success' })
+      setPostId(-1);
+    }).catch(err => {
+      enqueueSnackbar(err.messaage, { variant: 'error' })
+    })
   }
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
 
   const togglePost = e => setPostId(e.currentTarget.id);
 
   return (
-    <Grid container item spacing={1} direction="column">
-      <Hidden mdDown>
-        <Drawer
-          className={classes.drawer}
-          variant="permanent"
-          classes={{
-            paper: classes.drawerPaper,
-          }}
-          anchor="right"
-        >
-          <Toolbar />
-          <Typography variant="h5" style={{ margin: "4% 3% 0% 3%" }}>
-            Moderators for this channel
-          </Typography>
-          {moderators.map((moderator, index) => (
-            <Paper
-              elevation={3}
-              key={index}
-              style={{ margin: "3% 4% 3% 4%", padding: "3%" }}
-            >
-              <Typography variant="body1">
-                Moderator Name: {moderator.first_name} {moderator.last_name}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Moderator Email: {moderator.email}
-              </Typography>
-            </Paper>
-          ))}
-        </Drawer>
-      </Hidden>
-      <SpeedDial
-        color="primary"
-        ariaLabel="Coral Create"
-        className={classes.speedDial}
-        icon={<KeyboardArrowUpIcon />}
-        onClose={handleClose}
-        onOpen={handleOpen}
-        open={open}
-      >
-        {actions.map((action) => (
-          <SpeedDialAction
-            key={action.name}
-            icon={action.icon}
-            tooltipTitle={action.name}
-            onClick={handleClose}
-          />
-        ))}
-      </SpeedDial>
-      {!!posts
-        ? posts.map((post, index) => (
+    <>
+      <Grid container item xs={12} md={8} spacing={1} className={classes.scrollable}>
+        {
+          !loading
+          ? 
+          posts.map((post, index) => (
             <Grid item key={index}>
               <Card>
                 <CardActionArea
@@ -273,104 +203,150 @@ export default function Communities() {
                     />
                   </IconButton>
                   {
-                      mod.is_moderator && mod.tags.includes(tag) ?
-                        <IconButton id={post.id} onClick={() => setPostId(post.id)}>
-                            <DeleteIcon />
-                        </IconButton>
-                    :
-                    null
+                    mod.is_moderator && mod.tags.includes(tag) ?
+                      <IconButton id={post.id} onClick={() => setPostId(post.id)}>
+                        <DeleteIcon />
+                      </IconButton>
+                      :
+                      null
                   }
-                    <Dialog
-                    aria-labelledby="form-dialog-title"
-                    open={postId !== -1}
-                    onClose={() => setPostId(-1)}
-                    fullWidth
-                    >
-                    <DialogTitle id="form-dialog-title">
-                        Reason to delete post
-                    </DialogTitle>
-                        <DialogContent>
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            label="Reason to delete post"
-                            type="text"
-                            autoComplete="Reason"
-                            onChange={e => setReason(e.target.value)}
-                            required
-                            multiline
-                            rows={4}
-                            fullWidth
-                        />
-                        </DialogContent>
-                        <DialogActions>
-                        <Button autoFocus color="primary" onClick={()=> setPostId(-1)}>
-                            CANCEL
-                        </Button>
-                        <Button color="primary" onClick={handleSubmit} type="submit">
-                            EDIT
-                        </Button>
-                        </DialogActions>
-                    </Dialog>
                 </CardActions>
               </Card>
             </Grid>
           ))
-        : [1, 1].map((v, i) => (
-            <Grid item key={i}>
-              <Card>
-                <CardHeader
-                  avatar={
-                    <Skeleton variant="circle">
-                      <Avatar />
-                    </Skeleton>
-                  }
-                  title={<Skeleton variant="text" width="80%" />}
-                  subheader={<Skeleton variant="text" width="40%" />}
-                />
-                <CardContent>
-                  <Skeleton variant="h6" width="50%" />
-                  <br />
-                  <Skeleton variant="h1" width="100%" />
-                  <br />
-                  <Skeleton variant="h6" width="50%" />
-                </CardContent>
-                <CardActions>
+          : 
+          <Grid item xs={12}>
+            <Card>
+              <CardHeader
+                avatar={
                   <Skeleton variant="circle">
                     <Avatar />
                   </Skeleton>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-      {!!posts &&
-        (end ? (
-          <Grid item>
-            <Card>
-              <CardMedia
-                style={{ height: 300 }}
-                image="https://images.unsplash.com/photo-1502726299822-6f583f972e02?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80"
+                }
+                title={<Skeleton variant="text" width="80%" />}
+                subheader={<Skeleton variant="text" width="40%" />}
               />
-              <CardContent style={{ textAlign: "center" }}>
-                All done for now! Welcome to the bottom of Ocean!
+              <CardContent>
+                <Skeleton variant="h6" width="50%" />
+                <br />
+                <Skeleton variant="h1" width="100%" />
+                <br />
+                <Skeleton variant="h6" width="50%" />
               </CardContent>
+              <CardActions>
+                <Skeleton variant="circle">
+                  <Avatar />
+                </Skeleton>
+              </CardActions>
             </Card>
           </Grid>
-        ) : (
-          <Grid item>
-            <ReactVisibilitySensor
-              onChange={(visible) => {
-                if (visible) getPosts(page + 1);
-              }}
-            >
-              <Card>
-                <CardContent style={{ textAlign: "center" }}>
-                  <CircularProgress />
-                </CardContent>
-              </Card>
+          }
+        <Grid item xs={12}>
+        {
+        !!posts && !loading &&
+        (
+          end 
+          ? 
+          <Card>
+            <CardMedia
+              style={{ height: 300 }}
+              image="https://images.unsplash.com/photo-1502726299822-6f583f972e02?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80"
+            />
+            <CardContent style={{ textAlign: "center" }}>
+              All done for now! Welcome to the bottom of Ocean!
+          </CardContent>
+          </Card>
+          : 
+          <Card>
+            <ReactVisibilitySensor onChange={visible => {
+              if (visible)
+                getPosts(page + 1)
+            }}>
+              <CardHeader
+                avatar={
+                  <Skeleton variant="circle">
+                    <Avatar />
+                  </Skeleton>
+                }
+                title={
+                  <Skeleton variant="text" width="80%" />
+                }
+                subheader={
+                  <Skeleton variant="text" width="40%" />
+                }
+              />
+
             </ReactVisibilitySensor>
-          </Grid>
-        ))}
-    </Grid>
+            <CardContent>
+              <Skeleton variant="h6" width="50%" />
+              <br />
+              <Skeleton variant="h1" width="100%" />
+              <br />
+              <Skeleton variant="h6" width="50%" />
+            </CardContent>
+            <CardActions>
+              <Skeleton variant="circle">
+                <Avatar />
+              </Skeleton>
+            </CardActions>
+          </Card>
+        )
+        }
+        </Grid>
+      </Grid>
+      <Grid container item xs={12} md={4} direction="column" spacing={1}>
+        <Grid item>
+          <Card style={{textAlign: 'center'}}>
+            <CardHeader
+              subheader='Moderators for this community'
+            />
+          </Card>
+        </Grid>
+        {
+          moderators.map((moderator, index) => 
+            <Grid item key={index}>
+              <Card>
+                <CardHeader
+                  title={moderator.first_name + " " + moderator.last_name}
+                  subheader={moderator.email}
+                />
+              </Card>
+            </Grid>
+          )
+        }
+      </Grid>
+      <Dialog
+        aria-labelledby="form-dialog-title"
+        open={postId !== -1}
+        onClose={() => setPostId(-1)}
+        fullWidth
+      >
+        <DialogTitle id="form-dialog-title">
+          Reason to delete post
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            label="Reason to delete post"
+            type="text"
+            autoComplete="Reason"
+            onChange={e => setReason(e.target.value)}
+            required
+            multiline
+            rows={4}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus color="primary" onClick={() => setPostId(-1)}>
+            CANCEL
+        </Button>
+          <Button color="primary" onClick={handleSubmit} type="submit">
+            EDIT
+        </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
