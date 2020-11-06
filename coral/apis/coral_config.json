@@ -1,0 +1,6 @@
+{
+    "EMAIL": "teamocean481@gmail.com",
+    "PASSWORD": "oceanteam1234",
+    "SQLALCHEMY_DATABASE_URI": "sqlite:///coral.db",
+    "SECRET_KEY": "1ac7f040338d0f5af035aeb5f160a9e2"
+}

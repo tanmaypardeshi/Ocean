@@ -1,5 +1,6 @@
 import os
 import random
+import json
 import secrets
 import torch
 
@@ -17,6 +18,8 @@ from transformers import (
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
 model = AutoModelWithLMHead.from_pretrained(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bot'))
 
+with open(os.getcwd() + '/apis/coral_config.json') as config_file:
+    config = json.load(config_file)
 
 @app.route("/", methods=["GET"])
 @app.route("/home/", methods=["GET"])
@@ -41,14 +44,13 @@ def getkey():
         db.session.add(user)
         db.session.commit()
         msg = Message('API Key for Coral',
-                      sender='credenzuser@gmail.com',
-                      recipients=[email])
+                        sender=config.get('EMAIL'),
+                        recipients=[email])
         msg.body = f"Your API Key is {apikey}."
         mail.send(msg)
-        return render_template('getkey.html', apikey=f'API Key sent to your {email}')
+        return render_template('getkey.html', apikey=f'API Key sent to {email}')
     except:
-        return render_template('getkey.html', error=f'API key for {email} already exists')
-
+        return render_template('getkey.html', apikey=f'API Key for {email} already exists')
 
 @app.route("/api/chat/", methods=["POST"])
 def chat():
