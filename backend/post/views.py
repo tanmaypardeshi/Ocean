@@ -20,8 +20,10 @@ from .serializers import CommentSerializer
 from .similar import top_similar
 from .recommendation import recommendation_system
 
-from .summariser import create_summary
+# from .summariser import create_summary
 
+def create_summary(post):
+    return ''
 
 # file = os.getcwd() + '/post/populate.txt'
 #

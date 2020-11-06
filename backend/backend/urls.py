@@ -14,6 +14,9 @@ urlpatterns = [
     # chat
     path('api/coral/', include('coral.urls')),
 
+    # search
+    path('api/search/', include('search.urls')),
+
     # admin
     path('admin/', admin.site.urls),
 ]

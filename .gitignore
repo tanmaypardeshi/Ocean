@@ -7,10 +7,12 @@ backend/user/__pycache__
 backend/post/__pycache__
 backend/cheer/__pycache__
 backend/coral/__pycache__
+backend/search/__pycache__
 backend/post/migrations
 backend/user/migrations
 backend/cheer/migrations
 backend/coral/migrations
+backend/search/migrations
 backend/post/glove.6B.200d.txt
 backend/db.sqlite3
 
