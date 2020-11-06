@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse } from '@material-ui/core';
-import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, MoreHoriz, ExitToApp, Delete, ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, ExitToApp, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import Routes from './Routes';
 import clsx from 'clsx'
@@ -135,8 +135,7 @@ export default function ClippedDrawer() {
 
   const location = useLocation();
   const history = useHistory();
-  const params = useParams();
-
+  
   const { dark, toggleTheme } = React.useContext(ThemeContext)
 
   const { enqueueSnackbar } = useSnackbar()

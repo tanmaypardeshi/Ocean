@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography, Card, CardHeader, Avatar, CardContent, makeStyles, CardActionArea } from '@material-ui/core';
+import { Typography, Card, CardHeader, Avatar, CardContent, CardActionArea } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
 const Post = ({ data }) => {

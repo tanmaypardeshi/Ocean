@@ -142,8 +142,6 @@ export default function Communities() {
     })
   }
 
-  const togglePost = e => setPostId(e.currentTarget.id);
-
   return (
     <>
       <Grid container item xs={12} md={8} spacing={1} className={classes.scrollable}>

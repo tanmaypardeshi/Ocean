@@ -4,7 +4,7 @@ import { getCookie } from '../../../cookie/cookie'
 import Axios from 'axios'
 import {
     Grid, Card, CardHeader, Avatar, CardContent, Typography, CardActions,
-    IconButton, CardMedia, CircularProgress, CardActionArea, makeStyles, Button, Dialog, DialogTitle, TextField, Select, Input, Chip, MenuItem, DialogContent, FormControlLabel, Switch, DialogActions, InputLabel
+    IconButton, CardMedia, CardActionArea, makeStyles, Button, Dialog, DialogTitle, TextField, Select, Input, Chip, MenuItem, DialogContent, FormControlLabel, Switch, DialogActions, InputLabel
 } from '@material-ui/core'
 import { Skeleton } from '@material-ui/lab'
 import { ThumbUpAlt } from '@material-ui/icons'
