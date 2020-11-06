@@ -34,8 +34,8 @@ class GetTaskView(generics.GenericAPIView):
 
 
 class PostTaskView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
 
     def post(self, request, *args, **kwargs):
         try:
@@ -85,24 +85,36 @@ class SingleTaskView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            subtask_list = []
+            progress1 = 0
+            progress2 = 0
+            done = 0
+            total = 0
+            subtask_list1 = []
+            subtask_list2 = []
             sub_objects = {}
             task = Task.objects.get(id=kwargs['id'])
             subtasks = SubTask.objects.filter(task=task, user__first_name__contains=task.created_by.split(' ')[0])
+            total = subtasks.count()
             for subtask in subtasks:
                 sub_objects['title'] = subtask.title
-                subtask_list.append(sub_objects)
+                sub_objects['is_subtask'] = subtask.is_subtask
+                if subtask.is_subtask:
+                    done = done + 1
+                subtask_list1.append(sub_objects)
                 sub_objects = {}
+            progress1 = done/total * 100;
 
-            current_user = User.objects.get(email=request.user)
-            current_user_object = get_users(current_user)
-
-            users = task.user.all()
-
-            user_list = []
-            for user in users:
-                user_objects = get_users(user)
-                user_list.append(user_objects)
+            subtasks = SubTask.objects.filter(task=task, user=request.user)
+            total = subtasks.count()
+            for subtask in subtasks:
+                sub_objects['title'] = subtask.title
+                sub_objects['is_subtask'] = subtask.is_subtask
+                if subtask.is_subtask:
+                    done = done + 1
+                subtask_list2.append(sub_objects)
+                sub_objects = {}
+            if len(subtask_list2) != 0:
+                progress2 = done/total * 10
 
             return Response({
                 'success': True,
@@ -110,9 +122,10 @@ class SingleTaskView(APIView):
                 'data': {
                     'task': task.task,
                     'created_by': task.created_by,
-                    'subtasks': subtask_list,
-                    'current_user': current_user_object,
-                    'table': user_list
+                    'subtasks': subtask_list1,
+                    'current_user': subtask_list2,
+                    'progress1': progress1,
+                    'progress2': progress2
                 }
             }, status=status.HTTP_200_OK)
         except Exception as e:
