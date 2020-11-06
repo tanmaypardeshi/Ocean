@@ -15,7 +15,7 @@ const errPattern = {
 export default ({ navigation }) => {
     
     const [sec, setSec] = React.useState(true)
-    const [date, setDate] = React.useState(new Date('July 2, 2000'));
+    const [date, setDate] = React.useState(new Date());
     const [showDate, setShowDate] = React.useState(false)
     const [userDetails, setUserDetails] = React.useState({
         first_name: '',
@@ -57,6 +57,7 @@ export default ({ navigation }) => {
         email: errPattern,
         password: errPattern,
         confirm_password: errPattern,
+        gender: errPattern,
         country: errPattern,
         personalityErr: errPattern
     })
@@ -99,28 +100,41 @@ export default ({ navigation }) => {
     }
 
     const handlePersonalityChange = target => value => {
-        const tP = {...personality}
+        let tP = {...personality}
         tP[target] = value
         setPersonality(tP)
     }
 
     const handleSubmit = () => {
+        const persLength = Object.getOwnPropertyNames(personality).filter(keys => personality[keys]).length
         if (
             Object.getOwnPropertyNames(errors).some(val => errors[val][0]) ||
-            Object.getOwnPropertyNames(userDetails).some(keys => userDetails[keys].length === 0) //||
-            // Object.getOwnPropertyNames(personality).every(keys => !personality[keys])
+            Object.getOwnPropertyNames(userDetails).some(keys => userDetails[keys].length === 0) ||
+            persLength === 0 || persLength > 10
         ) {
             // error handling
-            Object.getOwnPropertyNames(userDetails).forEach(keys => handleUserChange(keys)(userDetails[keys]))
-            // if (Object.getOwnPropertyNames(personality).every(keys => !personality[keys]))
-            //     setErrors({...errors, personalityErr: true})
+            alert('Empty fields detected!')
+            if (persLength === 0 || persLength > 10) {
+                let tE = {...errors}
+                tE.personalityErr = {
+                    status: true,
+                    message: 'Selected tags must be between 1 and 10'
+                }
+                setErrors(tE)
+            }
         }
         else {
             setLoading(true);
             const {confirm_password, ...user} = userDetails;
+            let tags = ''
+            Object.getOwnPropertyNames(personality).forEach(str => {
+                if (personality[str])
+                    tags += str + ' '
+            })
             const data = {
-                ...personality,
-                "user": {...user, dob: date.getUTCFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate()}
+                ...user,
+                dob: date.toISOString().split('T')[0],
+                tags
             }
             Axios.post(
                 `${SERVER_URI}/user/register/`,
@@ -157,18 +171,18 @@ export default ({ navigation }) => {
                             style={styles.inputStyle}
                             value={userDetails[key]}
                             onChangeText={handleUserChange(key)}
-                            // error={errors[key]}
+                            error={errors[key].status}
                             secureTextEntry={key.includes('password') ? sec : false}
                             right={key.includes('password') && 
                                 <TextInput.Icon name={sec ? 'eye-off' : 'eye'} onPress={() => setSec(!sec)}/>
                             }
                         />
-                        {/* {
+                        {
                             errors[key].status && 
                             <HelperText type='error' style={styles.helperText} key={index}>
                                 {errors[key].message}
                             </HelperText>
-                        } */}
+                        }
                     </React.Fragment>
                 )
             }
@@ -177,29 +191,15 @@ export default ({ navigation }) => {
                 right={ <TextInput.Icon name='calendar-month' onPress={() => setShowDate(true)}/> }
                 style={styles.inputStyle}
                 editable={false}
-                value={date.getUTCFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate()}
+                value={date.toISOString().split('T')[0]}
             />
             <Caption style={{alignSelf: 'center', marginVertical: 10}}>Select topics of interest</Caption>
+            {
+                errors.personalityErr.status &&
+                <HelperText type='error' style={{alignSelf: 'center'}}>{errors.personalityErr.message}</HelperText>
+            }
             <View style={styles.personalityView}>
             {
-            //     Object.keys(personality).filter(val => personality[val]).map((val, index) => (
-            //         <Chip 
-            //             key={index} 
-            //             selected={true}
-            //             style={{margin: 10}}
-            //             onPress={() => handlePersonalityChange(val)(!personality[val])}
-            //         >{val.split('_').join(' ')}</Chip>
-            //     ))
-            // }
-            // {
-            //     Object.keys(personality).filter(val => !personality[val]).map((val, index) => (
-            //         <Chip 
-            //             key={index} 
-            //             selected={false}
-            //             style={{margin: 10}}
-            //             onPress={() => handlePersonalityChange(val)(!personality[val])}
-            //         >{val.split('_').join(' ')}</Chip>
-            //     ))
                 Object.getOwnPropertyNames(personality).map((val, index) => 
                     <Chip
                         key={index}
@@ -212,18 +212,27 @@ export default ({ navigation }) => {
                 )
             }
             </View>
+            <Button
+                mode='contained'
+                onPress={handleSubmit}
+                style={styles.submitButton}
+                loading={loading}
+            >
+                Register
+            </Button>
             {
-                loading
-                ?
-                <ActivityIndicator animating={true}/>
-                :
-                <Button
-                    mode='contained'
-                    onPress={handleSubmit}
-                    style={styles.submitButton}
-                >
-                    Register
-                </Button>
+                showDate &&
+                <DateTimePicker
+                    value={date}
+                    mode='date'
+                    onChange={(e, d) => {
+                        if (d)
+                            setDate(d)
+                        setShowDate(false)
+                    }}
+                    maximumDate={new Date()}
+                    minimumDate={new Date(1900, 0, 1)}
+                />
             }
         </ScrollView>
     )

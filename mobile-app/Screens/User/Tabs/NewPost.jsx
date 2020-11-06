@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Card, TextInput, Button, Caption, Chip } from 'react-native-paper';
+import { Card, TextInput, Button, Caption, Chip, Switch, List } from 'react-native-paper';
 import { getItemAsync } from 'expo-secure-store';
 import Axios from 'axios';
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network';
@@ -10,6 +10,7 @@ export default ({navigation, route}) => {
 
     const [title, setTitle] = React.useState(route.params.title);
     const [description, setDescription] = React.useState(route.params.description);
+    const [is_anonymous, set_is_anonymous] = React.useState(route.params.is_anonymous);
     const [patch, setPatch] = React.useState(!!route.params.id)
     const [tags, setTags] = React.useState({
         productivity: false,
@@ -38,6 +39,12 @@ export default ({navigation, route}) => {
     useFocusEffect(React.useCallback(() => {
         setTitle(route.params.title)
         setDescription(route.params.description)
+        set_is_anonymous(route.params.is_anonymous)
+        if (route.params.tag.length) {
+            let newTags = {...tags}
+            newTags[route.params.tag] = true
+            setTags(newTags)
+        }
     },[]))
 
     const createPost = () => {
@@ -50,25 +57,13 @@ export default ({navigation, route}) => {
             const tag = selectedTags().slice(1)
             if (tag.length < 4)
                 throw new Error('Select atleast 1 tag')
-            // return Axios.post(
-            //     `${SERVER_URI}/post/wall/`,
-            //     {
-            //         title,
-            //         description,
-            //         tag
-            //     },
-            //     {
-            //         headers: {
-            //             ...AXIOS_HEADERS,
-            //             "Authorization": `Bearer ${token}`
-            //         }
-            //     }
-            // )
-            const data = {
+            let data = {
                 title,
                 description,
-                tag
+                tag,
+                is_anonymous
             }
+            console.log(data)
             if (patch)
                 data = {...data, id: route.params.id}   
             return Axios({
@@ -84,7 +79,10 @@ export default ({navigation, route}) => {
         .then(res => {
             navigation.goBack()
         })
-        .catch(err => alert(err.message))
+        .catch(err => {
+            console.log(err)
+            alert(err.message)
+        })
     }
 
     const handlePersonalityChange = (target, value) => {
@@ -137,6 +135,11 @@ export default ({navigation, route}) => {
                 </Caption>
             </Card.Content>
         </Card>
+        <List.Item
+            title="Anonymity"
+            description="Show/Hide your information in your post"
+            right={props => <Switch style={props.style} value={is_anonymous} onValueChange={set_is_anonymous}/>}
+        />
         <Button 
             mode='contained'
             style={styles.button}

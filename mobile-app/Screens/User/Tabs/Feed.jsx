@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
 import { IconButton, useTheme, Card, Avatar, Title, Paragraph, FAB, ActivityIndicator, Button, Portal, Dialog, TextInput, Caption, Chip } from 'react-native-paper';
-import { Alert, FlatList, StyleSheet, RefreshControl, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, RefreshControl, View, BackHandler } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import Axios from 'axios'
 import { useIsFocused, useFocusEffect } from '@react-navigation/native';
@@ -40,6 +40,37 @@ const Feed = ({navigation}) => {
         //     setEnd(false)
         // }
     },[]))
+
+    const handleLogOut = () => {
+        SecureStore.deleteItemAsync('token')
+        .then(() => navigation.navigate("Auth"))
+        .catch(console.log)
+    }
+
+    useFocusEffect(React.useCallback(() => {
+        const onBackPress = () => {
+            Alert.alert(
+                'Log out', 
+                'Are you sure you want to log out?',
+                [
+                    {
+                        text: 'CANCEL',
+                        style: 'cancel',
+                        onPress: () => {}
+                    },
+                    {
+                        text: 'LOG OUT',
+                        style: 'destructive',
+                        onPress: handleLogOut
+                    }
+                ]
+            )
+            return true
+        }
+
+        BackHandler.addEventListener('hardwareBackPress', onBackPress)
+        return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress)
+    }, []))
     
 
     const getPosts = (pageno, oldposts) => 

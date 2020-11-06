@@ -4,7 +4,7 @@ import * as Device from 'expo-device'
 import { useTheme } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { StyleSheet } from 'react-native';
-import Feed from '../Screens/User/Tabs/Feed'
+import Feed from '../Screens/User/Tabs/VFeed'
 import Communities from '../Screens/User/Tabs/Communities'
 import Cheer from '../Screens/User/Tabs/Cheer'
 import Coral from '../Screens/User/Tabs/Coral'

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
 import * as SecureStore from 'expo-secure-store'
-import { FlatList, View, RefreshControl } from 'react-native'
+import { FlatList, View, RefreshControl, Alert } from 'react-native'
 import { useIsFocused, useFocusEffect } from '@react-navigation/native'
 import Axios from 'axios'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
@@ -35,14 +35,12 @@ const list = {
 
 const Communites = ({ navigation }) => {
 
-    //const isVisible = useIsFocused()
     const [refreshing, setRefreshing] = React.useState(false)
     const [myComms, setMyComms] = React.useState([])
+    const [profile, setProfile] = React.useState()
 
     useFocusEffect(React.useCallback(() => {
-        if (!myComms.length) {
-            getMyComms()
-        }
+        getMyComms()
     },[]))
     
     const getMyComms = () => 
@@ -59,10 +57,7 @@ const Communites = ({ navigation }) => {
             )    
         )
         .then(res => {
-            // const tags = res.data.data.tags
-            // let comms = Object.getOwnPropertyNames(tags).filter((name) => tags[name]).map((name) => ({name, status: true}))
-            // comms.push(Object.getOwnPropertyNames(tags).filter((name) => !tags[name]).map((name) => ({name, status: false})))
-            // setMyComms(comms.flat())
+            setProfile(res.data.data)
             let tlist = {...list};
             Object
             .getOwnPropertyNames(tlist)
@@ -96,8 +91,12 @@ const Communites = ({ navigation }) => {
                 <List.Item
                     key={index}
                     title={item.name.split('_').join(' ')}
-                    onPress={() => navigation.navigate('Community', { name: item.name.split('_').join(' ')})}
-                    right={props => item.status && <IconButton {...props} icon='bell'/>}
+                    onPress={() => navigation.navigate('Community', { 
+                        name: item.name.split('_').join(' '),
+                        status: item.status,
+                        profile
+                    })}
+                    right={props => item.status && <IconButton {...props} icon='account-multiple-check'/>}
                 />
             }
         /> 
@@ -111,6 +110,35 @@ const Communites = ({ navigation }) => {
 const Stack = createStackNavigator();
 
 export default ({navigation}) => {
+
+    const updateProfile = (profile, community, action) =>  
+        SecureStore.getItemAsync("token")
+        .then(token => {
+            let newProfile = {...profile}
+            if (action) {
+                newProfile.tags = newProfile.tags.filter(val => val !== community)
+            }
+            else {
+                const tgs = newProfile.tags
+                tgs.push(community)
+                newProfile.tags = tgs
+            }
+            newProfile.tags = newProfile.tags.join(' ')
+            console.log(newProfile)
+            return Axios.patch(
+                `${SERVER_URI}/user/profile/`,
+                newProfile,
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )
+        })
+        .catch(err => alert(err.message))
+    
+
     return(
         <Stack.Navigator initialRouteName="All Communities">
             <Stack.Screen
@@ -123,8 +151,20 @@ export default ({navigation}) => {
             <Stack.Screen
                 name="Community"
                 component={Community}
-                options={({ route }) => ({ 
-                    title: route.params.name
+                options={({ route, navigation }) => ({ 
+                    title: route.params.name,
+                    headerRight: () => <IconButton 
+                        icon={route.params.status ? 'account-remove' : 'account-multiple-plus'}
+                        onPress={() => {
+                            updateProfile(
+                                route.params.profile, 
+                                route.params.name.toLowerCase().split(' ').join('_'),
+                                route.params.status
+                            )
+                            .then(() => navigation.setParams({...route.params, status: !route.params.status}))
+                            .catch(err => alert(err.message))
+                        }} 
+                    />
                 })}
             />
             <Stack.Screen

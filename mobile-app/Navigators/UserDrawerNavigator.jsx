@@ -130,37 +130,6 @@ const DrawerItems = [
 
 export default ({ navigation }) => {
 
-    useFocusEffect(React.useCallback(() => {
-        const onBackPress = () => {
-            Alert.alert(
-                'Log out', 
-                'Are you sure you want to log out?',
-                [
-                    {
-                        text: 'CANCEL',
-                        style: 'cancel',
-                        onPress: () => {}
-                    },
-                    {
-                        text: 'LOG OUT',
-                        style: 'destructive',
-                        onPress: handleLogOut
-                    }
-                ]
-            )
-            return true
-        }
-
-        BackHandler.addEventListener('hardwareBackPress', onBackPress)
-        return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress)
-    }, []))
-
-    const handleLogOut = () => {
-        SecureStore.deleteItemAsync('token')
-        .then(() => navigation.navigate("Auth"))
-        .catch(console.log)
-    }
-
     return(
         <Drawer.Navigator initialRouteName="Home" drawerContent={props => <DCS {...props}/>}>
         {

@@ -32,7 +32,7 @@ const cheerScreen = ({navigation}) => {
         SecureStore.getItemAsync('token')
         .then(token => 
             Axios.get(
-                `${SERVER_URI}/cheer/gettasks/`,
+                `${SERVER_URI}/cheer/gettasks/1/`,
                 {
                     headers: {
                         ...AXIOS_HEADERS, "Authorization": `Bearer ${token}`
@@ -63,7 +63,7 @@ const cheerScreen = ({navigation}) => {
                 uri = "unfollow"
             }
             return Axios({
-                url: `${SERVER_URI}/cheer/${uri}/${id}`,
+                url: `${SERVER_URI}/cheer/${uri}/${id}/`,
                 headers: {
                     ...AXIOS_HEADERS,
                     "Authentication": `Bearer ${token}`

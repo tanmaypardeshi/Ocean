@@ -2,13 +2,17 @@ import * as React from 'react'
 import * as SecureStore from 'expo-secure-store'
 import Axios from 'axios'
 import { createStackNavigator } from '@react-navigation/stack'
-import { useIsFocused } from '@react-navigation/native'
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
-import { FlatList, RefreshControl, View } from 'react-native'
+import { FlatList, RefreshControl, View, StyleSheet } from 'react-native'
 import { Card, Avatar, IconButton, Paragraph, TouchableRipple, ActivityIndicator, Caption } from 'react-native-paper'
 import Post from '../Tabs/Post'
 
 const Stack = createStackNavigator()
+
+const styles = StyleSheet.create({
+    cardStyle: { marginTop: 10 }
+})
 
 const Likes = ({ navigation }) => {
     const [likes, setLikes] = React.useState([])
@@ -18,12 +22,18 @@ const Likes = ({ navigation }) => {
     const [end, setEnd] = React.useState(false)
     const isFocused = useIsFocused()
 
-    React.useEffect(() => {
-        if (isFocused && likes.length === 0)
-            getLikes(page, likes)
-    },[isFocused])
+    // React.useEffect(() => {
+    //     if (isFocused && likes.length === 0)
+    //         getLikes(page, likes)
+    // },[isFocused])
+
+    useFocusEffect(React.useCallback(() => {
+        if (!likes.length)
+            getLikes(1,[])
+    },[]))
 
     const getLikes = (pageno, oldLikes) => {
+        setLoading(true)
         SecureStore.getItemAsync('token')
         .then(token =>
             Axios.get(
@@ -34,12 +44,20 @@ const Likes = ({ navigation }) => {
             )    
         )
         .then(res => {
+            if (!res.data.success) {
+                setEnd(true)
+                return;
+            }
             setLikes([...oldLikes, ...res.data.like_list])
-            if (res.data.like_list.length < 10 || !res.data.success)
+            setPage(pageno)
+            if (res.data.like_list.length < 10)
                 setEnd(true)
         })
         .catch(err => {
-            alert(err.message)
+            if (!!!err.response.data.success)
+                setEnd(true)
+            else
+                alert(err.message)
         })
         .finally(() => {
             setLoading(false)
@@ -50,17 +68,36 @@ const Likes = ({ navigation }) => {
     const handleRefresh = () => {
         setEnd(false)
         setRefreshing(true)
-        setPage(1)
         getLikes(1, [])
     }
 
     const handleEnd = () => {
-        console.log("Fetching likes")
         if (!end && !loading) {
             getLikes(page + 1, likes)
             setPage(page + 1)
         }
     }
+
+    const renderItem = ({item, index}) =>
+        <Card
+            key={index}
+            onPress={() => navigation.navigate('Post', {item: {...item, id: item.post_id}})}
+            style={styles.cardStyle}
+        >
+            <Card.Title
+                key={index}
+                title={item.is_anonymous ? "Anonymous user" : item.author}
+                subtitle={item.post_title}
+                subtitleNumberOfLines={3}
+                left={props => 
+                    <Avatar.Text 
+                    {...props} 
+                    label={
+                        item.is_anonymous ? "AU" : item.author.split(" ").map(str => str[0]).join("")
+                    }/>
+                }
+            />
+        </Card>
 
     return(
         <FlatList
@@ -71,35 +108,14 @@ const Likes = ({ navigation }) => {
                 <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
             }
             onEndReached={handleEnd}
+            onEndReachedThreshold={0.1}
             ListFooterComponent={
-                !loading && 
-                // <Card.Title style={{justifyContent: 'center', alignItems: 'center', marginVertical: 10, paddingVertical: 10}}>
-                //     {
-                //         end 
-                //         ?
-                //         <Caption>Welcome to the bottom of Ocean :)</Caption>
-                //         :
-                //         <Caption>Fetching more content for you...</Caption>
-                //     }
-                // </Card.Title>
+                !refreshing && 
                 <Card.Title
-                    subtitle={end ? 'Welcome to the bottom of Ocean :)' : 'Fetching more content for you...'}
+                    subtitle={!likes.length ? "You haven't liked any posts yet" : end ? 'Welcome to the bottom of Ocean :)' : 'Fetching more content for you...'}
                 />
             }
-            renderItem={({ item, index }) => 
-                <TouchableRipple
-                    key={index}
-                    onPress={() => navigation.navigate('Post', {item: {...item, post_id: item.id}})}
-                >
-                    <Card.Title
-                        key={index}
-                        title={item.author}
-                        subtitle={item.post_title}
-                        subtitleNumberOfLines={3}
-                        left={props => <Avatar.Text {...props} label={item.author.split(" ").map(str => str[0]).join("")}/>}
-                    />
-                </TouchableRipple>
-            }
+            renderItem={renderItem}
         />
     )
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ScrollView, StyleSheet, Alert } from 'react-native';
-import { Title, Card, Paragraph, IconButton, Avatar, Caption, useTheme, ActivityIndicator, Button, Portal, Dialog, TextInput } from 'react-native-paper';
+import { Title, Card, Paragraph, IconButton, Avatar, Caption, useTheme, ActivityIndicator, Button, Portal, Dialog, TextInput, List, Switch } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import Axios from 'axios';
@@ -20,6 +20,7 @@ export default ({navigation, route}) => {
     const [loading, setLoading] = React.useState(true)
     const [showDialog, setShowDialog] = React.useState(-1)
     const [comment, setComment] = React.useState('')
+    const [is_anonymous, set_is_anonymous] = React.useState(false)
     const theme = useTheme();
 
     useFocusEffect(React.useCallback(() => {
@@ -54,6 +55,27 @@ export default ({navigation, route}) => {
         finally {
             setLoading(false);
         }
+    }
+
+    const handleLike = () => {
+        SecureStore.getItemAsync('token')
+        .then(token => {
+            let uri = "like"
+            if (postDetails.is_liked){
+                uri = "unlike"
+            }
+            return Axios.post(
+                `${SERVER_URI}/post/${uri}/`,
+                { "id": route.params.item.id },
+                { headers: {...AXIOS_HEADERS, "Authorization": `Bearer ${token}`} }
+            )    
+        })
+        .then(res => {
+            let pd = {...postDetails}
+            pd.is_liked = !pd.is_liked
+            setPostDetails(pd)
+        })
+        .catch(err => alert(err.message))
     }
 
     const renderComments = (innerComment, nestedLevel) => {
@@ -96,7 +118,8 @@ export default ({navigation, route}) => {
                 `${SERVER_URI}/post/comment/${postDetails.id}/`,
                 {
                     parent_id: showDialog === 0 ? null : showDialog,
-                    content: comment
+                    content: comment,
+                    is_anonymous
                 },
                 {
                     headers: {
@@ -137,7 +160,7 @@ export default ({navigation, route}) => {
                 <Card.Actions style={{justifyContent: 'space-around'}}>
                     <Button
                         icon='thumb-up'
-                        //onPress={() => handleLike(index, item.id)}
+                        onPress={handleLike}
                         color={postDetails.is_liked ? theme.colors.primary : theme.colors.text}
                         children={postDetails.is_liked ? 'Liked' : 'Like'}
                     />
@@ -200,6 +223,10 @@ export default ({navigation, route}) => {
                             type='flat'
                             style={{ backgroundColor: 'transparent' }}
                             onChangeText={setComment}
+                        />
+                        <List.Item
+                            title="Anonymity"
+                            right={props => <Switch style={props.style} value={is_anonymous} onValueChange={set_is_anonymous}/>}
                         />
                     </Dialog.Content>
                     <Dialog.Actions>

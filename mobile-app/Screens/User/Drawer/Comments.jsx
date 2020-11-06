@@ -2,10 +2,10 @@ import * as React from 'react'
 import * as SecureStore from 'expo-secure-store'
 import Axios from 'axios'
 import { createStackNavigator } from '@react-navigation/stack'
-import { useIsFocused } from '@react-navigation/native'
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
 import { FlatList, RefreshControl, View, Alert, StyleSheet } from 'react-native'
-import { Card, Avatar, IconButton, Paragraph, ActivityIndicator, Caption, Button, TextInput } from 'react-native-paper'
+import { Card, Avatar, IconButton, Paragraph, ActivityIndicator, Caption, Button, TextInput, Portal, Dialog, List, Switch } from 'react-native-paper'
 import Post from '../Tabs/Post'
 
 const styles = StyleSheet.create({
@@ -21,17 +21,20 @@ const Comment = ({ navigation }) => {
     const [loading, setLoading] = React.useState(true)
     const [refreshing, setRefreshing] = React.useState(true)
     const [editing, setEditing] = React.useState(false)
+    const [commentId, setCommentId] = React.useState(-1)
     const [newComment, setNewComment] = React.useState('')
+    const [is_anonymous, set_is_anonymous] = React.useState(false)
     const [page, setPage] = React.useState(1)
     const [end, setEnd] = React.useState(false)
     const isFocused = useIsFocused()
 
-    React.useEffect(() => {
-        if (isFocused && comments.length === 0)
-            getComments(page, comments)
-    },[isFocused])
+    useFocusEffect(React.useCallback(() => {
+        if (!comments.length)
+            getComments(1,[])
+    },[]))
 
     const getComments = (pageno, oldComments) => {
+        setLoading(true)
         SecureStore.getItemAsync("token")
         .then(token => 
             Axios.get(
@@ -42,12 +45,20 @@ const Comment = ({ navigation }) => {
             )    
         )
         .then(res => {
-            setComments([...comments, ...res.data.comment_list])
-            if (res.data.comment_list.length < 10 || res.data.success)
+            if (!res.data.success) {
+                setEnd(true)
+                return;
+            }
+            setComments([...oldComments, ...res.data.comment_list])
+            setPage(pageno)
+            if (res.data.comment_list.length < 10)
                 setEnd(true)
         })
         .catch(err => {
-            alert(err.message)
+            if (!!!err.response.data.success)
+                setEnd(true)
+            else
+                alert(err.message)
         })
         .finally(() => {
             setRefreshing(false)
@@ -58,7 +69,6 @@ const Comment = ({ navigation }) => {
     const handleRefresh = () => {
         setEnd(false)
         setRefreshing(true)
-        setPage(1)
         getComments(1, [])
     }
 
@@ -69,15 +79,16 @@ const Comment = ({ navigation }) => {
         }
     }
 
-    const patchComment = (commentId) => {
+    const patchComment = () => {
         setEditing(true)
         SecureStore.getItemAsync("token")
         .then(token =>
             Axios.patch(
-                `${SERVER_URI}/post/comment/`,
+                `${SERVER_URI}/post/comment/${commentId}/`,
                 {
                     "id": commentId,
-                    "content": newComment
+                    "content": newComment,
+                    is_anonymous
                 },
                 {
                     headers: {
@@ -88,10 +99,21 @@ const Comment = ({ navigation }) => {
             )    
         )
         .then(res => {
+            const index = comments.findIndex(obj => obj.comment_id === commentId)
+            let newCommArray = [...comments]
+            newCommArray[index] = {
+                ...newCommArray[index], 
+                content: newComment,
+                is_anonymous
+            }
+            setComments(newCommArray)
+            setCommentId(-1)
             setNewComment('')
         })
         .catch(err => alert(err.message))
-        .finally(() => setEditing(false))
+        .finally(() => {
+            setEditing(false)
+        })
     }
 
     const handleDelete = (id) => {
@@ -107,11 +129,56 @@ const Comment = ({ navigation }) => {
                 }
             )
         )
+        .then(res => {
+            let newCommArray = comments.filter(obj => obj.comment_id !== id)
+            setComments(newCommArray)
+        })
         .catch(err => alert(err.message))
-        .finally(handleRefresh)
     }
 
+    const renderItem = ({ item, index }) => 
+    <Card
+        key={index}
+        style={styles.cardStyle}
+        onPress={() => navigation.navigate('Post', {item: {...item, id: item.post_id}})}
+        onLongPress={() => {
+            setNewComment(item.content)
+            setCommentId(item.comment_id)
+            set_is_anonymous(item.is_anonymous)
+        }}
+    >
+        <Card.Title
+            title={item.content}
+            titleNumberOfLines={10}
+            subtitle={
+                item.post_title +
+                ", by " + item.author + " at " + item.published_at.split("T")[0]
+            }
+            subtitleNumberOfLines={10}
+            left={props => 
+                <Avatar.Icon {...props} icon={item.is_anonymous ? 'incognito' : 'eye'}/>
+            }
+            right={props => <IconButton {...props} icon='delete' onPress={() => Alert.alert(
+                "Delete comment",
+                "Your comment will be completely deleted. Proceed?",
+                [
+                    {
+                        text: 'Cancel',
+                        style: 'cancel',
+                        onPress: () => {}
+                    },
+                    {
+                        text: 'Delete',
+                        style: 'delete',
+                        onPress: () => handleDelete(item.comment_id)
+                    }
+                ]
+            )}/>}
+        />
+    </Card>
+
     return(
+        <>
         <FlatList
             data={comments}
             keyExtractor={(item, index) => index.toString()}
@@ -119,53 +186,16 @@ const Comment = ({ navigation }) => {
                 <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
             }
             onEndReached={handleEnd}
-            renderItem={({ item, index }) => 
-                <Card
-                    key={index}
-                    style={styles.cardStyle}
-                    onPress={() => navigation.push('Post', {item})}
-                    onLongPress={() => Alert.alert(
-                        "Delete comment",
-                        "Your comment will be completely deleted. Proceed?",
-                        [
-                            {
-                                text: 'Cancel',
-                                style: 'cancel',
-                                onPress: () => {}
-                            },
-                            {
-                                text: 'Delete',
-                                style: 'delete',
-                                onPress: () => handleDelete(item.comment_id)
-                            }
-                        ]
-                    )}
-                >
-                    <Card.Title
-                        title={item.post_title}
-                        subtitle={item.author + " at " + item.published_at.split("T")[0]}
-                        left={props => <Avatar.Text {...props} label={item.author.split(" ").map(str => str[0]).join("")}/>}
-                        right={props => <IconButton {...props} icon='dots-vertical'/>}
-                    />
-                    <Card.Content>
-                        <TextInput
-                            defaultValue={item.content}
-                            onChangeText={setNewComment}
-                            multiline
-                            right={
-                                <TextInput.Icon 
-                                    name={editing ? 'update' : 'pencil'} 
-                                    onPress={() => patchComment(item.comment_id)}
-                                />
-                            }
-                        />
-                    </Card.Content>
-                </Card>
-            }
+            onEndReachedThreshold={0.1}
+            renderItem={renderItem}
             ListFooterComponent={
-                !loading && 
+                !refreshing && 
                 <Card style={{justifyContent: 'center', alignItems: 'center', marginVertical: 10, paddingVertical: 10}}>
                     {
+                        !comments.length
+                        ?
+                        <Caption>You haven't commented yet</Caption>
+                        :
                         end 
                         ?
                         <Caption>Welcome to the bottom of Ocean :)</Caption>
@@ -175,6 +205,46 @@ const Comment = ({ navigation }) => {
                 </Card>
             }
         />
+        <Portal>
+            <Dialog
+                visible={commentId !== -1}
+                onDismiss={() => setCommentId(-1)}
+            >
+                <Dialog.Title>Modify Comment</Dialog.Title>
+                <Dialog.Content>
+                    <TextInput
+                        value={newComment}
+                        mode="flat"
+                        style={{ backgroundColor: 'transparent' }}
+                        onChangeText={setNewComment}
+                        multiline
+                    />
+                    <List.Item
+                        title="Anonymity"
+                        right={props => 
+                            <Switch 
+                                style={props.style}
+                                value={is_anonymous}
+                                onValueChange={set_is_anonymous}
+                            />
+                        }
+                    />
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button
+                        onPress={() => setCommentId(-1)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onPress={patchComment}
+                    >
+                    {editing ? "Changing" : "Change"}
+                    </Button>
+                </Dialog.Actions>
+            </Dialog>
+        </Portal>
+        </>
     )
 }
 

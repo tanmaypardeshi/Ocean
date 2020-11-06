@@ -6,19 +6,16 @@ import { IconButton, useTheme, Card, Avatar, Title, Paragraph, FAB, Caption, Chi
 import { getItemAsync } from 'expo-secure-store'
 import Axios from 'axios'
 import { AXIOS_HEADERS, SERVER_URI } from '../../../Constants/Network'
+import NewPost from './NewPost';
+import Post from './Post';
 
 const Stack = createStackNavigator()
 
 const styles = StyleSheet.create({
-    cardStyle: { marginTop: 10 },
-    personalityView: {
-        flexDirection: 'row',
-        flexWrap: 'wrap'
-    }
+    cardStyle: { marginTop: 10 }
 })
 
-export default ({ route, navigation }) => {
-    const theme = useTheme()
+const Feed = ({ navigation }) => {
     const [posts, setPosts] = React.useState([])
     const [refreshing, setRefreshing] = React.useState(true)
     const [loading, setLoading] = React.useState(true)
@@ -27,15 +24,14 @@ export default ({ route, navigation }) => {
 
     useFocusEffect(React.useCallback(() => {
         if (!posts.length)
-            getPosts(1,posts)
+            getPosts(1, posts)
     },[]))
 
     const getPosts = async (pageNo, oldposts) => {
         try {
             let token = await getItemAsync('token')
-            const comm = route.params.name.toLowerCase().split(' ').join('_')
             let res = await Axios.get(
-                `${SERVER_URI}/post/${comm}/${pageNo}/`,
+                `${SERVER_URI}/post/wall/${pageNo}`,
                 {
                     headers: {
                         ...AXIOS_HEADERS,
@@ -49,7 +45,7 @@ export default ({ route, navigation }) => {
             }
             setPosts([...oldposts, ...res.data.post_list])
             setPage(pageNo)
-            if (res.data.post_list.length < 10)
+            if (res.data.post_list.length < 20)
                 setEnd(true)
         } catch (error) {
             if (!!!err.response.data.success)
@@ -80,7 +76,7 @@ export default ({ route, navigation }) => {
     const renderItem = ({ item, index }) =>
         <Card
             key={index}
-            onPress={() => navigation.navigate('Post', {item: {...item, post_id: item.id}})}
+            onPress={() => navigation.push('Post', {item: {...item, post_id: item.id}})}
             style={styles.cardStyle}
         >
             <Card.Title
@@ -128,13 +124,7 @@ export default ({ route, navigation }) => {
         />
         <FAB
             icon='plus'
-            onPress={() => navigation.navigate('New Post', {
-                id: '', 
-                tag: route.params.name.toLowerCase().split(' ').join('_'),
-                title: '',
-                description: '',
-                is_anonymous: false 
-            })}
+            onPress={() => navigation.push('New Post', { id: '', tag: '', title: '', description: '', is_anonymous: false})}
             style={{
                 position: 'absolute',
                 margin: 16,
@@ -143,5 +133,28 @@ export default ({ route, navigation }) => {
             }}
         />
         </>
+    )
+}
+
+export default ({navigation}) => {
+    return(
+        <Stack.Navigator initialRouteName="FeedTab">
+            <Stack.Screen 
+                name="FeedTab"
+                component={Feed}
+                options={{
+                    headerTitle: 'Feed',
+                    headerLeft: () => <IconButton icon='menu' onPress={() => navigation.toggleDrawer()}/>
+                }}
+            />
+            <Stack.Screen
+                name="New Post"
+                component={NewPost}
+            />
+            <Stack.Screen
+                name="Post"
+                component={Post}
+            />
+        </Stack.Navigator>
     )
 }
