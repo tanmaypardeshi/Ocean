@@ -63,6 +63,16 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.error.dark,
     },
   },
+  chips: {
+      display: 'flex',
+      flexWrap: 'wrap',
+  },
+  chip: {
+      margin: 2,
+  },
+  textInput: {
+      marginTop: theme.spacing(2)
+  }
 }));
 
 export default function Profile() {
@@ -116,9 +126,11 @@ export default function Profile() {
     title: "",
     description: "",
     tags: "",
-    is_anonymous: "",
+    is_anonymous: false,
   });
   const [selectedTags, setSelectedTags] = useState([]);
+
+  const [deletePost, setDeletePost] = useState(-1);
 
   const toggleLike = ({ currentTarget }) => {
     const index = currentTarget.id;
@@ -144,7 +156,7 @@ export default function Profile() {
     });
   };
 
-  const handleChange = (newValue) => {
+  const handleChange = (event, newValue) => {
     setValue(newValue);
     if (parseInt(newValue) === 0 && postloading) {
       getMyPosts(1);
@@ -166,15 +178,15 @@ export default function Profile() {
         Authorization: `Bearer ${cookie}`,
       },
     })
-      .then((response) => {
-        setPostPage(page);
-        setMyPosts([...myPosts, ...response.data.post_list]);
-        setPostLoading(false);
-        if (response.data.post_list.length < 10) setPostEnd(true);
-      })
-      .catch((err) => {
-        enqueueSnackbar("Could not fetch posts", { variant: "error" });
-      });
+    .then((response) => {
+      setPostPage(page);
+      setMyPosts([...myPosts, ...response.data.post_list]);
+      setPostLoading(false);
+      if (response.data.post_list.length < 10) setPostEnd(true);
+    })
+    .catch((err) => {
+      enqueueSnackbar("Could not fetch posts", { variant: "error" });
+    });
   };
 
   const getMyLikes = (page) => {
@@ -274,9 +286,73 @@ export default function Profile() {
       });
   };
 
+  const handleEditPostChange = (event) => {
+      const et = event.target;
+      if(et.name === 'title' || et.name === 'description') {
+        setEditPost({...editPost, [et.name]: et.value})
+      } else if(et.name === 'is_anonymous') {
+        setEditPost({...editPost, [et.name]: !editPost.is_anonymous})
+      }
+  }
   const handleEditPost = () => {
-    console.log(editPost)
-    console.log(selectedTags)
+    let final_tags = '';
+    
+    if (selectedTags.length === 0) {
+      console.log(editPost)
+      editPost.tags.map(tag => {
+        final_tags += tag + ' ';
+      })
+    } else {
+      selectedTags.map(tag => {
+        final_tags += tag + ' '
+      })
+    }
+    Axios.patch(
+      'http://localhost:8000/api/post/wall/',
+      {
+        "id": editPost.id,
+        "title": editPost.title,
+        "description": editPost.description,
+        "is_anonymous": editPost.is_anonymous,
+        "tag": final_tags
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookie}`
+        }
+      }
+    )
+    .then(response => {
+      setEditPost(-1);
+      setInd(-1);
+      getMyPosts(1);
+      enqueueSnackbar(response.data.message, {variant: 'success'})
+      
+    })
+    .catch(error => {
+      enqueueSnackbar(error.message, {variant: 'error'})
+    })
+  }
+
+  const handleDeletePost = () => {
+    Axios.delete(
+      `http://localhost:8000/api/post/${deletePost}/`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookie}`
+        }
+      }
+    )
+    .then(response => {
+      setDeletePost(-1)
+      getMyPosts(1)
+      enqueueSnackbar(response.data.message, {variant: 'success'})
+    })
+    .catch(error => {
+      enqueueSnackbar(error.message, {variant: 'error'})
+    })
   }
 
   useEffect(() => {
@@ -503,6 +579,29 @@ export default function Profile() {
               </Grid>
             ) : (
               <>
+                {
+                  deletePost !== -1 && (
+                    <Dialog
+                      fullWidth
+                      open={deletePost.id !== -1}
+                      onClose={() => setDeletePost(-1)}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle id="alert-dialog-title">
+                        Are you sure you want to delete this post?
+                      </DialogTitle>
+                      <DialogActions>
+                        <Button onClick={() => setDeletePost(-1)} color="secondary">
+                          NO
+                        </Button>
+                        <Button onClick={handleDeletePost} color="primary" autoFocus>
+                          YES
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  )    
+                }
                 {ind >= 0 && (
                   <Dialog
                     fullWidth
@@ -518,21 +617,17 @@ export default function Profile() {
                         label="Title"
                         type="text"
                         defaultValue={myPosts[ind].title}
-                        onChange={(event) => {
-                          console.log(event.target.name); 
-                          console.log(event.target.value);
-                          setEditPost({...editPost, })
-                        }}
+                        onChange={handleEditPostChange}
                         fullWidth
                       />
                       <TextField
                         variant="outlined"
-                        id="description"
+                        name="description"
                         label="Description"
                         type="text"
                         defaultValue={myPosts[ind].description}
                         fullWidth
-                        onChange={(e) => ({...setEditPost, description: e.target.value})}
+                        onChange={handleEditPostChange}
                         className={classes.textInput}
                         multiline
                       />
@@ -573,7 +668,7 @@ export default function Profile() {
                         control={
                           <Switch
                             name="is_anonymous"
-                            onChange={(e) => ({...setEditPost, is_anonymous: e.target.value})}
+                            onChange={handleEditPostChange}
                           />
                         }
                       />
@@ -611,6 +706,12 @@ export default function Profile() {
                         />
                         <CardContent>
                           <Typography paragraph variant="body2">
+                            {post.is_anonymous ?
+                            '(Posted Anonymously)'
+                            :
+                            '(Not Posted Anonymously)'}
+
+                            <br/>
                             {post.description
                               .split(" ")
                               .slice(0, 50)
@@ -640,7 +741,12 @@ export default function Profile() {
                         >
                           <EditIcon />
                         </IconButton>
-                        <IconButton>
+                        <IconButton 
+                          id={index}
+                          onClick={() => {
+                            setDeletePost(post.id);
+                          }}  
+                        >
                           <Delete />
                         </IconButton>
                       </CardActions>

@@ -10,15 +10,10 @@ import {
   CardContent,
   Typography,
   CardActions,
-  Paper,
   IconButton,
   CardMedia,
-  CircularProgress,
   CardActionArea,
   makeStyles,
-  Hidden,
-  Toolbar,
-  Drawer,
   Dialog,
   DialogTitle,
   DialogActions,
@@ -26,12 +21,9 @@ import {
   TextField,
   Button
 } from "@material-ui/core";
-import { Skeleton, SpeedDial, SpeedDialAction } from "@material-ui/lab";
+import { Skeleton} from "@material-ui/lab";
 import { ThumbUpAlt } from "@material-ui/icons";
-import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
-import CreateIcon from "@material-ui/icons/Create";
 import DeleteIcon from "@material-ui/icons/Delete";
-import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 import { blue } from "@material-ui/core/colors";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import { Link, useParams } from "react-router-dom";

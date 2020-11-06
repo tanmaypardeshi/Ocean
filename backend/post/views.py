@@ -396,7 +396,7 @@ class MyPosts(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            posts = Post.objects.filter(user=request.user)
+            posts = Post.objects.filter(user=request.user).order_by('published_at').reverse()
             paginator = Paginator(get_category(posts, request), 10)
             page = paginator.page(int(self.kwargs['id']))
             post_list = page.object_list
@@ -452,7 +452,7 @@ class MyComments(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            comments = Comment.objects.filter(user=request.user)
+            comments = Comment.objects.filter(user=request.user).order_by('published_at').reverse()
             objects = {}
             comment_list = []
             for comment in comments:
