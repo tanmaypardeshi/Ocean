@@ -37,6 +37,7 @@ import { blue } from "@material-ui/core/colors";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import { Link } from "react-router-dom";
 import tags from "../Tags";
+import SingleCheer from "./SingleCheer";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -74,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function VFeed() {
+export default function CheerSquad() {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
   const [cookie, setCookie] = useState(null);
@@ -102,6 +103,8 @@ export default function VFeed() {
     tag: "",
     is_anonymous: false,
   });
+
+  const [currentTask, setCurrentTask] = useState(-1);
 
   const toggleOpen = () => setOpen(!open);
 
@@ -298,10 +301,12 @@ export default function VFeed() {
               <Grid item xs={12} key={index} style={{marginTop:'8px'}}>
                 <Card>
                   <CardActionArea
-                    component={Link}
-                    to={(location) => `${location.pathname}/${task.id}`}
+                   onClick={() => {
+                              setCurrentTask(-1)
+                              setTimeout(() => setCurrentTask(index))                              
+                            }}
                   >
-                    <CardHeader
+                  <CardHeader
                       avatar={
                         <Avatar>
                           {task.created_by.split(" ")[0].charAt(0) + task.created_by.split(" ")[1].charAt(0)}
@@ -344,8 +349,10 @@ export default function VFeed() {
               <Grid item xs={12} key={index}>
               <Card>
                   <CardActionArea
-                    component={Link}
-                    to={(location) => `${location.pathname}/${task.id}`}
+                    onClick={() => {
+                              setCurrentTask(-1)
+                              setTimeout(() => setCurrentTask(index))                              
+                            }}
                   >
                     <CardHeader
                       avatar={
@@ -398,6 +405,11 @@ export default function VFeed() {
                 </Typography>
               </CardContent>
             </Card>
+          </Grid>
+          <Grid item>
+            {
+              currentTask !== -1 && <SingleCheer task={tasks[currentTask]}/>
+            }
           </Grid>
         </Grid>
       )}
