@@ -14,6 +14,7 @@
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.0",
     "clsx": "^1.1.1",
+    "cross-fetch": "^3.0.6",
     "date-fns": "^2.16.1",
     "jwt-decode": "^3.0.0",
     "notistack": "^1.0.1",

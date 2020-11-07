@@ -152,11 +152,31 @@ export default function VFeed() {
   }
 
   const handleSubmit = () => {
-    console.log(task, subtasks);
+    Axios.post(
+      'http://localhost:8000/api/cheer/posttask/',
+      {
+        "task": task.task,
+        "subtasks": subtasks
+      },
+      {
+      headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookie}`,
+        }
+      }
+    )
+    .then(response => {
+        enqueueSnackbar(response.data.message, {variant: 'success'});
+        setOpen(!open);
+    })
+    .catch(err => {
+        enqueueSnackbar(err.message, {variant: 'error'})
+    })
   };
 
   const getProfile = () =>
-    Axios.get("http://localhost:8000/api/user/profile/", {
+    Axios.get("http://localhost:8000/api/user/profile/", 
+    {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${cookie}`,
@@ -256,25 +276,25 @@ export default function VFeed() {
       }
 
       <Grid container item xs={12} md={8} className={classes.scrollable}>
-            <Paper style={{ width: "100%" }}>
-              <Tabs
-                variant="fullWidth"
-                value={value}
-                indicatorColor="primary"
-                textColor="primary"
-                onChange={handleTab}
-                aria-label="disabled tabs example"
-              >
-                <Tab label="All Tasks" />
-                <Tab label="My Tasks" />
-              </Tabs>
-            </Paper>
+          <Paper style={{ width: "100%" }}>
+            <Tabs
+              variant="fullWidth"
+              value={value}
+              indicatorColor="primary"
+              textColor="primary"
+              onChange={handleTab}
+              aria-label="disabled tabs example"
+            >
+              <Tab label="All Tasks" />
+              <Tab label="My Tasks" />
+            </Tabs>
+          </Paper>
           {
             parseInt(value) === 0 ?
             <>
             { tasks.length >= 0 &&
               tasks.map((task, index) => (
-              <Grid item xs={12} key={index}>
+              <Grid item xs={12} key={index} style={{marginTop:'8px'}}>
                 <Card>
                   <CardActionArea
                     component={Link}
