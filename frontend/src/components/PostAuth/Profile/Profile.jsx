@@ -49,7 +49,7 @@ import ReactVisibilitySensor from "react-visibility-sensor";
 const useStyles = makeStyles((theme) => ({
   scrollable: {
     [theme.breakpoints.up("sm")]: {
-      height: "calc(100vh - 72px)",
+      height: "calc(100vh - 104px)",
       overflow: "auto",
       "&::-webkit-scrollbar": {
         display: "none",

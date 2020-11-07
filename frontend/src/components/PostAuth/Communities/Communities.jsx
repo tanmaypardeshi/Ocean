@@ -31,7 +31,7 @@ import { Link, useParams } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   scrollable: {
     [theme.breakpoints.up('sm')]: {
-      height: 'calc(100vh - 72px)',
+      height: 'calc(100vh - 104px)',
       overflow: 'auto',
       '&::-webkit-scrollbar': {
         display: 'none'

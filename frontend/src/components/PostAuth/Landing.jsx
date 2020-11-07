@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse, Hidden, Box } from '@material-ui/core';
+import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse, Hidden, Box, TextField, InputAdornment } from '@material-ui/core';
 import { Waves, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, ExitToApp, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import SearchIcon from '@material-ui/icons/Search';
@@ -12,6 +12,7 @@ import Axios from 'axios';
 import { getCookie } from '../../cookie/cookie';
 import { useSnackbar } from 'notistack';
 import tags from './Tags';
+import { Autocomplete } from '@material-ui/lab';
 
 const drawerWidth = 300;
 
@@ -148,6 +149,8 @@ export default function ClippedDrawer() {
 
   const [results, setResults] = React.useState([]);
 
+  const time = React.useRef()
+
   const toggleComm = () => setOpenComm(!openComm)
 
   const handleLogout = () => {
@@ -203,25 +206,32 @@ export default function ClippedDrawer() {
   }
 
   const handleSearch = (e) => {
-    Axios.post(
-      'http://localhost:8000/api/search/',
-      {
-        "query": e.target.value
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getCookie("usertoken")}`
+    if (e.target.value === '') {
+      setResults([])
+      return;
+    }
+    clearTimeout(time.current)
+    time.current = setTimeout(() => {
+      Axios.post(
+        'http://localhost:8000/api/search/',
+        {
+          "query": e.target.value
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getCookie("usertoken")}`
+          }
         }
-      }
-    )
-    .then(res => {
-      console.log(res.data.search_results);
-      setResults(res.data.search_results);
-    })
-    .catch(err => {
-      console.log(err.message);
-    })
+      )
+      .then(res => {
+        console.log(res.data.search_results);
+        setResults(res.data.search_results);
+      })
+      .catch(err => {
+        console.log(err.message);
+      })
+    },1000)
   }
 
   return (
@@ -240,20 +250,21 @@ export default function ClippedDrawer() {
           <Typography variant="h4" className={classes.title}>
             Ocean
           </Typography>
-          <div className={classes.search}>
-            <IconButton className={classes.searchIcon}>
-              <SearchIcon/>
-            </IconButton>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ 'aria-label': 'search' }}
-              onChange={handleSearch}
-            />
-          </div>
+          <Autocomplete
+            id="ocean-search"
+            filterOptions={x=>x}
+            options={results}
+            getOptionLabel={option=>option.title}
+            onChange={(e,v,r,d) => v && history.push(`/home/feed/${v.id}`)}
+            renderInput={params => 
+              <TextField 
+                {...params}
+                onChange={handleSearch}
+                placeholder="Search"
+                style={{width: 250}}
+              />
+            }
+          />
           <IconButton
             onClick={toggleTheme}
             className={classes.toggleIcon}

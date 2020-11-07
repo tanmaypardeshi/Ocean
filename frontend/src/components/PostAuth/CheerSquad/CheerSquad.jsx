@@ -80,16 +80,21 @@ export default function CheerSquad() {
   const { enqueueSnackbar } = useSnackbar();
   const [cookie, setCookie] = useState(null);
   const [value, setValue] = useState(0);
- 
-  const [page, setPage] = useState(1);
-  const [end, setEnd] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const [follow, setFollow] = useState(-1);
+  const [atloading, setAtloading] = useState(true)
+  const [mtloading, setMtloading] = useState(true)
+
+  const [atPage, setAtPage] = useState(1)
 
   const [tasks, setTasks] = useState([]);
   const [mytasks, setMyTasks] = useState([]);
-  const [task, setTask] = useState({"task": ""});
+
+  const [atEnd, setAtEnd] = useState(false)
+
+
+  const [follow, setFollow] = useState(-1);
+
+  const [task, setTask] = useState({ "task": "" });
   const [subtasks, setSubTasks] = useState([
     {
       "title": ""
@@ -115,17 +120,17 @@ export default function CheerSquad() {
   }
 
   const addSubtasks = () => {
-    setSubTasks([...subtasks, {"title": ""}]);
+    setSubTasks([...subtasks, { "title": "" }]);
   }
 
   const handleChange = (e) => {
     const eti = e.target.id;
     const etv = e.target.value;
-    if(eti === 'task') {
-      setTask({...task, task: etv});
+    if (eti === 'task') {
+      setTask({ ...task, task: etv });
     } else {
       const newSubTasks = [...subtasks];
-      newSubTasks[eti] = {"title": etv}
+      newSubTasks[eti] = { "title": etv }
       setSubTasks(newSubTasks);
     }
 
@@ -146,10 +151,10 @@ export default function CheerSquad() {
 
   const handleTab = (event, newValue) => {
     setValue(newValue);
-    if (parseInt(newValue) === 0) {
+    if (parseInt(newValue) === 0 && atloading) {
       getMyTasks(1);
-      
-    } else if (parseInt(newValue) === 1) {
+
+    } else if (parseInt(newValue) === 1 && mtloading) {
       getMyTasks(1);
     }
   }
@@ -162,29 +167,29 @@ export default function CheerSquad() {
         "subtasks": subtasks
       },
       {
-      headers: {
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${cookie}`,
         }
       }
     )
-    .then(response => {
-        enqueueSnackbar(response.data.message, {variant: 'success'});
+      .then(response => {
+        enqueueSnackbar(response.data.message, { variant: 'success' });
         setOpen(!open);
-    })
-    .catch(err => {
-        enqueueSnackbar(err.message, {variant: 'error'})
-    })
+      })
+      .catch(err => {
+        enqueueSnackbar(err.message, { variant: 'error' })
+      })
   };
 
   const getProfile = () =>
-    Axios.get("http://localhost:8000/api/user/profile/", 
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cookie}`,
-      },
-    })
+    Axios.get("http://localhost:8000/api/user/profile/",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookie}`,
+        },
+      })
       .then((response) => {
         setUser(response.data.data);
       })
@@ -202,12 +207,17 @@ export default function CheerSquad() {
         }
       }
     )
-    .then(response => {
-      setTasks(response.data.post_list);
-    })
-    .catch(error => {
-      enqueueSnackbar('Could not fetch tasks', {variant: 'error'});
-    })
+      .then(response => {
+        setAtPage(page)
+        setTasks([...tasks, ...response.data.post_list]);
+        setAtloading(false)
+        if (response.data.post_list.length < 10)
+          setAtEnd(true)
+      })
+      .catch(error => {
+        setAtEnd(true)
+        enqueueSnackbar('Could not fetch tasks', { variant: 'error' });
+      })
   }
 
   const getMyTasks = () => {
@@ -220,15 +230,16 @@ export default function CheerSquad() {
         }
       }
     )
-    .then(response => {
-      setMyTasks(response.data.post_list);
-    })
-    .catch(error => {
-      enqueueSnackbar('Could not fetch tasks', {variant: 'error'});
-    })
+      .then(response => {
+        setMyTasks(response.data.post_list);
+        setMtloading(false)
+      })
+      .catch(error => {
+        enqueueSnackbar('Could not fetch tasks', { variant: 'error' });
+      })
   }
 
-  
+
   const handleFollow = () => {
     Axios.post(
       `http://localhost:8000/api/cheer/follow/`,
@@ -242,14 +253,14 @@ export default function CheerSquad() {
         }
       }
     )
-    .then(res => {
-      setFollow(-1);
-      enqueueSnackbar(res.data.message, {variant: 'success'});
-      
-    })
-    .catch(err => {
-      enqueueSnackbar(err.message, {variant: 'error'})
-    })
+      .then(res => {
+        setFollow(-1);
+        enqueueSnackbar(res.data.message, { variant: 'success' });
+
+      })
+      .catch(err => {
+        enqueueSnackbar(err.message, { variant: 'error' })
+      })
   }
 
 
@@ -276,11 +287,12 @@ export default function CheerSquad() {
               </Button>
             </DialogActions>
           </Dialog>
-        )    
+        )
       }
 
-      <Grid container item xs={12} md={8} className={classes.scrollable}>
-          <Paper style={{ width: "100%" }}>
+      <Grid container item xs={12} md={8} spacing={1}>
+        <Grid item xs={12}>
+          <Paper>
             <Tabs
               variant="fullWidth"
               value={value}
@@ -293,95 +305,151 @@ export default function CheerSquad() {
               <Tab label="My Tasks" />
             </Tabs>
           </Paper>
+        </Grid>
+        <Grid container item spacing={1} className={classes.scrollable}>
           {
             parseInt(value) === 0 ?
-            <>
-            { tasks.length >= 0 &&
-              tasks.map((task, index) => (
-              <Grid item xs={12} key={index} style={{marginTop:'8px'}}>
-                <Card>
-                  <CardActionArea
-                   onClick={() => {
-                              setCurrentTask(-1)
-                              setTimeout(() => setCurrentTask(index))                              
-                            }}
-                  >
-                  <CardHeader
-                      avatar={
-                        <Avatar>
-                          {task.created_by.split(" ")[0].charAt(0) + task.created_by.split(" ")[1].charAt(0)}
-                        </Avatar>
-                      }
-                      title={task.task}
-                      subheader={task.created_by}
-                    />
-                  <CardContent>
-                    {
-                      task.subtasks.map(sub => {
-                        return (
-                          <Typography variant="body2">
-                            {sub.title}
-                          </Typography>
-                        )
-                      })
-                    }
-                  </CardContent>
-                  </CardActionArea>
-                  <CardActions>
-                  { 
-                    task.is_taken ?
-                      null
-                      :
-                      <Button color="primary" variant="contained" onClick={() => setFollow(task.id)}>
-                          Follow
-                      </Button>
-                  }
-                  </CardActions>
-                </Card>
-              </Grid>
-              ))
-            }
-            </>
-            :
-            <>
-            {
-              mytasks.map((task, index) => (
-              <Grid item xs={12} key={index}>
-              <Card>
-                  <CardActionArea
-                    onClick={() => {
-                              setCurrentTask(-1)
-                              setTimeout(() => setCurrentTask(index))                              
-                            }}
-                  >
+              (atloading
+                ?
+                <Grid item xs={12}>
+                  <Card>
                     <CardHeader
                       avatar={
-                        <Avatar>
-                          {task.created_by.split(" ")[0].charAt(0) + task.created_by.split(" ")[1].charAt(0)}
-                        </Avatar>
+                        <Skeleton variant='circle'>
+                          <Avatar />
+                        </Skeleton>
                       }
-                      title={task.task}
-                      subheader={task.created_by}
+                      title={<Skeleton variant="text" width="80%" />}
+                      subheader={<Skeleton variant="text" width="40%" />}
                     />
-                 
                     <CardContent>
-                      {
-                        task.subtasks.map(sub => {
-                          return (
-                            <Typography variant="body2">
-                              {sub.title}
-                            </Typography>
-                          )
-                        })
-                      }
+                      <Skeleton variant='text' width="40%" />
+                      <Skeleton variant='text' width="40%" />
+                      <Skeleton variant='text' width="40%" />
                     </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-              ))
-            }
-            </>
+                  </Card>
+                </Grid>
+                :
+                <>
+                  {tasks.map((task, index) => (
+              <Grid item xs={12} key={index} >
+                    <Card>
+                      <CardActionArea
+                        onClick={() => {
+                          setCurrentTask(-1)
+                          setTimeout(() => setCurrentTask(index))
+                        }}
+                      >
+                        <CardHeader
+                          avatar={
+                            <Avatar>
+                              {task.created_by.split(" ")[0].charAt(0) + task.created_by.split(" ")[1].charAt(0)}
+                            </Avatar>
+                          }
+                          title={task.task}
+                          subheader={task.created_by}
+                        />
+                        <CardContent>
+                          {
+                            task.subtasks.map(sub => {
+                              return (
+                                <Typography variant="body2">
+                                  {sub.title}
+                                </Typography>
+                              )
+                            })
+                          }
+                        </CardContent>
+                      </CardActionArea>
+                      {
+                        !task.is_taken &&
+                        <CardActions>
+                          <Button color="primary" variant="contained" onClick={() => setFollow(task.id)}>
+                            Follow
+                      </Button>
+                        </CardActions>
+                      }
+                    </Card>
+                  </Grid>
+              ))}
+              <Grid item xs={12}>
+                    {
+                      atEnd && !atloading ?
+                        <Card>
+                          <CardMedia
+                            style={{ height: 300 }}
+                            image="https://images.unsplash.com/photo-1502726299822-6f583f972e02?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80"
+                          />
+                          <CardContent style={{ textAlign: "center" }}>
+                            All done for now! Welcome to the bottom of the Ocean!
+                    </CardContent>
+                        </Card>
+                        :
+                        <Card>
+                          <ReactVisibilitySensor
+                            onChange={visible => visible && getTasks(atPage + 1)}
+                          >
+                            <CardHeader
+                              avatar={
+                                <Skeleton variant='circle'>
+                                  <Avatar />
+                                </Skeleton>
+                              }
+                              title={<Skeleton variant="text" width="80%" />}
+                              subheader={<Skeleton variant="text" width="40%" />}
+                            />
+                          </ReactVisibilitySensor>
+                          <CardContent>
+                            <Skeleton variant='text' width="40%" />
+                            <Skeleton variant='text' width="40%" />
+                            <Skeleton variant='text' width="40%" />
+                          </CardContent>
+                        </Card>
+                    }
+                  </Grid>
+                </>
+              )
+              :
+              <>
+                {
+                  mytasks.map((task, index) => (
+                    <Grid item xs={12} key={index}>
+                      <Card>
+                        <CardActionArea
+                          onClick={() => {
+                            setCurrentTask(-1)
+                            setTimeout(() => setCurrentTask(index))
+                          }}
+                        >
+                          <CardHeader
+                            avatar={
+                              <Avatar>
+                                {task.created_by.split(" ")[0].charAt(0) + task.created_by.split(" ")[1].charAt(0)}
+                              </Avatar>
+                            }
+                            title={task.task}
+                            subheader={task.created_by}
+                          />
+
+                          <CardContent>
+                            {
+                              task.subtasks.map(sub => {
+                                return (
+                                  <Typography variant="body2">
+                                    {sub.title}
+                                  </Typography>
+                                )
+                              })
+                            }
+                          </CardContent>
+                        </CardActionArea>
+                      </Card>
+                    </Grid>
+                  ))
+                }
+              </>
           }
+        </Grid>
       </Grid>
       {user && (
         <Grid container item xs={12} md={4} direction="column" spacing={1}>
@@ -408,7 +476,7 @@ export default function CheerSquad() {
           </Grid>
           <Grid item>
             {
-              currentTask !== -1 && <SingleCheer task={tasks[currentTask]}/>
+              currentTask !== -1 && <SingleCheer task={tasks[currentTask]} />
             }
           </Grid>
         </Grid>
@@ -427,7 +495,7 @@ export default function CheerSquad() {
           />
           {
             subtasks.map((subtask, index) => (
-                <TextField
+              <TextField
                 variant="outlined"
                 id={index}
                 value={subtask.title}
@@ -442,7 +510,7 @@ export default function CheerSquad() {
           }
         </DialogContent>
         <DialogActions>
-           <Button onClick={removeSubtasks} color="default" disabled={subtasks.length === 1}>
+          <Button onClick={removeSubtasks} color="default" disabled={subtasks.length === 1}>
             Remove subtask
           </Button>
           <Button onClick={addSubtasks} color="default" disabled={subtasks.length === 5}>
