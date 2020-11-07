@@ -1,7 +1,7 @@
 from fuzzywuzzy import fuzz
 
 
-def search(dataframe, query):
+def search_results(dataframe, query):
     levenshtein = []
     for i in range(len(dataframe)):
         temp_string = str(dataframe.loc[i, ['title']])

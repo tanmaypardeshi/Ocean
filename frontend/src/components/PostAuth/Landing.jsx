@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse } from '@material-ui/core';
-import { Waves, Search, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, ExitToApp, ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Waves, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, ExitToApp, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
+import SearchIcon from '@material-ui/icons/Search';
 import Routes from './Routes';
 import clsx from 'clsx'
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -135,6 +136,8 @@ export default function ClippedDrawer() {
 
   const location = useLocation();
   const history = useHistory();
+
+  const { cookie } = getCookie("usertoken");
   
   const { dark, toggleTheme } = React.useContext(ThemeContext)
 
@@ -142,6 +145,8 @@ export default function ClippedDrawer() {
 
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => setOpen(!open)
+
+  const [query, setQuery] = React.useState("");
 
   const [openComm, setOpenComm] = React.useState(false)
   const toggleComm = () => setOpenComm(!openComm)
@@ -198,6 +203,28 @@ export default function ClippedDrawer() {
     })
   }
 
+  const handleSearch = (e) => {
+    setQuery(e.target.value);
+  }
+
+  const handleSubmit = () => {
+    Axios.post(
+      'http://localhost:8000/search/',
+      query,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookie}`
+        }
+      }
+    )
+    .then(res => {
+      console.log(res.data);
+    })
+    .catch(err => {
+      console.log(err.message);
+    })
+  }
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -215,9 +242,9 @@ export default function ClippedDrawer() {
             Ocean
           </Typography>
           <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <Search />
-            </div>
+            <IconButton onClick={handleSubmit}>
+              <SearchIcon/>
+            </IconButton>
             <InputBase
               placeholder="Search…"
               classes={{
@@ -225,6 +252,7 @@ export default function ClippedDrawer() {
                 input: classes.inputInput,
               }}
               inputProps={{ 'aria-label': 'search' }}
+              onChange={handleSearch}
             />
           </div>
           <IconButton

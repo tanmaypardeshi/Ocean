@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from .search import search
+from .search_data import search_results
 from user.models import User, Tag
 from post.models import Like, Post, Comment
 
@@ -35,12 +35,12 @@ class SearchView(generics.GenericAPIView):
             for p in post_set:
                 post = Post.objects.get(id=p)
                 df = df.append({'id': post.id, 'title': post.title}, ignore_index=True)
-            result = search(df, query)
-            search_results = serialize(result)
+            result = search_results(df, query)
+            result_list = serialize(result)
             return Response({
                 'status': True,
                 'message': 'Success',
-                'search_results': search_results
+                'search_results': result_list
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -51,10 +51,10 @@ class SearchView(generics.GenericAPIView):
 
 def serialize(result):
     objects = {}
-    search_results = []
+    result_list = []
     for i in range(result.shape[0]):
         objects['id'] = result['id'][i]
         objects['title'] = result['title'][i]
         search_results.append(objects)
         objects = {}
-    return search_results
+    return result_list

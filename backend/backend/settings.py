@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'post',
     'cheer',
     'coral',
-    'search'
+    'search_data',
 ]
 
 AUTH_USER_MODEL = 'user.User'

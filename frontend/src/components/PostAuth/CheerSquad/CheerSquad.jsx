@@ -240,8 +240,9 @@ export default function VFeed() {
       }
     )
     .then(res => {
-      enqueueSnackbar(res.data.message, {variant: 'success'});
       setFollow(-1);
+      enqueueSnackbar(res.data.message, {variant: 'success'});
+      
     })
     .catch(err => {
       enqueueSnackbar(err.message, {variant: 'error'})
@@ -261,7 +262,7 @@ export default function VFeed() {
             aria-describedby="alert-dialog-description"
           >
             <DialogTitle id="alert-dialog-title">
-              Are you sure you want to delete this post?
+              Do you want to follow this task?
             </DialogTitle>
             <DialogActions>
               <Button onClick={() => setFollow(-1)} color="secondary">
@@ -368,11 +369,6 @@ export default function VFeed() {
                       }
                     </CardContent>
                   </CardActionArea>
-                  <CardActions>
-                    <Button color="secondary" variant="contained">
-                        Update progress
-                    </Button>                  
-                  </CardActions>
                 </Card>
               </Grid>
               ))

@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    
+   
+
     # user
     path('api/user/', include('user.urls')),
 
@@ -15,7 +18,7 @@ urlpatterns = [
     path('api/coral/', include('coral.urls')),
 
     # search
-    path('api/search/', include('search.urls')),
+    path('api/search/', include('search_data.urls')),
 
     # admin
     path('admin/', admin.site.urls),
