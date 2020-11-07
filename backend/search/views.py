@@ -14,7 +14,7 @@ class SearchView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [JSONWebTokenAuthentication, ]
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         query = request.data['query']
         post_set = set()
         try:

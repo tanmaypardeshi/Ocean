@@ -160,25 +160,6 @@ class TakeTaskView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteTaskView(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (JSONWebTokenAuthentication,)
-
-    def delete(self, request, *args, **kwargs):
-        try:
-            task = Task.objects.get(id=kwargs['id'])
-            task.user.remove(request.user)
-            task.save()
-            return Response({
-                'success': True,
-                'message': 'Deleted task'
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                'success': False,
-                'message': e.__str__()
-            }, status=status.HTTP_400_BAD_REQUEST)
-
 
 class UpdateProgressView(APIView):
     permission_classes = (IsAuthenticated,)
