@@ -105,7 +105,8 @@ class SingleTaskView(APIView):
             progress1 = done/total * 100;
             user = User.objects.get(email=request.user)
             name = user.first_name + ' ' + user.last_name
-            
+            done = 0
+            total = 0
             if not task.created_by == name:
                 subtasks = SubTask.objects.filter(task=task, user=request.user)
                 total = subtasks.count()
@@ -117,7 +118,7 @@ class SingleTaskView(APIView):
                     subtask_list2.append(sub_objects)
                     sub_objects = {}
                 if len(subtask_list2) != 0:
-                    progress2 = done/total * 10
+                    progress2 = done/total * 100
 
             return Response({
                 'success': True,

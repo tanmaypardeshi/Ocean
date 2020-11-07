@@ -20,19 +20,20 @@ const styles = StyleSheet.create({
 const cheerScreen = ({navigation}) => {
     const [loading, setLoading] = React.useState(true)
     const [tasks, setTasks] = React.useState([])
-    const [refreshing, setRefreshing] = React.useState(false)
-    const isFocused = useIsFocused()
+    const [refreshing, setRefreshing] = React.useState(true)
+    const [page, setPage] = React.useState(0)
+    const [end, setEnd] = React.useState(false)
 
     useFocusEffect(React.useCallback(() => {
         if (tasks.length === 0) 
-            getTasks()
+            getTasks(1, tasks)
     },[]))
 
-    const getTasks = () => {
+    const getTasks = (pageno, oldtasks) => {
         SecureStore.getItemAsync('token')
         .then(token => 
             Axios.get(
-                `${SERVER_URI}/cheer/gettasks/1/`,
+                `${SERVER_URI}/cheer/gettasks/${pageno}/`,
                 {
                     headers: {
                         ...AXIOS_HEADERS, "Authorization": `Bearer ${token}`
@@ -41,10 +42,20 @@ const cheerScreen = ({navigation}) => {
             )    
         )
         .then(res => {
-            setTasks(res.data.post_list)
+            if (!!!res.data.success) {
+                setEnd(true)
+                return;
+            }
+            setTasks([...oldtasks, ...res.data.post_list])
+            setPage(pageno)
+            if (res.data.post_list.length < 10)
+                setEnd(true)
         })
         .catch(err => {
-            alert(err.message)
+            if (!!!err.response.data.success)
+                setEnd(true)
+            else
+                alert(err.message)
         })
         .finally(() => {
             setRefreshing(false)
@@ -52,24 +63,22 @@ const cheerScreen = ({navigation}) => {
         })
     }
 
-    const handleTaken = (index) => {
+    const handleTaken = index =>
         SecureStore.getItemAsync('token')
         .then(token => {
-            let method = "POST"
-            let uri = "follow"
-            const id = tasks[index].id
-            if (tasks[index].is_taken){
-                method = "DELETE"
-                uri = "unfollow"
-            }
-            return Axios({
-                url: `${SERVER_URI}/cheer/${uri}/${id}/`,
-                headers: {
-                    ...AXIOS_HEADERS,
-                    "Authentication": `Bearer ${token}`
+            // console.log(tasks[index].id, token)
+            return Axios.post(
+                `${SERVER_URI}/cheer/follow/`,
+                {
+                    "id": tasks[index].id
                 },
-                method
-            })
+                {
+                    headers: {
+                        ...AXIOS_HEADERS,
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            )    
         })
         .then(res => {
             let tempTasks = [...tasks]
@@ -77,52 +86,71 @@ const cheerScreen = ({navigation}) => {
             setTasks(tempTasks)
         })
         .catch(err => alert(err.message))
-    }
+    
 
     const handleRefresh = () => {
+        setEnd(false)
         setRefreshing(true)
-        getTasks()
+        getTasks(1, [])
     }
 
+    const handleEnd = () => {
+        if (!end && !loading && !refreshing) {
+            setLoading(true)
+            getTasks(page+1, tasks)
+        }
+    }
+
+    const renderItem = ({ item, index }) =>
+        <Card
+            key={index}
+            onPress={() => navigation.navigate('Goal', {item})}
+            style={styles.cardStyle}
+        >
+            <Card.Title
+                title={item.task}
+                subtitle={item.created_by}
+                left={props => 
+                    <Avatar.Text {...props} label={item.created_by.split(" ").map(str => str[0]).join("")}/>
+                }
+                right={props =>
+                    !item.is_taken && 
+                    <IconButton 
+                        {...props}
+                        icon='bookmark-plus'
+                        onPress={() => handleTaken(index)}
+                    />
+                }
+            />
+            <Card.Content>
+                {
+                    item.subtasks.map((st, index) => 
+                        <Caption key={index}>{st.title}</Caption>
+                    )
+                }
+            </Card.Content>
+        </Card>
+
     return(
-        !loading
-        ?
         <>
         <FlatList
             data={tasks}
-            extraData={tasks}
             keyExtractor={(item, index) => index.toString()}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={handleRefresh}/>
             }
-            renderItem={({ item, index }) =>
-                <Card
-                    key={index}
-                    onPress={() => navigation.navigate('Goal', {item})}
-                    style={styles.cardStyle}
-                >
-                    <Card.Title
-                        title={item.task}
-                        subtitle={item.created_by}
-                        left={props => 
-                            <Avatar.Text {...props} label={item.created_by.split(" ").map(str => str[0]).join("")}/>
-                        }
-                    />
-                    <Card.Content>
-                        {
-                            item.subtasks.map((st, index) => 
-                                <Caption key={index}>{st.title}</Caption>
-                            )
-                        }
-                    </Card.Content>
-                    <Card.Actions>
-                        <Button 
-                            icon={item.is_taken ? 'minus' : 'plus'}
-                            onPress={() => handleTaken(index)}
-                        >
-                            {item.is_taken ? 'Remove' : 'Follow'}
-                        </Button>
-                    </Card.Actions>
+            renderItem={renderItem}
+            onEndReached={handleEnd}
+            ListFooterComponent={
+                !refreshing &&
+                <Card style={{justifyContent: 'center', alignItems: 'center', marginVertical: 10, paddingVertical: 10}}>
+                    {
+                        end 
+                        ?
+                        <Caption>Welcome to the bottom of Ocean :)</Caption>
+                        :
+                        <Caption>Fetching more content for you...</Caption>
+                    }
                 </Card>
             }
         />
@@ -137,10 +165,6 @@ const cheerScreen = ({navigation}) => {
             }}
         />
         </>
-        :
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <ActivityIndicator animating={true}/>
-        </View>
     )
 }
 
