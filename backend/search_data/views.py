@@ -17,36 +17,36 @@ class SearchView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         query = request.data['query']
         post_set = set()
-        # try:
-        user = User.objects.get(email=request.user)
-        tags = user.user_tag.all()
-        for tag in tags:
-            posts = Post.objects.filter(post_tag=tag.id)
-            for post in posts:
-                post_set.add(post.id)
-        likes = Like.objects.filter(user=request.user)
-        for like in likes:
-            post_set.add(like.post_id)
-        comments = Comment.objects.filter(user=request.user)
-        for comment in comments:
-            post_set.add(comment.post_id)
-        post_set = list(post_set)
-        df = pd.DataFrame(columns=['id', 'title'])
-        for p in post_set:
-            post = Post.objects.get(id=p)
-            df = df.append({'id': post.id, 'title': post.title}, ignore_index=True)
-        result = search_results(df, query)
-        result_list = serialize(result)
-        return Response({
-            'status': True,
-            'message': 'Success',
-            'search_results': result_list
-        }, status=status.HTTP_200_OK)
-        # except Exception as e:
-        #     return Response({
-        #         'status': False,
-        #         'message': e.__str__()
-        #     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            user = User.objects.get(email=request.user)
+            tags = user.user_tag.all()
+            for tag in tags:
+                posts = Post.objects.filter(post_tag=tag.id)
+                for post in posts:
+                    post_set.add(post.id)
+            likes = Like.objects.filter(user=request.user)
+            for like in likes:
+                post_set.add(like.post_id)
+            comments = Comment.objects.filter(user=request.user)
+            for comment in comments:
+                post_set.add(comment.post_id)
+            post_set = list(post_set)
+            df = pd.DataFrame(columns=['id', 'title'])
+            for p in post_set:
+                post = Post.objects.get(id=p)
+                df = df.append({'id': post.id, 'title': post.title}, ignore_index=True)
+            result = search_results(df, query)
+            result_list = serialize(result)
+            return Response({
+                'status': True,
+                'message': 'Success',
+                'search_results': result_list
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'status': False,
+                'message': e.__str__()
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def serialize(result):
