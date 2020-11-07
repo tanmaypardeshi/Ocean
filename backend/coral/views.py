@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from user.models import User
+from user.models import User, Tag
 from .models import Chat
 
 
@@ -59,19 +59,43 @@ class ChatView(generics.GenericAPIView):
                     "string3": text
                 }
             chat.save()
-            url = "https://coral.teamocean.ml/api/chat/"
-    
+            url = "http://localhost:5000/api/chat/"
+
             user.counter = user.counter + 1
             user.save()
             send = requests.post(url, json=data)
             chat = Chat(user=request.user, text=json.loads(send.text)[0]['reply'], type=2)
             chat.save()
+
+            is_popup = False
+            check = ['bipolar_disorder', 'social_anxiety_disorder', 'sleep_disorder', 'empathy_deficit_disorder',
+                     'depression', 'alcohol', 'stress']
+            moderator_list = []
+            if user.counter >= 3:
+                tags = list(user.user_tag.all().values_list('tag_name', flat=True))
+                final_tags = common_elements(check, tags)
+                if len(final_tags) != 0:
+                    is_popup = True
+                    for tag in final_tags:
+                        t = Tag.objects.get(tag_name=tag)
+                        mods = User.objects.filter(user_tag=t, is_moderator=True)
+                        objects = {}
+                        for m in mods:
+                            objects['name'] = m.first_name + " " + m.last_name
+                            objects['email'] = m.email
+                            moderator_list.append(objects)
+                            objects = {}
+
             return Response({
-                '_id': chat.pk,
-                'createdAt': chat.createdAt,
-                'text': json.loads(send.text)[0]['reply'],
-                'user': {
-                    '_id': chat.type
+                'is_popup': is_popup,
+                'moderator_list': moderator_list,
+                'chat': {
+                    '_id': chat.pk,
+                    'createdAt': chat.createdAt,
+                    'text': json.loads(send.text)[0]['reply'],
+                    'user': {
+                        '_id': chat.type
+                    }
                 }
             }, status=status.HTTP_200_OK)
         except Exception as e:
@@ -87,15 +111,15 @@ class ChatView(generics.GenericAPIView):
             user.save()
             chat = Chat.objects.filter(user=user)
             chat.delete()
-            return  Response({
+            return Response({
                 'success': True,
                 'message': 'Cleared Chat history'
             }, status=status.HTTP_200_OK)
         except Exception as e:
-            return  Response({
+            return Response({
                 'success': False,
                 'message': e.__str__()
-            },status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def get_chats(chats):
@@ -119,3 +143,13 @@ def get_text(num):
     total = obj.count()
     temp = obj[total - 1]
     return temp.text
+
+
+def common_elements(a, b):
+    a_set = set(a)
+    b_set = set(b)
+
+    if a_set & b_set:
+        return list(a_set & b_set)
+    else:
+        return []
