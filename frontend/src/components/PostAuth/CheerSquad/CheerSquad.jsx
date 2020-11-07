@@ -84,7 +84,6 @@ export default function VFeed() {
   const [end, setEnd] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [unfollow, setUnfollow] = useState(-1);
   const [follow, setFollow] = useState(-1);
 
   const [tasks, setTasks] = useState([]);
@@ -146,11 +145,9 @@ export default function VFeed() {
     setValue(newValue);
     if (parseInt(newValue) === 0) {
       getMyTasks(1);
-      console.log(tasks)
       
     } else if (parseInt(newValue) === 1) {
       getMyTasks(1);
-      console.log(mytasks);
     }
   }
 
@@ -208,28 +205,13 @@ export default function VFeed() {
     })
   }
 
-  const handleUnfollow = () => {
-    Axios.delete(
-      `http://localhost:8000/api/cheer/unfollow/${unfollow}/`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": `Bearer ${cookie}`
-        }
-      }
-    )
-    .then(res => {
-      enqueueSnackbar(res.data.message, {variant: 'success'});
-      setUnfollow(-1);
-    })
-    .catch(err => {
-      enqueueSnackbar('Could not unfollow', {variant: 'error'})
-    })
-  }
-
+  
   const handleFollow = () => {
     Axios.post(
-      `http://localhost:8000/api/cheer/follow/${follow}/`,
+      `http://localhost:8000/api/cheer/follow/`,
+      {
+        'id': follow
+      },
       {
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +224,6 @@ export default function VFeed() {
       setFollow(-1);
     })
     .catch(err => {
-      console.log(err.response)
       enqueueSnackbar(err.message, {variant: 'error'})
     })
   }
@@ -250,30 +231,6 @@ export default function VFeed() {
 
   return (
     <>
-     {
-        unfollow !== -1 && (
-          <Dialog
-            fullWidth
-            open={unfollow !== -1}
-            onClose={() => setUnfollow(-1)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <DialogTitle id="alert-dialog-title">
-              Are you sure you want to delete this post?
-            </DialogTitle>
-            <DialogActions>
-              <Button onClick={() => setUnfollow(-1)} color="secondary">
-                NO
-              </Button>
-              <Button onClick={handleUnfollow} color="primary" autoFocus>
-                YES
-              </Button>
-            </DialogActions>
-          </Dialog>
-        )    
-      }
-
       {
         follow !== -1 && (
           <Dialog
@@ -318,7 +275,7 @@ export default function VFeed() {
             { tasks.length >= 0 &&
               tasks.map((task, index) => (
               <Grid item xs={12} key={index}>
-                <Card style={{marginTop: '2%'}}>
+                <Card>
                   <CardActionArea
                     component={Link}
                     to={(location) => `${location.pathname}/${task.id}`}
@@ -347,9 +304,7 @@ export default function VFeed() {
                   <CardActions>
                   { 
                     task.is_taken ?
-                      <Button color="primary" variant="contained" onClick={() => setUnfollow(task.id)}>
-                          Unfollow
-                      </Button>
+                      null
                       :
                       <Button color="primary" variant="contained" onClick={() => setFollow(task.id)}>
                           Follow
@@ -366,7 +321,7 @@ export default function VFeed() {
             {
               mytasks.map((task, index) => (
               <Grid item xs={12} key={index}>
-              <Card style={{marginTop: '2%'}}>
+              <Card>
                   <CardActionArea
                     component={Link}
                     to={(location) => `${location.pathname}/${task.id}`}
@@ -394,9 +349,6 @@ export default function VFeed() {
                     </CardContent>
                   </CardActionArea>
                   <CardActions>
-                    <Button color="primary" variant="contained" onClick={() => setUnfollow(task.id)}>
-                        {task.is_taken ? 'Unfollow' : 'Follow' }
-                    </Button>
                     <Button color="secondary" variant="contained">
                         Update progress
                     </Button>                  

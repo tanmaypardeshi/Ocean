@@ -141,7 +141,7 @@ class TakeTaskView(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            task = Task.objects.get(id=kwargs['id'])
+            task = Task.objects.get(id=request.data['id'])
             subtasks = SubTask.objects.filter(task=task)
             task.user.add(request.user)
             task.save()
