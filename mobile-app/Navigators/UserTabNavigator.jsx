@@ -9,6 +9,7 @@ import Communities from '../Screens/User/Tabs/Communities'
 import Cheer from '../Screens/User/Tabs/Cheer'
 import Coral from '../Screens/User/Tabs/Coral'
 import { Caption } from 'react-native-paper';
+import Search from '../Screens/User/Tabs/Search';
 
 const Tab = createMaterialTopTabNavigator();
 const isIphoneX = Device.modelName.includes('iPhone X')
@@ -23,6 +24,11 @@ const TabDetails = [
         name: "Communities",
         component: Communities,
         iconName: 'account-group'
+    },
+    {
+        name: "Search",
+        component: Search,
+        iconName: 'magnify'
     },
     {
         name: "Cheer Squad",
