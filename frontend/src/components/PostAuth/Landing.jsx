@@ -137,8 +137,6 @@ export default function ClippedDrawer() {
   const location = useLocation();
   const history = useHistory();
 
-  const { cookie } = getCookie("usertoken");
-  
   const { dark, toggleTheme } = React.useContext(ThemeContext)
 
   const { enqueueSnackbar } = useSnackbar()
