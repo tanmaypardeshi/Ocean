@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse } from '@material-ui/core';
+import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse, Hidden, Box } from '@material-ui/core';
 import { Waves, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, ExitToApp, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import SearchIcon from '@material-ui/icons/Search';
@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  toggleIcon: { marginLeft: theme.spacing(3) },
+  toggleIcon: { marginLeft: theme.spacing(3), float:'right' },
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
@@ -142,11 +142,12 @@ export default function ClippedDrawer() {
   const { enqueueSnackbar } = useSnackbar()
 
   const [open, setOpen] = React.useState(true);
-  const toggleDrawer = () => setOpen(!open)
-
-  const [query, setQuery] = React.useState("");
+  const toggleDrawer = () => setOpen(!open);
 
   const [openComm, setOpenComm] = React.useState(false)
+
+  const [results, setResults] = React.useState([]);
+
   const toggleComm = () => setOpenComm(!openComm)
 
   const handleLogout = () => {
@@ -202,14 +203,10 @@ export default function ClippedDrawer() {
   }
 
   const handleSearch = (e) => {
-    setQuery(e.target.value);
-  }
-
-  const handleSubmit = () => {
     Axios.post(
       'http://localhost:8000/api/search/',
       {
-        "query": query
+        "query": e.target.value
       },
       {
         headers: {
@@ -219,12 +216,14 @@ export default function ClippedDrawer() {
       }
     )
     .then(res => {
-      console.log(res.data);
+      console.log(res.data.search_results);
+      setResults(res.data.search_results);
     })
     .catch(err => {
       console.log(err.message);
     })
   }
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -242,7 +241,7 @@ export default function ClippedDrawer() {
             Ocean
           </Typography>
           <div className={classes.search}>
-            <IconButton onClick={handleSubmit}>
+            <IconButton className={classes.searchIcon}>
               <SearchIcon/>
             </IconButton>
             <InputBase
@@ -264,7 +263,6 @@ export default function ClippedDrawer() {
           <IconButton onClick={handleLogout}>
             <ExitToApp />
           </IconButton>
-
         </Toolbar>
       </AppBar>
       <Drawer

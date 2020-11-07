@@ -132,6 +132,8 @@ export default function Profile() {
 
   const [deletePost, setDeletePost] = useState(-1);
 
+  const [deleteComment, setDeleteComment] = useState(-1);
+
   const toggleLike = ({ currentTarget }) => {
     const index = currentTarget.id;
     const action = myPosts[index].is_liked ? "unlike" : "like";
@@ -216,6 +218,7 @@ export default function Profile() {
     })
       .then((response) => {
         setCommentPage(page);
+        console.log(response.data.comment_list);
         setMyComments([...myComments, ...response.data.comment_list]);
         setCommentLoading(false);
         if (response.data.comment_list.length < 10) setCommentEnd(true);
@@ -348,6 +351,26 @@ export default function Profile() {
     .then(response => {
       setDeletePost(-1)
       getMyPosts(1)
+      enqueueSnackbar(response.data.message, {variant: 'success'})
+    })
+    .catch(error => {
+      enqueueSnackbar(error.message, {variant: 'error'})
+    })
+  }
+
+  const handleDeleteComment = () => {
+    Axios.delete(
+      `http://localhost:8000/api/post/comment/${deleteComment}/`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookie}`
+        }
+      }
+    )
+    .then(response => {
+      setDeleteComment(-1)
+      getMyComments(1)
       enqueueSnackbar(response.data.message, {variant: 'success'})
     })
     .catch(error => {
@@ -901,6 +924,29 @@ export default function Profile() {
             </Grid>
           ) : (
             <>
+                {
+                  deleteComment !== -1 && (
+                    <Dialog
+                      fullWidth
+                      open={deleteComment !== -1}
+                      onClose={() => setDeletePost(-1)}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle id="alert-dialog-title">
+                        Are you sure you want to delete this comment?
+                      </DialogTitle>
+                      <DialogActions>
+                        <Button onClick={() => setDeleteComment(-1)} color="secondary">
+                          NO
+                        </Button>
+                        <Button onClick={handleDeleteComment}  color="primary" autoFocus>
+                          YES
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  )    
+                }
               {myComments.map((comment, index) => (
                 <Grid item xs={12} key={index}>
                   <Card>
@@ -920,6 +966,7 @@ export default function Profile() {
                         title={comment.content}
                         subheader={
                           <Typography variant="caption">
+                            Posted Anonymously: {comment.is_anonymous ? 'Yes': 'No'}<br/>
                             Time:&nbsp;&nbsp;{" "}
                             {new Date(comment.published_at).toLocaleString()}
                             <br />
@@ -931,10 +978,9 @@ export default function Profile() {
                       />
                     </CardActionArea>
                     <CardActions>
-                      <IconButton>
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton>
+                      <IconButton
+                        id={index}
+                        onClick={() => setDeleteComment(comment.comment_id)}>
                         <Delete />
                       </IconButton>
                     </CardActions>
