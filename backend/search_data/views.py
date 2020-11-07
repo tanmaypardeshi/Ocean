@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from .search_data import search_results
+from .ml_search import search_results
 from user.models import User, Tag
 from post.models import Like, Post, Comment
 
@@ -55,6 +55,6 @@ def serialize(result):
     for i in range(result.shape[0]):
         objects['id'] = result['id'][i]
         objects['title'] = result['title'][i]
-        search_results.append(objects)
+        result_list.append(objects)
         objects = {}
     return result_list
