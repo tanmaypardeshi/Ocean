@@ -3,9 +3,10 @@ from django.urls import path, include
 
 urlpatterns = [
     
-   
-
-    # user
+    # search
+    path('api/search/', include('search_data.urls')),
+    
+     # user
     path('api/user/', include('user.urls')),
 
     # post
@@ -16,9 +17,6 @@ urlpatterns = [
 
     # chat
     path('api/coral/', include('coral.urls')),
-
-    # search
-    path('api/search/', include('search_data.urls')),
 
     # admin
     path('admin/', admin.site.urls),

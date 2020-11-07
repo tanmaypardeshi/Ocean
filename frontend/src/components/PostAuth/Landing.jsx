@@ -209,12 +209,14 @@ export default function ClippedDrawer() {
 
   const handleSubmit = () => {
     Axios.post(
-      'http://localhost:8000/search/',
-      query,
+      'http://localhost:8000/api/search/',
+      {
+        "query": query
+      },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cookie}`
+          'Authorization': `Bearer ${getCookie("usertoken")}`
         }
       }
     )
