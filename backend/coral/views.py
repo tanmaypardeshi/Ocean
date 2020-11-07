@@ -42,8 +42,6 @@ class ChatView(generics.GenericAPIView):
                 data = {
                     "email": "tanmaypardeshi@gmail.com",
                     "key": "c8f0544a850ff220990a7ba739e552d4",
-                    # "email": "kaustubhodak1@gmail.com",
-                    # "key": "35af30d4feb65757fc3f130251f7a7fe",
                     "counter": user.counter,
                     "string1": text,
                     "string2": '',
@@ -55,16 +53,14 @@ class ChatView(generics.GenericAPIView):
                 data = {
                     "email": "tanmaypardeshi@gmail.com",
                     "key": "c8f0544a850ff220990a7ba739e552d4",
-                    # "email": "kaustubhodak1@gmail.com",
-                    # "key": "35af30d4feb65757fc3f130251f7a7fe",
                     "counter": user.counter,
                     "string1": string1,
                     "string2": string2,
                     "string3": text
                 }
             chat.save()
-            url = "http://127.0.0.1:5000/api/chat/"
-
+            url = "https://coral.teamocean.ml/api/chat/"
+    
             user.counter = user.counter + 1
             user.save()
             send = requests.post(url, json=data)
@@ -87,6 +83,8 @@ class ChatView(generics.GenericAPIView):
     def delete(self, request, *args, **kwargs):
         try:
             user = User.objects.get(email=request.user)
+            user.counter = 1
+            user.save()
             chat = Chat.objects.filter(user=user)
             chat.delete()
             return  Response({
