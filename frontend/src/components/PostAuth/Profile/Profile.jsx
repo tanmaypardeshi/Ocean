@@ -45,6 +45,7 @@ import tags from "../Tags";
 import { getCookie } from "../../../cookie/cookie";
 import { Skeleton } from "@material-ui/lab";
 import ReactVisibilitySensor from "react-visibility-sensor";
+import { dropMessages } from "react-chat-widget";
 
 const useStyles = makeStyles((theme) => ({
   scrollable: {
@@ -238,6 +239,7 @@ export default function Profile() {
       .then((response) => {
         enqueueSnackbar(response.data.message, { variant: "success" });
         setChat(!chat);
+        dropMessages();
       })
       .catch((error) => {
         enqueueSnackbar(error.message, { variant: "error" });

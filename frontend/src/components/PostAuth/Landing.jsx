@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import { makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, InputBase, Grid, Collapse, Hidden, Box, TextField, InputAdornment } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Button, makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, ListItemAvatar, Grid, Collapse, Hidden, Box, TextField, InputAdornment, Dialog, DialogTitle, Avatar } from '@material-ui/core';
 import { Waves, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, ExitToApp, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
-import SearchIcon from '@material-ui/icons/Search';
+import PersonIcon from '@material-ui/icons/Person';
 import Routes from './Routes';
 import clsx from 'clsx'
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { addResponseMessage, Widget, addUserMessage, markAllAsRead } from 'react-chat-widget';
+import { addResponseMessage, Widget, addUserMessage, markAllAsRead, renderCustomComponent } from 'react-chat-widget';
 import 'react-chat-widget/lib/styles.css'
 import Axios from 'axios';
 import { getCookie } from '../../cookie/cookie';
@@ -131,6 +131,7 @@ const drawerItems = [
   }
 ]
 
+
 export default function ClippedDrawer() {
 
   const classes = useStyles();
@@ -151,6 +152,9 @@ export default function ClippedDrawer() {
 
   const time = React.useRef()
 
+  const [moderators, setModerators] = useState([]);
+  const [contact, setContact] = useState(false);
+
   const toggleComm = () => setOpenComm(!openComm)
 
   const handleLogout = () => {
@@ -159,7 +163,6 @@ export default function ClippedDrawer() {
   }
 
   useEffect(() => {
-    console.log(location)
     Axios.get(`http://localhost:8000/api/coral/`, {
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +201,11 @@ export default function ClippedDrawer() {
       }
     )
     .then(res => {
-      addResponseMessage(res.data.text)
+      if(res.data.is_popup) {
+        renderCustomComponent(Button, {children: 'Do you want to contact moderators?', onClick: handlePopup, color: "primary", variant: "contained", fullWidth: true});
+        setModerators(res.data.moderator_list);
+      }
+      addResponseMessage(res.data.chat.text)
     })
     .catch(err => {
       addResponseMessage(err.message)
@@ -234,8 +241,36 @@ export default function ClippedDrawer() {
     },1000)
   }
 
+  const handlePopup = () => {
+    setContact(!contact);
+  }
   return (
     <div className={classes.root}>
+      {
+        moderators.length > 0 
+        &&
+        <Dialog
+          open={contact}
+          onClose={handlePopup}
+          fullWidth
+        >
+          <DialogTitle>Moderators you can contact</DialogTitle>
+          <List>
+          { moderators.map((moderator, index) => (
+              <ListItem>
+                <ListItemAvatar>
+                  <Avatar>
+                    <PersonIcon/>
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={moderator.name} />
+                <ListItemText secondary={moderator.email} />
+              </ListItem> 
+            ))}
+          </List>
+        </Dialog>
+      }
+
       <CssBaseline />
       <AppBar position="fixed" className={classes.appBar} color="inherit">
         <Toolbar>

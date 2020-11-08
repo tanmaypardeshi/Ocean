@@ -290,6 +290,9 @@ export default function Communities() {
             <CardHeader
               subheader='Moderators for this community'
             />
+            <CardContent>
+              You can contact moderators if needed
+            </CardContent>
           </Card>
         </Grid>
         {

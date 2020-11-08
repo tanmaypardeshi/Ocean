@@ -87,7 +87,7 @@ const SingleCheer = ({ task }) => {
                 },
             }
         )
-            .then(res => enqueueSnackbar(res.data, {variant: 'success'}))
+            .then(res => enqueueSnackbar(res.data.message, {variant: 'success'}))
             .catch((err) => enqueueSnackbar(err.message, {variant: 'error'}))
             .finally(getData);
     };
