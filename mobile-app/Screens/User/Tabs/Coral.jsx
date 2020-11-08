@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useTheme, IconButton, Colors } from 'react-native-paper'
+import { useTheme, IconButton, Colors, Portal, Dialog, List } from 'react-native-paper'
 import { GiftedChat, InputToolbar, Composer, Bubble, Time } from 'react-native-gifted-chat'
 import { v4 as uuidv4 } from 'uuid'
 import { useIsFocused, useFocusEffect } from '@react-navigation/native'
@@ -7,12 +7,19 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { getItemAsync } from 'expo-secure-store'
 import Axios from 'axios'
 import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
-import { Alert } from 'react-native'
+import { Alert, ScrollView } from 'react-native'
+import { isAvailableAsync, composeAsync } from 'expo-mail-composer'
 
 const Stack = createStackNavigator()
 
 const Coral = ({ navigation, del }) => {
+    
     const [messages, setMessages] = React.useState([])
+    const [moderatorList, setModeratorList] = React.useState([])
+    const [showModerators, setShowModerators] = React.useState(false)
+
+    const toggleModerators = () => setShowModerators(!showModerators)
+
     const theme = useTheme()
 
 
@@ -77,7 +84,19 @@ const Coral = ({ navigation, del }) => {
             )
         )
         .then(res => {
-            setMessages(previousMessages => GiftedChat.append(previousMessages, [res.data]))
+            let responseMsgs = [res.data.chat]
+            if (res.data.is_popup) {
+                setModeratorList(res.data.moderator_list)
+                responseMsgs.unshift({
+                    "_id": uuidv4(),
+                    "createdAt": new Date().toISOString(),
+                    "text": "You can always long press this message to communicate with our moderators!",
+                    "user": {
+                        "_id": 2
+                    }
+                })
+            }
+            setMessages(previousMessages => GiftedChat.append(previousMessages, responseMsgs))
         })
         .catch(err => {
             setMessages(previousMessages => GiftedChat.append(previousMessages, [{
@@ -93,13 +112,19 @@ const Coral = ({ navigation, del }) => {
     }, [])
 
     return(
+        <>
         <GiftedChat
             messages={messages}
             onSend={messages => onSend(messages)}
             user={{
                 _id: 1,
             }}
-            renderAvatar={() => null}
+            renderAvatar={null}
+            onLongPress={(context, message) => {
+                if (message.text.includes('moderators')) {
+                    toggleModerators()
+                }
+            }}
             renderInputToolbar={
                 props => 
                 <InputToolbar 
@@ -124,7 +149,9 @@ const Coral = ({ navigation, del }) => {
                 <Bubble 
                     {...props} 
                     wrapperStyle={{ left:{ 
-                        backgroundColor: !props.currentMessage.text.includes('ERROR') ? theme.colors.disabled : Colors.redA400
+                        backgroundColor: 
+                        props.currentMessage.text.includes('ERROR') ? Colors.redA400 : 
+                        props.currentMessage.text.includes('moderators') ? Colors.green500 : theme.colors.disabled 
                     }}}
                     textStyle={{ left: { color: theme.colors.text } }}
                 />
@@ -137,6 +164,41 @@ const Coral = ({ navigation, del }) => {
                 />
             }
         />
+        <Portal>
+            <Dialog
+                visible={showModerators}
+                onDismiss={toggleModerators}
+            >
+                <Dialog.Title>Moderator list</Dialog.Title>
+                <Dialog.ScrollArea>
+                    <ScrollView>
+                    {
+                        moderatorList.map((v,i) =>
+                            <List.Item
+                                key={i}
+                                title={v.name}
+                                description={v.email}
+                                onPress={() => {
+                                    isAvailableAsync()
+                                    .then(available => {
+                                        if (available)
+                                            return composeAsync({
+                                                recipients: [v.email]
+                                            })
+                                        else
+                                            throw new Error('Mailing service not available')
+                                    })
+                                    .then(response => alert(response.status))
+                                    .catch(err => alert(err.message))
+                                }}
+                            />
+                        )
+                    }
+                </ScrollView>
+                </Dialog.ScrollArea>
+            </Dialog>
+        </Portal>
+        </>
     )
 }
 

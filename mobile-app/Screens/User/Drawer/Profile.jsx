@@ -106,11 +106,11 @@ const profileScreen = () => {
                 </DataTable.Row>
                 <DataTable.Row>
                     <DataTable.Cell>Date Joined</DataTable.Cell>
-                    <DataTable.Cell>{userDetails.date_joined}</DataTable.Cell>
+                    <DataTable.Cell>{userDetails.date_joined.split('T')[0]}</DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
                     <DataTable.Cell>Last login</DataTable.Cell>
-                    <DataTable.Cell>{userDetails.last_login}</DataTable.Cell>
+                    <DataTable.Cell>{userDetails.last_login.split('T')[0]}</DataTable.Cell>
                 </DataTable.Row>
             </DataTable>
         </ScrollView>

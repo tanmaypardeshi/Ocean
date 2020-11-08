@@ -58,6 +58,7 @@ const Search = ({ navigation }) => {
             onChangeText={setSearch}
             value={search}
             onIconPress={handleSearch}
+            onSubmitEditing={handleSearch}
         />
         {
             results.map((obj, index) =>

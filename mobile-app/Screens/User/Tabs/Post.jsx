@@ -92,7 +92,7 @@ export default ({navigation, route}) => {
                         borderLeftColor: theme.colors.disabled,
                         borderLeftWidth: 2
                     }}
-                    subtitle={innerComment.first_name + ' ' + innerComment.last_name}
+                    subtitle={innerComment.is_anonymous ? 'Anonymous User' : innerComment.first_name + ' ' + innerComment.last_name}
                     right={
                         props => 
                         <IconButton 

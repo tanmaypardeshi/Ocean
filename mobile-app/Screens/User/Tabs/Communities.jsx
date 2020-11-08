@@ -8,6 +8,7 @@ import { SERVER_URI, AXIOS_HEADERS } from '../../../Constants/Network'
 import { ActivityIndicator, List, IconButton } from 'react-native-paper'
 import NewPost from './NewPost'
 import Community from './Community'
+import Post from './Post'
 
 const list = {
     Productivity: false,
@@ -170,6 +171,10 @@ export default ({navigation}) => {
             <Stack.Screen
                 name="New Post"
                 component={NewPost}
+            />
+            <Stack.Screen
+                name="Post"
+                component={Post}
             />
         </Stack.Navigator>
     )
