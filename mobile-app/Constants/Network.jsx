@@ -1,9 +1,9 @@
-const mode = 'DEV'
+const mode = 'PROD'
 const config = {
     "Content-Type" : "application/json"
 }
 
-const PROD_URI="https://api.pulsex.tk/api"
+const PROD_URI="https://apis.teamocean.ml/api"
 const DEV_URI="http://192.168.29.126:8000/api"
 
 export const SERVER_URI = (mode === 'PROD' ? PROD_URI : DEV_URI);

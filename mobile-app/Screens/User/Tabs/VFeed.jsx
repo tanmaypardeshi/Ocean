@@ -47,7 +47,7 @@ const Feed = ({ navigation }) => {
             setPage(pageNo)
             if (res.data.post_list.length < 20)
                 setEnd(true)
-        } catch (error) {
+        } catch (err) {
             if (!!!err.response.data.success)
                 setEnd(true)
             else
