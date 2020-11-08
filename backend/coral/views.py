@@ -71,7 +71,7 @@ class ChatView(generics.GenericAPIView):
             check = ['bipolar_disorder', 'social_anxiety_disorder', 'sleep_disorder', 'empathy_deficit_disorder',
                      'depression', 'alcohol', 'stress']
             moderator_list = []
-            if user.counter >= 3:
+            if user.counter % 3 == 0:
                 tags = list(user.user_tag.all().values_list('tag_name', flat=True))
                 final_tags = common_elements(check, tags)
                 if len(final_tags) != 0:

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, ListItemAvatar, Grid, Collapse, Hidden, Box, TextField, InputAdornment, Dialog, DialogTitle, Avatar } from '@material-ui/core';
+import { Button, makeStyles, fade, Drawer, AppBar, CssBaseline, Toolbar, List, Typography, ListItem, ListItemText, ListItemIcon, IconButton, ListItemAvatar, Grid, Collapse, Hidden, Box, TextField, InputAdornment, Dialog, DialogTitle, Avatar, Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 import { Waves, Brightness7, Brightness4, Home, AccountCircle, People, Whatshot, ExitToApp, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { ThemeContext } from '../../context/useTheme';
 import PersonIcon from '@material-ui/icons/Person';
@@ -255,19 +255,21 @@ export default function ClippedDrawer() {
           fullWidth
         >
           <DialogTitle>Moderators you can contact</DialogTitle>
-          <List>
+          <Table>
+          <TableBody>
           { moderators.map((moderator, index) => (
-              <ListItem>
-                <ListItemAvatar>
+              <TableRow key={index}>
+                <TableCell>
                   <Avatar>
                     <PersonIcon/>
                   </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={moderator.name} />
-                <ListItemText secondary={moderator.email} />
-              </ListItem> 
+                </TableCell>
+                <TableCell><ListItemText primary={moderator.name} /></TableCell>
+                <TableCell><ListItemText secondary={moderator.email} /></TableCell>
+              </TableRow>
             ))}
-          </List>
+            </TableBody>
+            </Table>
         </Dialog>
       }
 
