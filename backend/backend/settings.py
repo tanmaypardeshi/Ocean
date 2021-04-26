@@ -150,7 +150,7 @@ JWT_AUTH = {
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'credenzuser@gmail.com'
-EMAIL_HOST_PASSWORD = 'credenztechdays'
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
 EMAIL_USE_TLS = True
 
