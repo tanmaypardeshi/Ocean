@@ -19,7 +19,7 @@
 ## Steps to run the project on the local machine
 
 1. Clone this repository into your local machine by using<br> 
-    `git clone https://github.com/tanmaypardeshi/PULSE-X.git`
+    `git clone https://github.com/tanmaypardeshi/Ocean.git`
 
 * ### Setting up the django and flask development server:
 
